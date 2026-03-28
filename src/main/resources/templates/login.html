@@ -1,40 +1,44 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Login | مقرري+</title>
+    <!-- Scrubbed: no _ar/_en suffix -->
+    <title th:text="#{login.title}">Login | مقرري+</title>
 </head>
 <body th:replace="~{fragments/layout :: html}">
 
-    <div th:fragment="main-content" class="container" style="max-width: 500px; padding: 5rem 0;">
-        <div class="card shadow-lg border-0 rounded-4">
+    <div th:fragment="main-content" class="container d-flex justify-content-center align-items-center flex-grow-1" style="min-height: 80vh;">
+        <div class="card shadow-lg border-0 rounded-4 w-100" style="max-width: 450px;">
             <div class="card-body p-5">
-                <h2 class="text-center mb-4" style="color: var(--primary-blue);" th:text="#{nav.login}">Login</h2>
+                <div class="text-center mb-4">
+                    <!-- Scrubbed: no _ar/_en suffix -->
+                    <h2 class="fw-bold" style="color: var(--primary-blue);" th:text="#{login.title}">Welcome Back</h2>
+                </div>
                 
-                <div th:if="${param.error}" class="alert alert-danger" role="alert">
-                    Invalid email or password.
+                <div th:if="${param.error}" class="alert alert-danger" role="alert" th:text="#{login.error}">
+                    Invalid credentials or account is pending.
                 </div>
-                <div th:if="${param.logout}" class="alert alert-success" role="alert">
-                    You have been logged out successfully.
-                </div>
-                 <div th:if="${param.registered}" class="alert alert-success" role="alert">
-                    Registration successful! Please login.
+                <div th:if="${param.registered}" class="alert alert-success" role="alert" th:text="#{login.success}">
+                    Registration successful. Please login.
                 </div>
 
                 <form th:action="@{/login}" method="post">
                     <div class="mb-4">
-                        <label class="form-label font-weight-bold" th:text="#{nav.email_or_username}">Email or Username</label>
+                        <!-- Scrubbed: no _ar/_en suffix -->
+                        <label class="form-label font-weight-bold" th:text="#{login.identifier}">Email or Username</label>
                         <input type="text" id="username" name="username" class="form-control form-control-lg" required autofocus>
                     </div>
                     <div class="mb-4">
-                        <label for="password" class="form-label font-weight-bold">Password</label>
+                        <!-- Scrubbed: no _ar/_en suffix -->
+                        <label for="password" class="form-label font-weight-bold" th:text="#{login.password}">Password</label>
                         <input type="password" id="password" name="password" class="form-control form-control-lg" required>
                     </div>
+                    <!-- Scrubbed: no _ar/_en suffix -->
+                    <button type="submit" class="btn btn-primary w-100 btn-lg mb-3" th:text="#{login.submit}">Login Securely</button>
                     
-                    <button type="submit" class="btn btn-primary w-100 btn-lg mb-3" style="background-color: var(--primary-blue); border-color: var(--primary-blue);" th:text="#{nav.login}">Login</button>
-                    
-                    <div class="text-center">
-                        <span class="text-muted">Don't have an account?</span> 
-                        <a th:href="@{/register}" style="color: var(--secondary-teal); font-weight: 600;" th:text="#{nav.register}">Register Here</a>
+                    <div class="text-center mt-3">
+                        <!-- Scrubbed: no _ar/_en suffix -->
+                        <span class="text-muted" th:text="#{login.no_account}">Don't have an account?</span> 
+                        <a th:href="@{/register}" style="color: var(--secondary-teal); font-weight: 600;" th:text="#{nav.register}">Register</a>
                     </div>
                 </form>
             </div>

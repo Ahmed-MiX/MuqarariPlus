@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Courses | مقرري+</title>
+    <title th:text="#{courses.title}">Courses | مقرري+</title>
 </head>
 <body th:replace="~{fragments/layout :: html}">
 
@@ -13,7 +13,7 @@
                 <form th:action="@{/courses}" method="get" class="d-flex mx-auto" style="max-width: 600px;">
                     <div class="input-group shadow border-0 rounded-3 overflow-hidden">
                         <input type="text" name="search" class="form-control form-control-lg border-0 py-3" 
-                               th:placeholder="#{search.placeholder}"
+                               th:placeholder="#{courses.search.placeholder}"
                                th:value="${param.search}">
                         <button type="submit" class="btn btn-accent px-4 fw-bold">🔍</button>
                     </div>
@@ -42,9 +42,9 @@
                                 
                                 <div class="mt-auto pt-4 d-flex justify-content-between align-items-center">
                                     <strong class="text-secondary-teal fs-6">
-                                        <i class="me-1" th:text="${course.enrichments.size()}">0</i> Resources
+                                        <i class="me-1" th:text="${course.enrichments.size()}">0</i> <span th:text="#{courses.card.resources}">Resources</span>
                                     </strong>
-                                    <a th:href="@{/course/{id}(id=${course.id})}" class="btn btn-outline-primary btn-sm px-3 rounded-pill fw-bold">View &rarr;</a>
+                                    <a th:href="@{/course/{id}(id=${course.id})}" class="btn btn-outline-primary btn-sm px-3 rounded-pill fw-bold" th:text="#{courses.card.view}">View &rarr;</a>
                                 </div>
                             </div>
                         </div>
@@ -53,8 +53,8 @@
                     <!-- Empty State -->
                     <div th:if="${#lists.isEmpty(courses)}" class="col-12 text-center py-5 mt-4">
                         <div class="p-5 bg-white border rounded-4 shadow-sm max-w-600 mx-auto text-muted">
-                            <h3 class="fw-light display-6 text-primary-blue mb-4">No Courses Found</h3>
-                            <p class="fs-5">Try adjusting your search criteria.</p>
+                            <h3 class="fw-light display-6 text-primary-blue mb-4" th:text="#{courses.empty.title}">No Courses Found</h3>
+                            <p class="fs-5" th:text="#{courses.empty.desc}">Try adjusting your search criteria.</p>
                         </div>
                     </div>
                 </div>

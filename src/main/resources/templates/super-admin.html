@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Supreme Command | مقرري+</title>
+    <title th:text="#{superadmin.title}">Supreme Command | مقرري+</title>
 </head>
 <body th:replace="~{fragments/layout :: html}">
 
@@ -11,10 +11,10 @@
             <div class="container py-3">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
-                        <h1 class="display-6 fw-bold mb-0">Supreme Command Center</h1>
-                        <p class="text-white-50 mb-0 mt-2">Manage Administrator lifecycles globally.</p>
+                        <h1 class="display-6 fw-bold mb-0" th:text="#{superadmin.title}">Supreme Command Center</h1>
+                        <p class="text-white-50 mb-0 mt-2" th:text="#{superadmin.subtitle}">Manage Administrator lifecycles globally.</p>
                     </div>
-                    <span class="badge bg-danger rounded-pill px-4 py-2 fs-6 shadow-sm border border-light">SUPER ADMIN</span>
+                    <span class="badge bg-danger rounded-pill px-4 py-2 fs-6 shadow-sm border border-light" th:text="#{superadmin.badge}">SUPER ADMIN</span>
                 </div>
             </div>
         </section>
@@ -24,43 +24,49 @@
             
             <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}">Error</div>
             <div th:if="${newUsername}" class="alert alert-success shadow-sm" role="alert">
-                <h4 class="alert-heading fw-bold">Admin Generated Successfully!</h4>
-                <p>Please copy these generated credentials securely. They cannot be recovered later.</p>
+                <h4 class="alert-heading fw-bold" th:text="#{superadmin.success}">Admin Generated Successfully!</h4>
+                <p th:text="#{superadmin.success_msg}">Please copy these generated credentials securely. They cannot be recovered later.</p>
                 <hr>
-                <p class="mb-0 fw-bold fs-5">Username: <span class="bg-light px-2 rounded text-dark" th:text="${newUsername}"></span></p>
-                <p class="mb-0 fw-bold fs-5">Password: <span class="bg-light px-2 rounded text-dark" th:text="${newPassword}"></span></p>
+                <p class="mb-0 fw-bold fs-5">
+                    <span th:text="#{superadmin.success_user}">Username: </span>
+                    <span class="bg-light px-2 rounded text-dark" th:text="${newUsername}"></span>
+                </p>
+                <p class="mb-0 fw-bold fs-5 mt-2">
+                    <span th:text="#{superadmin.success_pass}">Password: </span>
+                    <span class="bg-light px-2 rounded text-dark" th:text="${newPassword}"></span>
+                </p>
             </div>
 
             <!-- Create Admin Form -->
             <div class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5 mb-5 border-top border-4 border-secondary-teal">
-                <h2 class="h4 fw-bold text-primary-blue border-bottom border-2 pb-3 mb-4">
+                <h2 class="h4 fw-bold text-primary-blue border-bottom border-2 pb-3 mb-4" th:text="#{superadmin.create.title}">
                     Create New Administrator
                 </h2>
                 
                 <form th:action="@{/super-admin/create-admin}" method="post">
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label class="form-label fw-bold small">First Name</label>
+                            <label class="form-label fw-bold small" th:text="#{superadmin.create.firstname}">First Name</label>
                             <input type="text" name="firstName" class="form-control" required>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label fw-bold small">Last Name</label>
+                            <label class="form-label fw-bold small" th:text="#{superadmin.create.lastname}">Last Name</label>
                             <input type="text" name="lastName" class="form-control" required>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label fw-bold small">Email (Backend Tracking Only)</label>
+                            <label class="form-label fw-bold small" th:text="#{superadmin.create.email}">Email (Backend Tracking Only)</label>
                             <input type="email" name="email" class="form-control" required>
                         </div>
                     </div>
                     <div class="mt-4 text-end">
-                        <button type="submit" class="btn btn-primary px-5 fw-bold shadow-sm rounded-pill" style="background-color: var(--secondary-teal);">Generate Admin Credentials</button>
+                        <button type="submit" class="btn btn-primary px-5 fw-bold shadow-sm rounded-pill" style="background-color: var(--secondary-teal);" th:text="#{superadmin.create.btn}">Generate Admin Credentials</button>
                     </div>
                 </form>
             </div>
 
             <!-- Manage Admins -->
             <div class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5">
-                <h2 class="h4 fw-bold text-accent-orange border-bottom border-2 pb-3 mb-4">
+                <h2 class="h4 fw-bold text-accent-orange border-bottom border-2 pb-3 mb-4" th:text="#{superadmin.fleet.title}">
                     Active Administrators Fleet
                 </h2>
                 
@@ -68,10 +74,10 @@
                     <table class="table align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th class="py-3 px-4">Admin Name</th>
-                                <th class="py-3 px-4">Email</th>
-                                <th class="py-3 px-4">Auto-Generated Username</th>
-                                <th class="py-3 px-4 text-end">Lifecycle Command</th>
+                                <th class="py-3 px-4" th:text="#{superadmin.fleet.name}">Admin Name</th>
+                                <th class="py-3 px-4" th:text="#{superadmin.fleet.email}">Email</th>
+                                <th class="py-3 px-4" th:text="#{superadmin.fleet.username}">Auto-Generated Username</th>
+                                <th class="py-3 px-4 text-end" th:text="#{superadmin.fleet.action}">Lifecycle Command</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -80,14 +86,14 @@
                                 <td class="py-3 px-4 text-muted" th:text="${admin.email}">Email</td>
                                 <td class="py-3 px-4 text-primary-blue fw-bold" th:text="${admin.username}">admin1234</td>
                                 <td class="py-3 px-4 text-end">
-                                    <form th:action="@{/super-admin/delete-admin}" method="post" onsubmit="return confirm('Are you sure you want to completely eradicate this Admin?');">
+                                    <form th:action="@{/super-admin/delete-admin}" method="post" th:data-confirm="#{superadmin.fleet.delete_confirm}" onsubmit="return confirm(this.getAttribute('data-confirm'));">
                                         <input type="hidden" name="adminId" th:value="${admin.id}" />
-                                        <button type="submit" class="btn btn-sm btn-danger rounded-pill px-4 shadow-sm border-0" style="background-color: var(--accent-orange);">Wipe Access</button>
+                                        <button type="submit" class="btn btn-sm btn-danger rounded-pill px-4 shadow-sm border-0" style="background-color: var(--accent-orange);" th:text="#{superadmin.fleet.delete}">Wipe Access</button>
                                     </form>
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(admins)}">
-                                <td colspan="4" class="text-center py-4 text-muted fst-italic">No administrators active in the fleet.</td>
+                                <td colspan="4" class="text-center py-4 text-muted fst-italic" th:text="#{superadmin.fleet.empty}">No administrators active in the fleet.</td>
                             </tr>
                         </tbody>
                     </table>

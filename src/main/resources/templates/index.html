@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Muqarari+ | مقرري+</title>
+    <title th:text="#{app.title}">Muqarari+ | مقرري+</title>
 </head>
 <body th:replace="~{fragments/layout :: html}">
 
@@ -84,7 +84,7 @@
         <!-- Benefits -->
         <section class="py-5 bg-white">
             <div class="container text-center py-5">
-                <h2 class="display-6 fw-bold text-primary-blue mb-5">Benefits</h2>
+                <h2 class="display-6 fw-bold text-primary-blue mb-5" th:text="#{benefits.title}">Benefits</h2>
                 <div class="row g-4 max-w-800 mx-auto justify-content-center align-items-center">
                     <div class="col-md-8 text-start fs-5 text-dark lh-lg">
                         <div class="d-flex align-items-center mb-3">

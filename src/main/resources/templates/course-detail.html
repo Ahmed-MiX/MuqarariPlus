@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Course Detail | مقرري+</title>
+    <title th:text="${#locale.language == 'ar' ? course.nameAr : course.nameEn}">Course Detail | مقرري+</title>
 </head>
 <body th:replace="~{fragments/layout :: html}">
 
@@ -50,7 +50,7 @@
                                                <h5 class="text-secondary-teal fw-bold mb-2" th:text="${enrichment.expert.user.firstName + ' ' + enrichment.expert.user.lastName}">Expert Name</h5>
                                                <p class="text-dark fs-5 lh-base" th:text="${#locale.language == 'ar' ? enrichment.applicationAr : enrichment.applicationEn}">Application Concept...</p>
                                          </div>
-                                         <div th:if="${#lists.isEmpty(enrichments)}" class="text-muted fst-italic py-3">No verified applications yet.</div>
+                                         <div th:if="${#lists.isEmpty(enrichments)}" class="text-muted fst-italic py-3" th:text="#{course.enrichment.empty_app}">No verified applications yet.</div>
                                     </div>
                                </div>
                           </div>
@@ -68,7 +68,7 @@
                                                <h5 class="text-secondary-teal fw-bold mb-2" th:text="${enrichment.expert.user.firstName + ' ' + enrichment.expert.user.lastName}">Expert Name</h5>
                                                <p class="text-dark fs-5 lh-base" th:text="${#locale.language == 'ar' ? enrichment.roadmapAr : enrichment.roadmapEn}">Roadmap mapping...</p>
                                          </div>
-                                         <div th:if="${#lists.isEmpty(enrichments)}" class="text-muted fst-italic py-3">No verified roadmaps yet.</div>
+                                         <div th:if="${#lists.isEmpty(enrichments)}" class="text-muted fst-italic py-3" th:text="#{course.enrichment.empty_roadmap}">No verified roadmaps yet.</div>
                                     </div>
                                </div>
                           </div>
@@ -86,7 +86,7 @@
                                                <h5 class="text-secondary-teal fw-bold mb-2" th:text="${enrichment.expert.user.firstName + ' ' + enrichment.expert.user.lastName}">Expert Name</h5>
                                                <p class="text-dark fs-5 lh-base" th:text="${#locale.language == 'ar' ? enrichment.resourcesAr : enrichment.resourcesEn}">Resources links...</p>
                                          </div>
-                                         <div th:if="${#lists.isEmpty(enrichments)}" class="text-muted fst-italic py-3">No verified resources yet.</div>
+                                         <div th:if="${#lists.isEmpty(enrichments)}" class="text-muted fst-italic py-3" th:text="#{course.enrichment.empty_resources}">No verified resources yet.</div>
                                     </div>
                                </div>
                           </div>
@@ -96,8 +96,8 @@
                 <!-- Sidebar Component -->
                 <div class="col-lg-4 mt-5 mt-lg-0">
                      <div class="bg-white rounded-4 p-4 shadow-sm border">
-                          <h3 class="h5 fw-bold text-primary-blue border-bottom border-2 pb-3 mb-4" style="border-bottom-color: var(--accent-orange) !important;">
-                              Contributing Experts
+                          <h3 class="h5 fw-bold text-primary-blue border-bottom border-2 pb-3 mb-4" style="border-bottom-color: var(--accent-orange) !important;" th:text="#{course.experts.title}">
+                               Contributing Experts
                           </h3>
                           
                           <ul class="list-unstyled m-0">
@@ -107,10 +107,10 @@
                                         th:text="${#strings.substring(enrichment.expert.user.firstName, 0, 1) + #strings.substring(enrichment.expert.user.lastName, 0, 1)}">AB</div>
                                    <div>
                                        <strong class="d-block mt-1 text-dark fs-6" th:text="${enrichment.expert.user.firstName + ' ' + enrichment.expert.user.lastName}">John Doe</strong>
-                                       <a th:href="${enrichment.expert.linkedinUrl}" target="_blank" class="text-secondary-teal text-decoration-none small fw-semibold">View LinkedIn</a>
+                                       <a th:href="${enrichment.expert.linkedinUrl}" target="_blank" class="text-secondary-teal text-decoration-none small fw-semibold" th:text="#{course.experts.linkedin}">View LinkedIn</a>
                                    </div>
                               </li>
-                              <li th:if="${#lists.isEmpty(enrichments)}" class="text-muted small">No experts added yet.</li>
+                              <li th:if="${#lists.isEmpty(enrichments)}" class="text-muted small" th:text="#{course.experts.empty}">No experts added yet.</li>
                           </ul>
                      </div>
                 </div>
