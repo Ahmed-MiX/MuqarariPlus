@@ -1,0 +1,185 @@
+/*=============================================================================
+  Muqarari+ Design System - Bootstrap 5 Overwrite
+=============================================================================*/
+
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Official Color Palette */
+  --primary-blue: #0A192F;
+  --secondary-teal: #00B4D8;
+  --accent-orange: #FF4D4D;
+  --accent-dark-orange: #d93838;
+  
+  --bg-white: #FFFFFF;
+  --bg-offwhite: #F9F9F9;
+  
+  --text-dark: #333333;
+  --text-muted: #666666;
+  
+  --border-color: #E0E0E0;
+  
+  /* Shared font fallbacks */
+  --font-en: 'Poppins', sans-serif;
+  --font-ar: 'Cairo', sans-serif;
+  
+  /* Soft Neumorphic Shadow for cards */
+  --shadow-light: 0px 4px 15px rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0px 8px 25px rgba(0, 0, 0, 0.1);
+  --shadow-solid: 0px 4px 12px rgba(10, 25, 47, 0.1);
+}
+
+/* Base Typography Overrides */
+html[lang="en"] body {
+  font-family: var(--font-en);
+}
+
+html[lang="ar"] body {
+  font-family: var(--font-ar);
+}
+
+body {
+  color: var(--text-dark);
+  background-color: var(--bg-offwhite);
+}
+
+h1, h2, h3, h4, h5 {
+  color: var(--primary-blue);
+}
+
+a {
+  text-decoration: none;
+  color: var(--primary-blue);
+  transition: color 0.3s ease;
+}
+a:hover {
+  color: var(--secondary-teal);
+}
+
+/* Custom Buttons leveraging Bootstrap base classes */
+.btn-primary {
+  background-color: var(--secondary-teal) !important;
+  border-color: var(--secondary-teal) !important;
+  color: white !important;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 180, 216, 0.3);
+  background-color: #0099b8 !important;
+}
+
+.btn-accent {
+  background-color: var(--accent-orange) !important;
+  border-color: var(--accent-orange) !important;
+  color: white !important;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-accent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255, 77, 77, 0.3);
+  background-color: var(--accent-dark-orange) !important;
+}
+
+.btn-outline {
+  background-color: transparent !important;
+  border: 2px solid var(--primary-blue) !important;
+  color: var(--primary-blue) !important;
+  font-weight: 600;
+}
+.btn-outline:hover {
+  background-color: var(--primary-blue) !important;
+  color: white !important;
+}
+
+/* Navbar */
+.navbar {
+  background-color: var(--bg-white);
+  box-shadow: var(--shadow-solid);
+}
+.nav-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.nav-links li a {
+  font-weight: 500;
+}
+.lang-switcher {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* Hero Section */
+.hero {
+  padding: 6rem 0;
+  background: linear-gradient(135deg, rgba(10, 25, 47, 0.05) 0%, rgba(0, 180, 216, 0.05) 100%);
+}
+.hero-img img {
+  max-width: 100%;
+  animation: float 4s ease-in-out infinite;
+}
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Cards & Pillars */
+.pillar-card {
+  background-color: var(--bg-white);
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow-light);
+  transition: all 0.3s ease;
+  border-top: 5px solid var(--secondary-teal);
+  height: 100%;
+}
+.pillar-card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-5px);
+}
+
+/* Course Listing styling */
+.badge-verified {
+  background-color: rgba(0, 180, 216, 0.1);
+  color: var(--secondary-teal);
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Course Detail styling overrides */
+.accordion-item {
+  border: 1px solid var(--border-color);
+  border-radius: 8px !important;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+.accordion-button {
+  background-color: var(--bg-offwhite) !important;
+  color: var(--primary-blue) !important;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+.accordion-button:not(.collapsed) {
+  color: var(--primary-blue) !important;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.125);
+}
+
+/* Utilities */
+.text-primary-blue { color: var(--primary-blue) !important; }
+.text-secondary-teal { color: var(--secondary-teal) !important; }
+.text-accent-orange { color: var(--accent-orange) !important; }

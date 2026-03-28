@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Dashboard | مقرري+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <div th:fragment="main-content">
+        <!-- Student Greeting Banner -->
+        <section class="bg-primary-blue text-white py-5 position-relative overflow-hidden" style="background-color: var(--primary-blue);">
+            <div class="position-absolute top-0 end-0 opacity-25 w-50 h-100" style="background: radial-gradient(circle, var(--accent-orange) 0%, transparent 60%); pointer-events: none;"></div>
+            
+            <div class="container py-4 position-relative z-1">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <span class="badge bg-white text-secondary-teal rounded-pill px-3 py-2 fw-bold shadow-sm mb-3">Student Portal</span>
+                        <h1 class="display-6 fw-bold mb-0">Welcome to Your Learning Path</h1>
+                        <p class="text-white-50 mt-2 fs-5">Track course enrollments and discover the latest real-world industry insights.</p>
+                    </div>
+                    
+                    <div class="col-md-4 mt-4 mt-md-0 d-flex justify-content-md-end">
+                        <form th:action="@{/courses}" method="get" class="w-100 max-w-400">
+                             <div class="input-group shadow-sm border-0 rounded-4 overflow-hidden bg-white">
+                                  <input type="text" name="search" class="form-control form-control-lg border-0 py-3" placeholder="Search course code...">
+                                  <button type="submit" class="btn btn-primary px-4 fw-bold" style="background-color: var(--secondary-teal);">🔍</button>
+                             </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container py-5 mt-3">
+            <div class="row g-5">
+                
+                <!-- Left Column: My Learning Path -->
+                <div class="col-lg-7">
+                    <h2 class="h4 fw-bold text-primary-blue border-bottom border-3 border-secondary-teal pb-3 mb-4 d-inline-block">My Learning Path</h2>
+                    
+                    <div class="row row-cols-1 g-4">
+                         <!-- Empty State -->
+                         <div class="col">
+                              <div class="card bg-white rounded-4 shadow-sm border-0 h-100 p-5 text-center">
+                                   <div class="bg-light rounded-circle d-inline-flex justify-content-center align-items-center mb-4 mx-auto" style="width: 100px; height: 100px;">
+                                        <span class="display-4 text-muted">🎓</span>
+                                   </div>
+                                   <h3 class="h5 fw-bold text-primary-blue mb-2">You haven't added any courses yet.</h3>
+                                   <p class="text-muted fs-6 mb-4">Start by searching for your university curriculum to discover real-world applications and roadmaps.</p>
+                                   <a th:href="@{/courses}" class="btn btn-outline-primary btn-lg rounded-pill px-5 fw-bold mx-auto border-2 shadow-sm">Browse Course Catalog &rarr;</a>
+                              </div>
+                         </div>
+                         
+                         <!-- Mock Enrolled Course -->
+                         <!--
+                         <div class="col">
+                              <div class="card bg-white rounded-4 shadow-sm border h-100 p-4 transition-all course-card border-start border-4 border-secondary-teal">
+                                   <h3 class="h5 fw-bold text-dark mb-2">Introduction to Algorithms</h3>
+                                   <p class="text-muted small mb-3">CS202 • King Saud University</p>
+                                   <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-success" style="width: 45%;"></div>
+                                   </div>
+                                   <div class="d-flex justify-content-between align-items-center mt-4">
+                                        <span class="text-secondary-teal fw-bold fs-6">★ 3 Verified Insights</span>
+                                        <a href="#" class="btn btn-sm btn-light border rounded-pill px-3 fw-bold shadow-sm">Continue Learning &rarr;</a>
+                                   </div>
+                              </div>
+                         </div>
+                         -->
+                    </div>
+                </div>
+
+                <!-- Right Column: Industry Insights Feed -->
+                <div class="col-lg-5 mt-5 mt-lg-0">
+                    <div class="card bg-offwhite rounded-4 shadow-sm border-0 p-4 p-md-5 h-100 border-top border-4 border-accent-orange">
+                         <h2 class="h5 fw-bold text-accent-orange border-bottom border-2 pb-3 mb-4 text-uppercase">
+                             <span class="fs-5 me-2">🔔</span> Industry Insights Feed
+                         </h2>
+                         
+                         <p class="text-muted fst-italic mb-4">Latest course enrichments by verified experts based on your learning map.</p>
+                         
+                         <div class="d-flex flex-column gap-4">
+                              <!-- Feed Item 1 -->
+                              <div class="bg-white rounded p-4 border shadow-sm position-relative">
+                                   <span class="position-absolute top-0 end-0 badge bg-secondary-teal mt-3 me-3 rounded-pill text-white fw-bold shadow-sm" style="background-color: var(--secondary-teal) !important;">New</span>
+                                   <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm me-3" 
+                                             style="width: 40px; height: 40px; background-color: var(--primary-blue);">JS</div>
+                                        <div>
+                                            <strong class="d-block text-dark fs-6">Khalid Developer</strong>
+                                            <span class="text-muted small">Systems Architect</span>
+                                        </div>
+                                   </div>
+                                   <a href="#" class="text-primary-blue fw-bold text-decoration-none d-block mb-2">Data Structures in High-Frequency Trading</a>
+                                   <p class="text-muted small mb-0 lh-sm">Discover how O(1) hash maps are utilized directly in real-time engine optimizations...</p>
+                              </div>
+                              
+                              <!-- Feed Item 2 -->
+                              <div class="bg-white rounded p-4 border shadow-sm position-relative">
+                                   <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm me-3" 
+                                             style="width: 40px; height: 40px; background-color: var(--accent-orange);">AM</div>
+                                        <div>
+                                            <strong class="d-block text-dark fs-6">Sarah Designer</strong>
+                                            <span class="text-muted small">Senior UI/UX Researcher</span>
+                                        </div>
+                                   </div>
+                                   <a href="#" class="text-primary-blue fw-bold text-decoration-none d-block mb-2">HCI Roadmap to Silicon Valley</a>
+                                   <p class="text-muted small mb-0 lh-sm">A direct career path bridging the final year HCI course to a junior product design role...</p>
+                              </div>
+                         </div>
+                         
+                         <div class="text-center mt-4">
+                              <button class="btn btn-outline-secondary btn-sm rounded-pill px-4 fw-bold">Load More Insights</button>
+                         </div>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+    </div>
+
+</body>
+</html>

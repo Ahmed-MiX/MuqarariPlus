@@ -1,0 +1,37 @@
+{
+  "nav.courses": "Courses",
+  "nav.about": "About",
+  "nav.login": "Log In",
+  "nav.register": "Register",
+  "nav.lang": "عربي",
+  
+  "hero.heading": "Your 'Why study this?' finally has an answer in 'Muqarari+'.",
+  "hero.sub": "Bridge the gap between academic theory and real-world application. Learn from verified industry experts.",
+  "hero.cta.courses": "Find My Course",
+  "hero.cta.expert": "Become an Expert",
+  
+  "pillars.title": "Our Three Pillars of Enrichment",
+  "pillars.app": "Practical Applications",
+  "pillars.app.desc": "See how your course material is used daily in toplevel industries.",
+  "pillars.roadmap": "Career Roadmap",
+  "pillars.roadmap.desc": "Discover the precise path from taking this course to landing a job.",
+  "pillars.res": "Enrichment Resources",
+  "pillars.res.desc": "Hand-picked books, articles, and tools by professionals.",
+  
+  "why.title": "Why Muqarari+?",
+  "why.ai": "Generic AI answers vs",
+  "why.human": "Local Expert Insights",
+  
+  "benefits.student": "For Students: Clarity and Motivation",
+  "benefits.univ": "For Universities: Modern Curriculum Alignment",
+  "benefits.expert": "For Experts: Give Back and Gain Recognition",
+  
+  "course.expert.verified": "Verified Expert Content",
+  "course.details.title": "Course Details",
+  "course.syllabus": "View Syllabus",
+  
+  "search.placeholder": "Search courses, specializations...",
+  
+  "footer.cta": "Ready to Transform Your Learning?",
+  "footer.rights": "© 2026 Muqarari+. All rights reserved."
+}

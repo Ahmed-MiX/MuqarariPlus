@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Expert Portal | مقرري+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <div th:fragment="main-content">
+        <!-- Expert Header -->
+        <section class="bg-primary-blue text-white py-5" style="background-color: var(--primary-blue);">
+            <div class="container py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="display-6 fw-bold mb-0">Welcome Back, Expert</h1>
+                        <p class="text-white-50 mt-2 fs-5">Enrich academic theory with your real-world industry experience.</p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-4 mt-md-0">
+                        <!-- Dynamic Badge based on verification state (Mocked for UI) -->
+                        <div class="d-inline-flex align-items-center bg-white text-dark rounded-pill shadow-sm px-4 py-3">
+                            <span class="fs-4 text-accent-orange me-3">⏱</span>
+                            <div class="text-start">
+                                <span class="d-block fw-bold fs-6">Status</span>
+                                <span class="text-muted small">Pending Verification</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container py-5 mt-3">
+            <div class="row g-5">
+                
+                <!-- Left Column: Verification Form -->
+                <div class="col-lg-8">
+                    <!-- Identity Verification Form -->
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5 mb-5 border-start border-5 border-accent-orange position-relative overflow-hidden">
+                         <div class="position-absolute top-0 end-0 p-4 opacity-10">
+                              <span style="font-size: 8rem; line-height: 1; color: var(--accent-orange);">🛡</span>
+                         </div>
+                         <h2 class="h3 fw-bold text-primary-blue mb-3 position-relative z-1">Identity Verification</h2>
+                         <p class="text-muted fs-5 mb-4 position-relative z-1">Upload your credentials. Once verified, you can begin submitting course enrichments.</p>
+                         
+                         <form method="post" action="#" enctype="multipart/form-data" class="needs-validation position-relative z-1">
+                              <div class="mb-4">
+                                  <label class="form-label fw-bold text-dark fs-6">Upload CV Document (PDF, DOCX)</label>
+                                  <input type="file" name="cvurl" class="form-control form-control-lg bg-light border-0 shadow-sm" required>
+                              </div>
+                              
+                              <div class="mb-5">
+                                  <label class="form-label fw-bold text-dark fs-6">LinkedIn Profile Profile</label>
+                                  <input type="url" name="linkedinUrl" class="form-control form-control-lg bg-light border-0 shadow-sm" placeholder="https://linkedin.com/in/username" required>
+                              </div>
+                              
+                              <button type="submit" class="btn btn-accent btn-lg px-5 fw-bold shadow-sm rounded-pill w-100 w-md-auto">Submit for Review</button>
+                         </form>
+                    </div>
+
+                    <!-- Course Enrichment Form (Mocked locked state) -->
+                    <div class="card bg-light rounded-4 shadow-sm border-0 p-4 p-md-5">
+                         <div class="d-flex justify-content-between align-items-center mb-4">
+                              <h2 class="h4 fw-bold text-primary-blue mb-0">Submit New Course Enrichment</h2>
+                              <span class="badge bg-secondary-teal rounded-pill px-3 py-2 text-white shadow-sm">Locked</span>
+                         </div>
+                         <p class="text-muted mb-4 fst-italic">This section will unlock upon successful Identity Verification.</p>
+                         
+                         <form class="opacity-50 pe-none">
+                              <div class="mb-4">
+                                  <label class="form-label fw-bold">Select University Course</label>
+                                  <select class="form-select form-select-lg bg-white border-0 shadow-sm" disabled>
+                                      <option>Data Structures & Algorithms (CS101)</option>
+                                  </select>
+                              </div>
+                              <div class="mb-4">
+                                  <label class="form-label fw-bold">Pillar 1: Practical Application</label>
+                                  <textarea rows="3" class="form-control bg-white border-0 shadow-sm" placeholder="How is this used in the industry?" disabled></textarea>
+                              </div>
+                              <div class="mb-4">
+                                  <label class="form-label fw-bold">Pillar 2: Career Roadmap</label>
+                                  <textarea rows="3" class="form-control bg-white border-0 shadow-sm" placeholder="What role does this skill lead to?" disabled></textarea>
+                              </div>
+                              <button type="button" class="btn btn-primary btn-lg px-5 fw-bold rounded-pill" disabled style="background-color: var(--secondary-teal); border-color: var(--secondary-teal);">Submit Contribution</button>
+                         </form>
+                    </div>
+                </div>
+
+                <!-- Right Column: My Contributions -->
+                <div class="col-lg-4">
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5 mb-5 h-100">
+                        <h3 class="h5 fw-bold text-secondary-teal border-bottom border-2 pb-3 mb-4">My Contributions</h3>
+                        
+                        <!-- Empty State -->
+                        <div class="text-center py-5">
+                             <div class="bg-light rounded-circle d-inline-flex justify-content-center align-items-center mb-3 text-muted" style="width: 80px; height: 80px;">
+                                  <span class="fs-1">📚</span>
+                             </div>
+                             <h4 class="h5 text-primary-blue fw-bold">No contributions yet.</h4>
+                             <p class="text-muted small">Your verified course enrichments will appear here with engagement metrics.</p>
+                        </div>
+                        
+                        <!-- Example Mock Item -->
+                        <!--
+                        <div class="border rounded px-3 py-3 mb-3 bg-light">
+                             <h5 class="fw-bold fs-6 text-dark mb-1">Machine Learning 101</h5>
+                             <div class="d-flex align-items-center text-muted small mt-2">
+                                  <span class="me-3"><span class="text-secondary-teal fw-bold">★ 124</span> Upvotes</span>
+                                  <span><span class="text-accent-orange fw-bold">✓</span> Approved</span>
+                             </div>
+                        </div>
+                        -->
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+    </div>
+
+</body>
+</html>

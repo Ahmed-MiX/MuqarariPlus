@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Dashboard | مقرري+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <div th:fragment="main-content">
+        <!-- Admin Header -->
+        <section class="bg-primary-blue text-white py-5" style="background-color: var(--primary-blue);">
+            <div class="container py-3">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h1 class="display-6 fw-bold mb-0">System Administration</h1>
+                        <p class="text-white-50 mb-0 mt-2">Manage expert verifications, users, and platform data.</p>
+                    </div>
+                    <span class="badge bg-danger rounded-pill px-4 py-2 fs-6 shadow-sm border border-light">SUPER ADMIN</span>
+                </div>
+                
+                <!-- Overview Stats -->
+                <div class="row g-4 mt-4">
+                    <div class="col-md-3">
+                        <div class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4">
+                            <h3 class="h6 text-muted fw-bold text-uppercase">Total Students</h3>
+                            <div class="display-5 fw-bold text-primary-blue mt-2">1,245</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4 border-start border-4 border-secondary-teal">
+                            <h3 class="h6 text-muted fw-bold text-uppercase">Verified Experts</h3>
+                            <div class="display-5 fw-bold text-secondary-teal mt-2">87</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4 border-start border-4 border-accent-orange">
+                            <h3 class="h6 text-muted fw-bold text-uppercase">Pending Verifications</h3>
+                            <div class="display-5 fw-bold text-accent-orange mt-2 flex-grow-1">12</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4">
+                            <h3 class="h6 text-muted fw-bold text-uppercase">Courses Enriched</h3>
+                            <div class="display-5 fw-bold text-dark mt-2">340</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Dashboard Area -->
+        <section class="container py-5 mt-3">
+            
+            <!-- Expert Verification Queue -->
+            <div class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5 mb-5 border-top border-4 border-accent-orange">
+                <h2 class="h4 fw-bold text-primary-blue border-bottom border-2 pb-3 mb-4">
+                    Expert Verification Queue
+                </h2>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="py-3 px-4">Expert Name & Email</th>
+                                <th class="py-3 px-4">CV Document</th>
+                                <th class="py-3 px-4">LinkedIn Profile</th>
+                                <th class="py-3 px-4 text-end">Action Interface</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Mock Data representing database fetch -->
+                            <tr>
+                                <td class="py-3 px-4">
+                                    <div class="fw-bold text-dark">Ahmed Al-Otaibi</div>
+                                    <div class="small text-muted">ahmed.otaibi@example.com</div>
+                                </td>
+                                <td class="py-3 px-4"><a href="#" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold shadow-sm">[PDF] View CV</a></td>
+                                <td class="py-3 px-4"><a href="#" target="_blank" class="text-secondary-teal fw-semibold text-decoration-none">View LinkedIn &rarr;</a></td>
+                                <td class="py-3 px-4 text-end">
+                                    <form method="post" action="#" class="d-inline">
+                                        <button type="button" class="btn btn-sm text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: var(--secondary-teal);">Approve</button>
+                                    </form>
+                                    <form method="post" action="#" class="d-inline">
+                                        <button type="button" class="btn btn-sm btn-danger rounded-pill px-4 fw-bold shadow-sm ms-2 border-0" style="background-color: var(--accent-orange);">Reject</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end mt-3">
+                    <a href="#" class="btn btn-link text-muted fw-bold text-decoration-none small">View All Pending &rarr;</a>
+                </div>
+            </div>
+
+            <!-- User Management -->
+            <div class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5 mb-5">
+                <div class="d-flex justify-content-between align-items-center border-bottom border-2 pb-3 mb-4">
+                    <h2 class="h4 fw-bold text-primary-blue mb-0">System User Management</h2>
+                    <input type="text" class="form-control form-control-sm w-25 rounded-pill px-3" placeholder="Search users by email...">
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="py-3 px-4">User Email</th>
+                                <th class="py-3 px-4">Full Name</th>
+                                <th class="py-3 px-4">Assigned Role</th>
+                                <th class="py-3 px-4 text-end">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="py-3 px-4 fw-semibold text-dark">admin@muqarariplus.com</td>
+                                <td class="py-3 px-4 text-muted">Super Admin</td>
+                                <td class="py-3 px-4"><span class="badge bg-danger rounded-pill">ROLE_ADMIN</span></td>
+                                <td class="py-3 px-4 text-end"><span class="badge bg-success rounded-pill px-3 shadow-sm">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 px-4 fw-semibold text-dark">expert@muqarariplus.com</td>
+                                <td class="py-3 px-4 text-muted">Tariq Expert</td>
+                                <td class="py-3 px-4"><span class="badge bg-primary rounded-pill" style="background-color: var(--secondary-teal) !important;">ROLE_EXPERT</span></td>
+                                <td class="py-3 px-4 text-end"><span class="badge bg-success rounded-pill px-3 shadow-sm">Active</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- System Health (Placeholder) -->
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card bg-light rounded-4 shadow-sm border-0 p-4">
+                        <h4 class="h6 fw-bold text-muted mb-3 text-uppercase">Database Health</h4>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-success" style="width: 25%"></div>
+                        </div>
+                        <small class="text-muted mt-2 d-block">25% Capacity Used</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-light rounded-4 shadow-sm border-0 p-4">
+                        <h4 class="h6 fw-bold text-muted mb-3 text-uppercase">Server Status</h4>
+                        <div class="d-flex align-items-center text-success fw-bold">
+                            <span class="fs-4 me-2">●</span> Operational (Uptime: 99.9%)
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </section>
+    </div>
+
+</body>
+</html>

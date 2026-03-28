@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Muqarari+ | مقرري+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <div th:fragment="main-content">
+        <!-- Hero Section -->
+        <section class="hero w-100 min-vh-75 d-flex align-items-center position-relative">
+            <div class="background-shape position-absolute w-100 h-100 top-0 start-0 z-n1" style="background: linear-gradient(135deg, rgba(10, 25, 47, 0.05) 0%, rgba(0, 180, 216, 0.05) 100%);"></div>
+            
+            <div class="container pb-5">
+                <div class="row align-items-center gy-5">
+                    <div class="col-lg-6 text-center text-lg-start">
+                        <h1 class="display-4 fw-bolder mb-4 text-primary-blue" style="line-height: 1.3" th:text="#{hero.heading}">سؤالك 'ليش أدرس هذا؟' وجد جوابه في 'مقرري+'.</h1>
+                        <p class="lead text-muted mb-5 pe-lg-5" th:text="#{hero.sub}">سد الفجوة بين النظرية الأكاديمية والتطبيق العملي. تعلم من خبراء ممارسين ومعتمدين.</p>
+                        
+                        <div class="d-flex gap-3 justify-content-center justify-content-lg-start">
+                             <a th:href="@{/courses}" class="btn btn-accent btn-lg px-4 shadow-sm" th:text="#{hero.cta.courses}">ابحث عن مقررك</a>
+                             <a th:href="@{/expert}" class="btn btn-outline-primary btn-lg px-4" th:text="#{hero.cta.expert}">كن خبيراً</a>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 text-center hero-img">
+                         <img th:src="@{/img/hero-graphic.png}" alt="Muqarari+ Concept Graphic" class="img-fluid rounded-4 shadow-lg p-3 bg-white border">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Problem Vs Solution (Why Us) -->
+        <section id="about" class="py-5 bg-white text-center">
+             <div class="container py-4">
+                  <h2 class="display-6 fw-bold text-primary-blue mb-5" th:text="#{why.title}">Why Muqarari+?</h2>
+                  
+                  <div class="row w-100 max-w-700 mx-auto bg-light rounded-4 shadow-sm p-4 align-items-center g-4 border" style="max-width: 800px;">
+                       <div class="col-md-5 text-center px-4">
+                            <h3 class="h4 text-muted mb-3" th:text="#{why.ai}">Generic AI answers</h3>
+                            <div class="display-4 text-secondary">✗</div>
+                       </div>
+                       
+                       <div class="col-md-2 text-center text-accent-orange display-5 fw-bold vs-divider">
+                            VS
+                       </div>
+                       
+                       <div class="col-md-5 text-center px-4">
+                            <h3 class="h4 text-primary-blue mb-3" th:text="#{why.human}">Local Expert Insights</h3>
+                            <div class="display-4 text-secondary-teal">✓</div>
+                       </div>
+                  </div>
+             </div>
+        </section>
+
+        <!-- The Three Pillars -->
+        <section class="py-5 text-center bg-offwhite">
+             <div class="container py-5">
+                  <h2 class="display-6 fw-bold mb-5 text-primary-blue" th:text="#{pillars.title}">Our Three Pillars</h2>
+                  
+                  <div class="row g-4 justify-content-center">
+                      <div class="col-md-6 col-lg-4 d-flex">
+                          <div class="pillar-card border-top border-4 w-100" style="border-top-color: var(--secondary-teal) !important;">
+                              <h3 class="h4 text-primary-blue mb-3 fw-bold" th:text="#{pillars.app}">Practical Applications</h3>
+                              <p class="text-muted" th:text="#{pillars.app.desc}">See how your course material is used daily.</p>
+                          </div>
+                      </div>
+                      
+                      <div class="col-md-6 col-lg-4 d-flex">
+                          <div class="pillar-card border-top border-4 w-100" style="border-top-color: var(--accent-orange) !important;">
+                              <h3 class="h4 text-primary-blue mb-3 fw-bold" th:text="#{pillars.roadmap}">Career Roadmap</h3>
+                              <p class="text-muted" th:text="#{pillars.roadmap.desc}">Discover the precise path from taking this course to landing a job.</p>
+                          </div>
+                      </div>
+                      
+                      <div class="col-md-6 col-lg-4 d-flex">
+                          <div class="pillar-card border-top border-4 w-100" style="border-top-color: var(--primary-blue) !important;">
+                              <h3 class="h4 text-primary-blue mb-3 fw-bold" th:text="#{pillars.res}">Enrichment Resources</h3>
+                              <p class="text-muted" th:text="#{pillars.res.desc}">Hand-picked books, articles, and tools.</p>
+                          </div>
+                      </div>
+                  </div>
+             </div>
+        </section>
+        
+        <!-- Benefits -->
+        <section class="py-5 bg-white">
+            <div class="container text-center py-5">
+                <h2 class="display-6 fw-bold text-primary-blue mb-5">Benefits</h2>
+                <div class="row g-4 max-w-800 mx-auto justify-content-center align-items-center">
+                    <div class="col-md-8 text-start fs-5 text-dark lh-lg">
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="text-accent-orange fs-4 me-3">■</span>
+                            <span class="fw-semibold" th:text="#{benefits.student}">For Students: Clarity and Motivation</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="text-secondary-teal fs-4 me-3">■</span>
+                            <span class="fw-semibold" th:text="#{benefits.univ}">For Universities: Modern Curriculum Alignment</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="text-primary-blue fs-4 me-3">■</span>
+                            <span class="fw-semibold" th:text="#{benefits.expert}">For Experts: Give Back and Gain Recognition</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+</body>
+</html>

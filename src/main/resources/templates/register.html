@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Register | مقرري+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <div th:fragment="main-content" class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+        <div class="card shadow-lg border-0 rounded-4 w-100" style="max-width: 600px;">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4" style="color: var(--primary-blue);" th:text="#{nav.register}">Create an Account</h2>
+                
+                <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}">
+                    Registration failed.
+                </div>
+
+                <!-- Registration Form using DTO Binding -->
+                <form th:action="@{/register}" th:object="${userDto}" method="post">
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label font-weight-bold">First Name</label>
+                            <input type="text" th:field="*{firstName}" class="form-control" th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid' : ''" required>
+                            <div class="invalid-feedback fw-bold" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">Error</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label font-weight-bold">Last Name</label>
+                            <input type="text" th:field="*{lastName}" class="form-control" th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid' : ''" required>
+                            <div class="invalid-feedback fw-bold" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">Error</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Email Address</label>
+                        <input type="email" th:field="*{email}" class="form-control form-control-lg" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''" required>
+                        <div class="invalid-feedback fw-bold text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Error</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Secure Password</label>
+                        <input type="password" th:field="*{password}" class="form-control form-control-lg" th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''" required>
+                        <div class="invalid-feedback fw-bold text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Error</div>
+                        <small class="text-muted d-block mt-1">Must be 8+ chars, 1 uppercase, 1 number, 1 special character.</small>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label font-weight-bold">Account Role</label>
+                        <select th:field="*{role}" class="form-select form-select-lg">
+                            <option value="ROLE_STUDENT">Student</option>
+                            <option value="ROLE_EXPERT">Industry Expert</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 btn-lg mb-3" style="background-color: var(--accent-orange); border-color: var(--accent-orange);" th:text="#{nav.register}">Register Now</button>
+                    
+                    <div class="text-center">
+                        <span class="text-muted">Already have an account?</span> 
+                        <a th:href="@{/login}" style="color: var(--primary-blue); font-weight: 600;" th:text="#{nav.login}">Login Here</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
