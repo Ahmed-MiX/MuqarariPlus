@@ -1,97 +1,116 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="#{admin.title}">Admin Dashboard | مقرري+</title>
+    <title th:text="${content['admin.title']}">Admin Dashboard | Muqarari+</title>
 </head>
 <body th:replace="~{fragments/layout :: html}">
 
     <div th:fragment="main-content">
-        <!-- Admin Header -->
-        <section class="bg-primary-blue text-white py-5" style="background-color: var(--primary-blue);">
+
+        <!-- ===== HEADER ===== -->
+        <section class="text-white py-5" style="background-color: var(--primary-blue);">
             <div class="container py-3">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
-                        <h1 class="display-6 fw-bold mb-0" th:text="#{admin.title}">System Administration</h1>
-                        <p class="text-white-50 mb-0 mt-2" th:text="#{admin.subtitle}">Manage expert verifications, users, and platform data.</p>
+                        <h1 class="display-6 fw-bold mb-0" th:text="${content['admin.title']}">System Administration</h1>
+                        <p class="text-white-50 mb-0 mt-2" th:text="${content['admin.subtitle']}">Manage expert verifications.</p>
                     </div>
-                    <span class="badge bg-danger rounded-pill px-4 py-2 fs-6 shadow-sm border border-light" th:text="#{admin.badge}">SUPER ADMIN</span>
+                    <span class="badge bg-danger rounded-pill px-4 py-2 fs-6 shadow-sm border border-light"
+                          th:text="${content['admin.badge']}">ADMIN</span>
                 </div>
-                
-                <!-- Overview Stats -->
+
+                <!-- Stats -->
                 <div class="row g-4 mt-4">
                     <div class="col-md-3">
                         <div class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4">
-                            <h3 class="h6 text-muted fw-bold text-uppercase" th:text="#{admin.stat.students}">Total Students</h3>
-                            <div class="display-5 fw-bold text-primary-blue mt-2" th:text="${totalStudents}">0</div>
+                            <h3 class="h6 text-muted fw-bold text-uppercase"
+                                th:text="${content['admin.stat.students']}">Total Students</h3>
+                            <div class="display-5 fw-bold text-primary-blue mt-2"
+                                 th:text="${totalStudents}">0</div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4 border-start border-4 border-secondary-teal">
-                            <h3 class="h6 text-muted fw-bold text-uppercase" th:text="#{admin.stat.experts}">Verified Experts</h3>
-                            <div class="display-5 fw-bold text-secondary-teal mt-2" th:text="${verifiedExperts}">0</div>
+                            <h3 class="h6 text-muted fw-bold text-uppercase"
+                                th:text="${content['admin.stat.experts']}">Verified Experts</h3>
+                            <div class="display-5 fw-bold text-secondary-teal mt-2"
+                                 th:text="${verifiedExperts}">0</div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4 border-start border-4 border-accent-orange">
-                            <h3 class="h6 text-muted fw-bold text-uppercase" th:text="#{admin.stat.pending}">Pending Verifications</h3>
-                            <div class="display-5 fw-bold text-accent-orange mt-2 flex-grow-1" th:text="${pendingExpertsCount}">0</div>
+                            <h3 class="h6 text-muted fw-bold text-uppercase"
+                                th:text="${content['admin.stat.pending']}">Pending</h3>
+                            <div class="display-5 fw-bold text-accent-orange mt-2"
+                                 th:text="${pendingExpertsCount}">0</div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4">
-                            <h3 class="h6 text-muted fw-bold text-uppercase" th:text="#{admin.stat.courses}">Courses Enriched</h3>
-                            <div class="display-5 fw-bold text-dark mt-2" th:text="${coursesEnriched}">0</div>
+                            <h3 class="h6 text-muted fw-bold text-uppercase"
+                                th:text="${content['admin.stat.courses']}">Courses Enriched</h3>
+                            <div class="display-5 fw-bold text-dark mt-2"
+                                 th:text="${coursesEnriched}">0</div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Main Dashboard Area -->
+        <!-- ===== MAIN AREA ===== -->
         <section class="container py-5 mt-3">
-            
+
             <!-- Expert Verification Queue -->
             <div class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5 mb-5 border-top border-4 border-accent-orange">
-                <h2 class="h4 fw-bold text-primary-blue border-bottom border-2 pb-3 mb-4" th:text="#{admin.queue.title}">
-                    Expert Verification Queue
-                </h2>
-                
+                <h2 class="h4 fw-bold text-primary-blue border-bottom border-2 pb-3 mb-4"
+                    th:text="${content['admin.queue.title']}">Expert Verification Queue</h2>
+
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th class="py-3 px-4" th:text="#{admin.queue.name}">Expert Name & Email</th>
-                                <th class="py-3 px-4" th:text="#{admin.queue.cv}">CV Document</th>
-                                <th class="py-3 px-4" th:text="#{admin.queue.linkedin}">LinkedIn Profile</th>
-                                <th class="py-3 px-4 text-end" th:text="#{admin.queue.action}">Action Interface</th>
+                                <th class="py-3 px-4" th:text="${content['admin.queue.name']}">Name</th>
+                                <th class="py-3 px-4" th:text="${content['admin.queue.cv']}">CV</th>
+                                <th class="py-3 px-4" th:text="${content['admin.queue.linkedin']}">LinkedIn</th>
+                                <th class="py-3 px-4 text-end" th:text="${content['admin.queue.action']}">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Dynamic Loop -->
                             <tr th:each="expert : ${pendingExperts}">
                                 <td class="py-3 px-4">
-                                    <div class="fw-bold text-dark" th:text="${expert.firstName + ' ' + expert.lastName}">Name</div>
+                                    <div class="fw-bold text-dark"
+                                         th:text="${expert.firstName + ' ' + expert.lastName}">Name</div>
                                     <div class="small text-muted" th:text="${expert.email}">email</div>
                                 </td>
-                                <td class="py-3 px-4"><a th:href="${expert.cvUrl ?: '#'}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold shadow-sm" th:text="#{admin.queue.cv.btn}">View CV</a></td>
-                                <td class="py-3 px-4"><a th:href="${expert.linkedinUrl ?: '#'}" target="_blank" class="text-secondary-teal fw-semibold text-decoration-none" th:text="#{admin.queue.linkedin.btn}">View LinkedIn &rarr;</a></td>
+                                <td class="py-3 px-4">
+                                    <a th:href="${expert.cvUrl ?: '#'}" target="_blank"
+                                       class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold shadow-sm"
+                                       th:text="${content['admin.queue.cv.btn']}">View CV</a>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <a th:href="${expert.linkedinUrl ?: '#'}" target="_blank"
+                                       class="text-secondary-teal fw-semibold text-decoration-none"
+                                       th:text="${content['admin.queue.linkedin.btn']}">LinkedIn &rarr;</a>
+                                </td>
                                 <td class="py-3 px-4 text-end">
                                     <form th:action="@{/admin/approve-expert}" method="post" class="d-inline">
-                                        <input type="hidden" name="expertId" th:value="${expert.id}" />
-                                        <button type="submit" class="btn btn-sm text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: var(--secondary-teal);" th:text="#{admin.queue.approve}">Approve</button>
+                                        <input type="hidden" name="expertId" th:value="${expert.id}"/>
+                                        <button type="submit"
+                                                class="btn btn-sm text-white rounded-pill px-4 fw-bold shadow-sm"
+                                                style="background-color: var(--secondary-teal);"
+                                                th:text="${content['admin.queue.approve']}">Approve</button>
                                     </form>
-                                    <form th:action="@{/admin/reject-expert}" method="post" class="d-inline">
-                                        <input type="hidden" name="expertId" th:value="${expert.id}" />
-                                        <button type="submit" class="btn btn-sm btn-danger rounded-pill px-4 fw-bold shadow-sm ms-2 border-0" style="background-color: var(--accent-orange);" th:text="#{admin.queue.reject}">Reject</button>
+                                    <form th:action="@{/admin/reject-expert}" method="post" class="d-inline ms-2">
+                                        <input type="hidden" name="expertId" th:value="${expert.id}"/>
+                                        <button type="submit"
+                                                class="btn btn-sm btn-danger rounded-pill px-4 fw-bold shadow-sm border-0"
+                                                th:text="${content['admin.queue.reject']}">Reject</button>
                                     </form>
                                 </td>
                             </tr>
-                            
-                            <!-- Empty State Map -->
-                            <tr th:if="${#lists.isEmpty(pendingExperts)}">
-                                 <td colspan="4" class="text-center py-4 text-muted fst-italic" th:text="#{admin.queue.empty}">
-                                     No pending experts awaiting verification.
-                                 </td>
+                            <tr th:if="${pendingExperts == null or #lists.isEmpty(pendingExperts)}">
+                                <td colspan="4" class="text-center py-5 text-muted fst-italic"
+                                    th:text="${content['admin.queue.empty']}">No pending experts.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -101,56 +120,69 @@
             <!-- User Management -->
             <div class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5 mb-5">
                 <div class="d-flex justify-content-between align-items-center border-bottom border-2 pb-3 mb-4 flex-wrap gap-2">
-                    <h2 class="h4 fw-bold text-primary-blue mb-0" th:text="#{admin.users.title}">System User Management</h2>
-                    <input type="text" class="form-control form-control-sm w-auto min-w-200 rounded-pill px-3" th:placeholder="#{admin.users.search}">
+                    <h2 class="h4 fw-bold text-primary-blue mb-0"
+                        th:text="${content['admin.users.title']}">User Management</h2>
+                    <input type="text"
+                           class="form-control form-control-sm w-auto rounded-pill px-3"
+                           style="min-width: 220px;"
+                           th:placeholder="${content['admin.users.search']}">
                 </div>
-                
                 <div class="table-responsive">
                     <table class="table align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th class="py-3 px-4" th:text="#{admin.users.email}">User Email</th>
-                                <th class="py-3 px-4" th:text="#{admin.users.name}">Full Name</th>
-                                <th class="py-3 px-4" th:text="#{admin.users.role}">Assigned Role</th>
-                                <th class="py-3 px-4 text-end" th:text="#{admin.users.status}">Status</th>
+                                <th class="py-3 px-4" th:text="${content['admin.users.email']}">Email</th>
+                                <th class="py-3 px-4" th:text="${content['admin.users.name']}">Name</th>
+                                <th class="py-3 px-4" th:text="${content['admin.users.role']}">Role</th>
+                                <th class="py-3 px-4 text-end" th:text="${content['admin.users.status']}">Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="user : ${allUsers}">
-                                <td class="py-3 px-4 fw-semibold text-dark" th:text="${user.email}">admin@muqarariplus.com</td>
-                                <td class="py-3 px-4 text-muted" th:text="${user.firstName + ' ' + user.lastName}">Super Admin</td>
-                                <td class="py-3 px-4"><span class="badge bg-secondary-teal rounded-pill" th:text="${user.role}">ROLE_ADMIN</span></td>
+                                <td class="py-3 px-4 fw-semibold text-dark" th:text="${user.email}">email</td>
+                                <td class="py-3 px-4 text-muted" th:text="${user.firstName + ' ' + user.lastName}">Name</td>
+                                <td class="py-3 px-4">
+                                    <span class="badge bg-secondary-teal rounded-pill" th:text="${user.role}">ROLE</span>
+                                </td>
                                 <td class="py-3 px-4 text-end">
-                                    <span class="badge bg-success rounded-pill px-3 shadow-sm" th:text="#{admin.users.active}" th:if="${user.status == 'APPROVED'}">Active</span>
-                                    <span class="badge bg-warning text-dark rounded-pill px-3 shadow-sm" th:unless="${user.status == 'APPROVED'}">Pending</span>
+                                    <span class="badge bg-success rounded-pill px-3 shadow-sm"
+                                          th:if="${user.status == 'APPROVED'}"
+                                          th:text="${content['admin.users.active']}">Active</span>
+                                    <span class="badge bg-warning text-dark rounded-pill px-3 shadow-sm"
+                                          th:unless="${user.status == 'APPROVED'}"
+                                          th:text="${content['admin.users.pending']}">Pending</span>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
-            
+
             <!-- System Health -->
             <div class="row g-4">
                 <div class="col-md-6">
                     <div class="card bg-light rounded-4 shadow-sm border-0 p-4">
-                        <h4 class="h6 fw-bold text-muted mb-3 text-uppercase" th:text="#{admin.health.db}">Database Health</h4>
+                        <h4 class="h6 fw-bold text-muted mb-3 text-uppercase"
+                            th:text="${content['admin.health.db']}">Database Health</h4>
                         <div class="progress" style="height: 10px;">
                             <div class="progress-bar bg-success" style="width: 25%"></div>
                         </div>
-                        <small class="text-muted mt-2 d-block" th:text="#{admin.health.cap}">25% Capacity Used</small>
+                        <small class="text-muted mt-2 d-block"
+                               th:text="${content['admin.health.cap']}">25% Used</small>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="card bg-light rounded-4 shadow-sm border-0 p-4">
-                        <h4 class="h6 fw-bold text-muted mb-3 text-uppercase" th:text="#{admin.health.server}">Server Status</h4>
+                        <h4 class="h6 fw-bold text-muted mb-3 text-uppercase"
+                            th:text="${content['admin.health.server']}">Server Status</h4>
                         <div class="d-flex align-items-center text-success fw-bold">
-                            <span class="fs-4 me-2">●</span> <span th:text="#{admin.health.uptime}">Operational (Uptime: 99.9%)</span>
+                            <span class="fs-4 me-2">●</span>
+                            <span th:text="${content['admin.health.uptime']}">Operational</span>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
         </section>
     </div>
 

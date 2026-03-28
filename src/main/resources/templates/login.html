@@ -1,44 +1,50 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <!-- Scrubbed: no _ar/_en suffix -->
-    <title th:text="#{login.title}">Login | مقرري+</title>
+    <title th:text="${content['login.title']}">Login | Muqarari+</title>
 </head>
 <body th:replace="~{fragments/layout :: html}">
 
-    <div th:fragment="main-content" class="container d-flex justify-content-center align-items-center flex-grow-1" style="min-height: 80vh;">
+    <div th:fragment="main-content"
+         class="container d-flex justify-content-center align-items-center flex-grow-1"
+         style="min-height: 80vh;">
         <div class="card shadow-lg border-0 rounded-4 w-100" style="max-width: 450px;">
             <div class="card-body p-5">
                 <div class="text-center mb-4">
-                    <!-- Scrubbed: no _ar/_en suffix -->
-                    <h2 class="fw-bold" style="color: var(--primary-blue);" th:text="#{login.title}">Welcome Back</h2>
+                    <h2 class="fw-bold" style="color: var(--primary-blue);"
+                        th:text="${content['login.title']}">Welcome Back</h2>
                 </div>
-                
-                <div th:if="${param.error}" class="alert alert-danger" role="alert" th:text="#{login.error}">
-                    Invalid credentials or account is pending.
-                </div>
-                <div th:if="${param.registered}" class="alert alert-success" role="alert" th:text="#{login.success}">
-                    Registration successful. Please login.
-                </div>
+
+                <div th:if="${param.error}"
+                     class="alert alert-danger" role="alert"
+                     th:text="${content['login.error']}">Invalid credentials.</div>
+                <div th:if="${param.registered}"
+                     class="alert alert-success" role="alert"
+                     th:text="${content['login.success']}">Registration successful.</div>
 
                 <form th:action="@{/login}" method="post">
                     <div class="mb-4">
-                        <!-- Scrubbed: no _ar/_en suffix -->
-                        <label class="form-label font-weight-bold" th:text="#{login.identifier}">Email or Username</label>
-                        <input type="text" id="username" name="username" class="form-control form-control-lg" required autofocus>
+                        <label class="form-label fw-bold"
+                               th:text="${content['login.identifier']}">Email or Username</label>
+                        <input type="text" id="username" name="username"
+                               class="form-control form-control-lg" required autofocus>
                     </div>
                     <div class="mb-4">
-                        <!-- Scrubbed: no _ar/_en suffix -->
-                        <label for="password" class="form-label font-weight-bold" th:text="#{login.password}">Password</label>
-                        <input type="password" id="password" name="password" class="form-control form-control-lg" required>
+                        <label for="password" class="form-label fw-bold"
+                               th:text="${content['login.password']}">Password</label>
+                        <input type="password" id="password" name="password"
+                               class="form-control form-control-lg" required>
                     </div>
-                    <!-- Scrubbed: no _ar/_en suffix -->
-                    <button type="submit" class="btn btn-primary w-100 btn-lg mb-3" th:text="#{login.submit}">Login Securely</button>
-                    
+                    <button type="submit"
+                            class="btn btn-primary w-100 btn-lg mb-3"
+                            th:text="${content['login.submit']}">Login Securely</button>
+
                     <div class="text-center mt-3">
-                        <!-- Scrubbed: no _ar/_en suffix -->
-                        <span class="text-muted" th:text="#{login.no_account}">Don't have an account?</span> 
-                        <a th:href="@{/register}" style="color: var(--secondary-teal); font-weight: 600;" th:text="#{nav.register}">Register</a>
+                        <span class="text-muted"
+                              th:text="${content['login.no_account']}">Don't have an account?</span>
+                        <a th:href="@{/register}"
+                           style="color: var(--secondary-teal); font-weight: 600;"
+                           th:text="${content['nav.register']}">Register</a>
                     </div>
                 </form>
             </div>

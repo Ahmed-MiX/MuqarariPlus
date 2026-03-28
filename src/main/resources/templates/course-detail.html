@@ -1,122 +1,159 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="${#locale.language == 'ar' ? course.nameAr : course.nameEn}">Course Detail | مقرري+</title>
+    <title th:text="${#locale.language == 'ar' ? course.nameAr : course.nameEn}">Course Detail | Muqarari+</title>
 </head>
 <body th:replace="~{fragments/layout :: html}">
 
     <div th:fragment="main-content">
-        <!-- Header -->
+
+        <!-- ===== HEADER ===== -->
         <section class="bg-white py-5 border-bottom">
             <div class="container py-4">
-                <a th:href="@{/courses}" class="btn btn-outline-secondary mb-4 rounded-pill px-4 fw-bold shadow-sm">
-                    &larr; <span th:text="#{nav.courses}">Back to Courses</span>
+                <a th:href="@{/courses}"
+                   class="btn btn-outline-secondary mb-4 rounded-pill px-4 fw-bold shadow-sm">
+                    &larr; <span th:text="${content['nav.courses']}">Courses</span>
                 </a>
-                
-                <h1 class="display-5 fw-bold text-primary-blue mb-3" th:text="${#locale.language == 'ar' ? course.nameAr : course.nameEn}">Course Name</h1>
-                <p class="lead text-muted mb-4 max-w-800" th:text="${#locale.language == 'ar' ? course.descriptionAr : course.descriptionEn}">Course Description</p>
-                
+
+                <h1 class="display-5 fw-bold text-primary-blue mb-3"
+                    th:text="${#locale.language == 'ar' ? course.nameAr : course.nameEn}">Course Name</h1>
+                <p class="lead text-muted mb-4"
+                   th:text="${#locale.language == 'ar' ? course.descriptionAr : course.descriptionEn}">Description</p>
+
                 <div class="d-flex align-items-center flex-wrap gap-3 mt-4">
-                     <span class="badge rounded-pill bg-light text-secondary-teal border px-4 py-2 fs-6 shadow-sm">
-                        <i class="me-2 text-accent-orange">★</i> 
-                        <span th:text="#{course.expert.verified}">Verified Master Course</span>
-                     </span>
-                     <a th:if="${course.syllabusUrl}" th:href="${course.syllabusUrl}" target="_blank" class="btn btn-primary px-4 fw-bold rounded-pill shadow-sm" th:text="#{course.syllabus}">View Syllabus</a>
+                    <span class="badge rounded-pill bg-light text-secondary-teal border px-4 py-2 fs-6 shadow-sm">
+                        <i class="me-2 text-accent-orange">★</i>
+                        <span th:text="${content['course.expert.verified']}">Verified</span>
+                    </span>
+                    <a th:if="${course.syllabusUrl}"
+                       th:href="${course.syllabusUrl}" target="_blank"
+                       class="btn btn-primary px-4 fw-bold rounded-pill shadow-sm"
+                       th:text="${content['course.syllabus']}">View Syllabus</a>
                 </div>
             </div>
         </section>
 
-        <!-- Main Layout with Sidebar -->
+        <!-- ===== MAIN LAYOUT ===== -->
         <section class="container py-5">
             <div class="row g-5">
-                
-                <!-- Main Pillar Panel -->
+
+                <!-- Pillars Accordion -->
                 <div class="col-lg-8">
-                     <h2 class="h3 fw-bold text-primary-blue border-bottom border-3 border-secondary-teal pb-3 mb-4 d-inline-block" th:text="#{course.details.title}">Course Core Value</h2>
-                     
-                     <!-- Bootstrap 5 Accordion for Pillars -->
-                     <div class="accordion shadow-sm rounded-4" id="pillarsAccordion">
-                          
-                          <!-- Applications -->
-                          <div class="accordion-item border-0 border-bottom">
-                               <h2 class="accordion-header">
-                                    <button class="accordion-button fs-5 py-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseApp" aria-expanded="true" aria-controls="collapseApp">
-                                         <span class="fw-bold" th:text="#{pillars.app}">Practical Applications</span>
-                                    </button>
-                               </h2>
-                               <div id="collapseApp" class="accordion-collapse collapse show" data-bs-parent="#pillarsAccordion">
-                                    <div class="accordion-body bg-white p-4">
-                                         <div th:each="enrichment : ${enrichments}" class="mb-4 pb-3 border-bottom border-light">
-                                               <h5 class="text-secondary-teal fw-bold mb-2" th:text="${enrichment.expert.user.firstName + ' ' + enrichment.expert.user.lastName}">Expert Name</h5>
-                                               <p class="text-dark fs-5 lh-base" th:text="${#locale.language == 'ar' ? enrichment.applicationAr : enrichment.applicationEn}">Application Concept...</p>
-                                         </div>
-                                         <div th:if="${#lists.isEmpty(enrichments)}" class="text-muted fst-italic py-3" th:text="#{course.enrichment.empty_app}">No verified applications yet.</div>
-                                    </div>
-                               </div>
-                          </div>
+                    <h2 class="h3 fw-bold text-primary-blue border-bottom border-3 border-secondary-teal pb-3 mb-4 d-inline-block"
+                        th:text="${content['course.details.title']}">Core Value</h2>
 
-                          <!-- Roadmap -->
-                          <div class="accordion-item border-0 border-bottom">
-                               <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed fs-5 py-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRoadmap" aria-expanded="false" aria-controls="collapseRoadmap">
-                                         <span class="fw-bold" th:text="#{pillars.roadmap}">Career Roadmap</span>
-                                    </button>
-                               </h2>
-                               <div id="collapseRoadmap" class="accordion-collapse collapse" data-bs-parent="#pillarsAccordion">
-                                    <div class="accordion-body bg-white p-4">
-                                         <div th:each="enrichment : ${enrichments}" class="mb-4 pb-3 border-bottom border-light">
-                                               <h5 class="text-secondary-teal fw-bold mb-2" th:text="${enrichment.expert.user.firstName + ' ' + enrichment.expert.user.lastName}">Expert Name</h5>
-                                               <p class="text-dark fs-5 lh-base" th:text="${#locale.language == 'ar' ? enrichment.roadmapAr : enrichment.roadmapEn}">Roadmap mapping...</p>
-                                         </div>
-                                         <div th:if="${#lists.isEmpty(enrichments)}" class="text-muted fst-italic py-3" th:text="#{course.enrichment.empty_roadmap}">No verified roadmaps yet.</div>
-                                    </div>
-                               </div>
-                          </div>
+                    <div class="accordion shadow-sm rounded-4" id="pillarsAccordion">
 
-                          <!-- Resources -->
-                          <div class="accordion-item border-0">
-                               <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed fs-5 py-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseResources" aria-expanded="false" aria-controls="collapseResources">
-                                         <span class="fw-bold" th:text="#{pillars.res}">Enrichment Resources</span>
-                                    </button>
-                               </h2>
-                               <div id="collapseResources" class="accordion-collapse collapse" data-bs-parent="#pillarsAccordion">
-                                    <div class="accordion-body bg-white p-4">
-                                         <div th:each="enrichment : ${enrichments}" class="mb-4 pb-3 border-bottom border-light">
-                                               <h5 class="text-secondary-teal fw-bold mb-2" th:text="${enrichment.expert.user.firstName + ' ' + enrichment.expert.user.lastName}">Expert Name</h5>
-                                               <p class="text-dark fs-5 lh-base" th:text="${#locale.language == 'ar' ? enrichment.resourcesAr : enrichment.resourcesEn}">Resources links...</p>
-                                         </div>
-                                         <div th:if="${#lists.isEmpty(enrichments)}" class="text-muted fst-italic py-3" th:text="#{course.enrichment.empty_resources}">No verified resources yet.</div>
+                        <!-- Practical Applications -->
+                        <div class="accordion-item border-0 border-bottom">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button fs-5 py-4" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#collapseApp"
+                                        aria-expanded="true">
+                                    <span class="fw-bold" th:text="${content['pillars.app']}">Applications</span>
+                                </button>
+                            </h2>
+                            <div id="collapseApp" class="accordion-collapse collapse show"
+                                 data-bs-parent="#pillarsAccordion">
+                                <div class="accordion-body bg-white p-4">
+                                    <div th:each="enrichment : ${enrichments}"
+                                         class="mb-4 pb-3 border-bottom border-light">
+                                        <h5 class="text-secondary-teal fw-bold mb-2"
+                                            th:text="${enrichment.expert.user.firstName + ' ' + enrichment.expert.user.lastName}">Expert</h5>
+                                        <p class="text-dark fs-5 lh-base"
+                                           th:text="${#locale.language == 'ar' ? enrichment.applicationAr : enrichment.applicationEn}">Application...</p>
                                     </div>
-                               </div>
-                          </div>
-                     </div>
+                                    <div th:if="${enrichments == null or #lists.isEmpty(enrichments)}"
+                                         class="text-muted fst-italic py-3"
+                                         th:text="${content['course.enrichment.empty_app']}">None yet.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Career Roadmap -->
+                        <div class="accordion-item border-0 border-bottom">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fs-5 py-4" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#collapseRoadmap">
+                                    <span class="fw-bold" th:text="${content['pillars.roadmap']}">Roadmap</span>
+                                </button>
+                            </h2>
+                            <div id="collapseRoadmap" class="accordion-collapse collapse"
+                                 data-bs-parent="#pillarsAccordion">
+                                <div class="accordion-body bg-white p-4">
+                                    <div th:each="enrichment : ${enrichments}"
+                                         class="mb-4 pb-3 border-bottom border-light">
+                                        <h5 class="text-secondary-teal fw-bold mb-2"
+                                            th:text="${enrichment.expert.user.firstName + ' ' + enrichment.expert.user.lastName}">Expert</h5>
+                                        <p class="text-dark fs-5 lh-base"
+                                           th:text="${#locale.language == 'ar' ? enrichment.roadmapAr : enrichment.roadmapEn}">Roadmap...</p>
+                                    </div>
+                                    <div th:if="${enrichments == null or #lists.isEmpty(enrichments)}"
+                                         class="text-muted fst-italic py-3"
+                                         th:text="${content['course.enrichment.empty_roadmap']}">None yet.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Enrichment Resources -->
+                        <div class="accordion-item border-0">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fs-5 py-4" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#collapseResources">
+                                    <span class="fw-bold" th:text="${content['pillars.res']}">Resources</span>
+                                </button>
+                            </h2>
+                            <div id="collapseResources" class="accordion-collapse collapse"
+                                 data-bs-parent="#pillarsAccordion">
+                                <div class="accordion-body bg-white p-4">
+                                    <div th:each="enrichment : ${enrichments}"
+                                         class="mb-4 pb-3 border-bottom border-light">
+                                        <h5 class="text-secondary-teal fw-bold mb-2"
+                                            th:text="${enrichment.expert.user.firstName + ' ' + enrichment.expert.user.lastName}">Expert</h5>
+                                        <p class="text-dark fs-5 lh-base"
+                                           th:text="${#locale.language == 'ar' ? enrichment.resourcesAr : enrichment.resourcesEn}">Resources...</p>
+                                    </div>
+                                    <div th:if="${enrichments == null or #lists.isEmpty(enrichments)}"
+                                         class="text-muted fst-italic py-3"
+                                         th:text="${content['course.enrichment.empty_resources']}">None yet.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
 
-                <!-- Sidebar Component -->
+                <!-- Contributing Experts Sidebar -->
                 <div class="col-lg-4 mt-5 mt-lg-0">
-                     <div class="bg-white rounded-4 p-4 shadow-sm border">
-                          <h3 class="h5 fw-bold text-primary-blue border-bottom border-2 pb-3 mb-4" style="border-bottom-color: var(--accent-orange) !important;" th:text="#{course.experts.title}">
-                               Contributing Experts
-                          </h3>
-                          
-                          <ul class="list-unstyled m-0">
-                              <li th:each="enrichment : ${enrichments}" class="d-flex align-items-center gap-3 mb-4">
-                                   <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm" 
-                                        style="width: 50px; height: 50px; background-color: var(--primary-blue);"
-                                        th:text="${#strings.substring(enrichment.expert.user.firstName, 0, 1) + #strings.substring(enrichment.expert.user.lastName, 0, 1)}">AB</div>
-                                   <div>
-                                       <strong class="d-block mt-1 text-dark fs-6" th:text="${enrichment.expert.user.firstName + ' ' + enrichment.expert.user.lastName}">John Doe</strong>
-                                       <a th:href="${enrichment.expert.linkedinUrl}" target="_blank" class="text-secondary-teal text-decoration-none small fw-semibold" th:text="#{course.experts.linkedin}">View LinkedIn</a>
-                                   </div>
-                              </li>
-                              <li th:if="${#lists.isEmpty(enrichments)}" class="text-muted small" th:text="#{course.experts.empty}">No experts added yet.</li>
-                          </ul>
-                     </div>
+                    <div class="bg-white rounded-4 p-4 shadow-sm border">
+                        <h3 class="h5 fw-bold text-primary-blue border-bottom border-2 pb-3 mb-4"
+                            style="border-bottom-color: var(--accent-orange) !important;"
+                            th:text="${content['course.experts.title']}">Contributing Experts</h3>
+
+                        <ul class="list-unstyled m-0">
+                            <li th:each="enrichment : ${enrichments}"
+                                class="d-flex align-items-center gap-3 mb-4">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm"
+                                     style="width: 50px; height: 50px; min-width: 50px; background-color: var(--primary-blue);"
+                                     th:text="${#strings.substring(enrichment.expert.user.firstName,0,1) + #strings.substring(enrichment.expert.user.lastName,0,1)}">AB</div>
+                                <div>
+                                    <strong class="d-block text-dark fs-6"
+                                            th:text="${enrichment.expert.user.firstName + ' ' + enrichment.expert.user.lastName}">Name</strong>
+                                    <a th:href="${enrichment.expert.linkedinUrl}" target="_blank"
+                                       class="text-secondary-teal text-decoration-none small fw-semibold"
+                                       th:text="${content['course.experts.linkedin']}">LinkedIn</a>
+                                </div>
+                            </li>
+                            <li th:if="${enrichments == null or #lists.isEmpty(enrichments)}"
+                                class="text-muted small"
+                                th:text="${content['course.experts.empty']}">No experts yet.</li>
+                        </ul>
+                    </div>
                 </div>
-                
+
             </div>
         </section>
+
     </div>
 
 </body>

@@ -1,19 +1,24 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="#{courses.title}">Courses | مقرري+</title>
+    <title th:text="${content['courses.title']}">Courses | Muqarari+</title>
 </head>
 <body th:replace="~{fragments/layout :: html}">
 
     <div th:fragment="main-content">
-        <!-- Search Header -->
-        <section class="search-header bg-primary text-white py-5" style="background-color: var(--primary-blue) !important;">
+
+        <!-- ===== SEARCH HEADER ===== -->
+        <section class="bg-primary text-white py-5"
+                 style="background-color: var(--primary-blue) !important;">
             <div class="container py-4 text-center">
-                <h1 class="display-5 fw-bold mb-4 text-white" th:text="#{nav.courses}">Courses</h1>
-                <form th:action="@{/courses}" method="get" class="d-flex mx-auto" style="max-width: 600px;">
+                <h1 class="display-5 fw-bold text-white mb-4"
+                    th:text="${content['nav.courses']}">Courses</h1>
+                <form th:action="@{/courses}" method="get" class="d-flex mx-auto"
+                      style="max-width: 600px;">
                     <div class="input-group shadow border-0 rounded-3 overflow-hidden">
-                        <input type="text" name="search" class="form-control form-control-lg border-0 py-3" 
-                               th:placeholder="#{courses.search.placeholder}"
+                        <input type="text" name="search"
+                               class="form-control form-control-lg border-0 py-3"
+                               th:placeholder="${content['courses.search.placeholder']}"
                                th:value="${param.search}">
                         <button type="submit" class="btn btn-accent px-4 fw-bold">🔍</button>
                     </div>
@@ -21,45 +26,59 @@
             </div>
         </section>
 
-        <!-- Listing -->
+        <!-- ===== COURSE LISTING ===== -->
         <section class="bg-offwhite py-5 min-vh-75">
             <div class="container pb-5">
                 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 pt-3">
-                    
-                    <!-- Course Cards -->
+
+                    <!-- Dynamic Course Cards -->
                     <div th:each="course : ${courses}" class="col">
                         <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden course-card transition-all">
                             <div class="card-body p-4 d-flex flex-column">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="text-uppercase small fw-bold text-muted" th:text="${course.university} ?: 'General'"></span>
-                                    <span th:if="${course.enrichments.size() > 0}" class="badge bg-secondary-teal text-white fw-bold rounded-pill px-3 py-2" style="background-color: var(--secondary-teal) !important;">
-                                        ★ <span th:text="#{course.expert.verified}">Verified</span>
-                                    </span>
+                                    <span class="text-uppercase small fw-bold text-muted"
+                                          th:text="${course.university ?: ''}"></span>
+                                    <span th:if="${course.enrichments != null and !course.enrichments.isEmpty()}"
+                                          class="badge text-white fw-bold rounded-pill px-3 py-2"
+                                          style="background-color: var(--secondary-teal);"
+                                          th:text="${content['course.expert.verified']}">Verified</span>
                                 </div>
-                                
-                                <h3 class="h5 fw-bold text-primary-blue mb-3" th:text="${#locale.language == 'ar' ? course.nameAr : course.nameEn}">Title</h3>
-                                <p class="text-muted text-truncate" th:text="${#locale.language == 'ar' ? course.descriptionAr : course.descriptionEn}" style="max-height: 48px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; white-space: normal;">Description</p>
-                                
+
+                                <h3 class="h5 fw-bold text-primary-blue mb-3"
+                                    th:text="${#locale.language == 'ar' ? course.nameAr : course.nameEn}">Course Name</h3>
+                                <p class="text-muted"
+                                   th:text="${#locale.language == 'ar' ? course.descriptionAr : course.descriptionEn}"
+                                   style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Description</p>
+
                                 <div class="mt-auto pt-4 d-flex justify-content-between align-items-center">
                                     <strong class="text-secondary-teal fs-6">
-                                        <i class="me-1" th:text="${course.enrichments.size()}">0</i> <span th:text="#{courses.card.resources}">Resources</span>
+                                        <span th:text="${course.enrichments != null ? course.enrichments.size() : 0}">0</span>
+                                        <span th:text="${content['courses.card.resources']}">Resources</span>
                                     </strong>
-                                    <a th:href="@{/course/{id}(id=${course.id})}" class="btn btn-outline-primary btn-sm px-3 rounded-pill fw-bold" th:text="#{courses.card.view}">View &rarr;</a>
+                                    <a th:href="@{/course/{id}(id=${course.id})}"
+                                       class="btn btn-outline-primary btn-sm px-3 rounded-pill fw-bold"
+                                       th:text="${content['courses.card.view']}">View &rarr;</a>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Empty State -->
-                    <div th:if="${#lists.isEmpty(courses)}" class="col-12 text-center py-5 mt-4">
-                        <div class="p-5 bg-white border rounded-4 shadow-sm max-w-600 mx-auto text-muted">
-                            <h3 class="fw-light display-6 text-primary-blue mb-4" th:text="#{courses.empty.title}">No Courses Found</h3>
-                            <p class="fs-5" th:text="#{courses.empty.desc}">Try adjusting your search criteria.</p>
+                    <div th:if="${courses == null or #lists.isEmpty(courses)}" class="col-12 text-center py-5 mt-4">
+                        <div class="p-5 bg-white border rounded-4 shadow-sm mx-auto text-muted"
+                             style="max-width: 500px;">
+                            <div class="display-1 mb-3">📚</div>
+                            <h3 class="fw-bold text-primary-blue mb-3"
+                                th:text="${content['courses.empty.title']}">No Courses Found</h3>
+                            <p class="fs-5"
+                               th:text="${content['courses.empty.desc']}">Try adjusting your search.</p>
                         </div>
                     </div>
+
                 </div>
             </div>
         </section>
+
     </div>
 
 </body>

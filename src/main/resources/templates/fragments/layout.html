@@ -1,97 +1,133 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      th:lang="${#locale.language}" 
+      th:lang="${#locale.language}"
       th:dir="${#locale.language == 'ar' ? 'rtl' : 'ltr'}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="#{app.title}">Muqarari+ | مقرري+</title>
-    
-    <meta name="description" th:content="#{app.description}">
-    
-    <!-- Bootstrap 5 CDN Dynamically switching based on RTL/LTR -->
-    <link th:if="${#locale.language == 'ar'}" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
-    <link th:unless="${#locale.language == 'ar'}" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    
-    <!-- Custom CSS -->
+    <title th:text="${content['app.title']}">Muqarari+ | مقرري+</title>
+    <meta name="description" th:content="${content['app.description']}">
+
+    <!-- Bootstrap 5 — switches RTL/LTR based on locale -->
+    <link th:if="${#locale.language == 'ar'}"
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
+    <link th:unless="${#locale.language == 'ar'}"
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+    <!-- Custom Design System -->
     <link rel="stylesheet" th:href="@{/css/styles.css}">
     <th:block th:insert="~{::head-extra} ?: _"/>
 </head>
 <body>
 
-    <!-- Navigation Bar -->
+    <!-- ===== NAVBAR ===== -->
     <nav class="navbar navbar-expand-lg bg-white shadow-sm py-3 sticky-top">
         <div class="container py-1 d-flex justify-content-between align-items-center">
-            
+
             <a href="/" class="navbar-brand">
-                <img th:src="@{/img/logo.jpg}" th:alt="#{nav.logo.alt}" style="height: 55px; object-fit: contain;">
+                <img th:src="@{/img/logo.jpg}"
+                     th:alt="${content['nav.logo.alt']}"
+                     style="height: 55px; object-fit: contain;">
             </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+
+            <button class="navbar-toggler" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#mainNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <div class="collapse navbar-collapse justify-content-end" id="mainNav">
                 <ul class="navbar-nav align-items-center mb-2 mb-lg-0 gap-3">
-                    <li class="nav-item"><a class="nav-link fw-semibold" th:href="@{/courses}" th:text="#{nav.courses}">Courses</a></li>
-                    
+
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold"
+                           th:href="@{/courses}"
+                           th:text="${content['nav.courses']}">Courses</a>
+                    </li>
+
                     <!-- ANONYMOUS ONLY -->
                     <th:block sec:authorize="isAnonymous()">
-                         <li class="nav-item"><a class="nav-link fw-semibold" th:href="@{/login}" th:text="#{nav.login}">Login</a></li>
-                         <li class="nav-item"><a class="btn btn-outline-primary fw-bold" th:href="@{/register}" th:text="#{nav.register}">Register</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-semibold"
+                               th:href="@{/login}"
+                               th:text="${content['nav.login']}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-primary fw-bold"
+                               th:href="@{/register}"
+                               th:text="${content['nav.register']}">Register</a>
+                        </li>
                     </th:block>
-                    
+
                     <!-- AUTHENTICATED ONLY -->
                     <th:block sec:authorize="isAuthenticated()">
-                         <li class="nav-item" sec:authorize="hasRole('SUPER_ADMIN')">
-                              <a class="nav-link fw-semibold text-danger" th:href="@{/super-admin}" th:text="#{nav.super_admin}">Supreme Center</a>
-                         </li>
-                         <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                              <a class="nav-link fw-semibold text-accent-orange" th:href="@{/admin}" th:text="#{nav.admin}">Admin Center</a>
-                         </li>
-                         <li class="nav-item" sec:authorize="hasRole('EXPERT')">
-                              <a class="nav-link fw-semibold text-secondary-teal" th:href="@{/expert}" th:text="#{nav.expert}">Expert Portal</a>
-                         </li>
-                         <li class="nav-item" sec:authorize="hasRole('STUDENT')">
-                              <a class="nav-link fw-semibold text-primary-blue" th:href="@{/student-dashboard}" th:text="#{nav.student}">My Dashboard</a>
-                         </li>
-                         
-                         <!-- Secure POST Logout -->
-                         <li class="nav-item ms-lg-3">
-                              <form th:action="@{/logout}" method="post" class="m-0">
-                                   <button type="submit" class="btn btn-danger btn-sm px-3 fw-bold shadow-sm" th:text="#{nav.logout}">Logout</button>
-                              </form>
-                         </li>
+                        <li class="nav-item" sec:authorize="hasRole('SUPER_ADMIN')">
+                            <a class="nav-link fw-semibold text-danger"
+                               th:href="@{/super-admin}"
+                               th:text="${content['nav.super_admin']}">Control Center</a>
+                        </li>
+                        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                            <a class="nav-link fw-semibold"
+                               th:href="@{/admin}"
+                               th:text="${content['nav.admin']}">Admin Panel</a>
+                        </li>
+                        <li class="nav-item" sec:authorize="hasRole('EXPERT')">
+                            <a class="nav-link fw-semibold text-secondary-teal"
+                               th:href="@{/expert}"
+                               th:text="${content['nav.expert']}">Expert Portal</a>
+                        </li>
+                        <li class="nav-item" sec:authorize="hasRole('STUDENT')">
+                            <a class="nav-link fw-semibold text-primary-blue"
+                               th:href="@{/student-dashboard}"
+                               th:text="${content['nav.student']}">My Dashboard</a>
+                        </li>
+
+                        <!-- Secure POST Logout -->
+                        <li class="nav-item ms-lg-3">
+                            <form th:action="@{/logout}" method="post" class="m-0">
+                                <button type="submit"
+                                        class="btn btn-danger btn-sm px-3 fw-bold shadow-sm"
+                                        th:text="${content['nav.logout']}">Logout</button>
+                            </form>
+                        </li>
                     </th:block>
-                    
+
+                    <!-- Language Toggle -->
                     <li class="nav-item border-start ps-3 ms-2">
                         <form method="get" action="">
-                            <input type="hidden" name="lang" th:value="${#locale.language == 'en' ? 'ar' : 'en'}">
-                            <button type="submit" class="btn btn-sm btn-light border fw-bold" th:text="#{nav.lang}">Lang</button>
+                            <input type="hidden" name="lang"
+                                   th:value="${#locale.language == 'en' ? 'ar' : 'en'}">
+                            <button type="submit"
+                                    class="btn btn-sm btn-light border fw-bold"
+                                    th:text="${content['nav.lang']}">عربي</button>
                         </form>
                     </li>
                 </ul>
             </div>
-            
         </div>
     </nav>
 
-    <!-- Main Content Injection -->
-    <main layout:fragment="content" class="flex-shrink-0">
-        <th:block th:insert="~{::main-content} ?: _" />
+    <!-- ===== MAIN CONTENT SLOT ===== -->
+    <main class="flex-shrink-0">
+        <th:block th:insert="~{::main-content} ?: _"/>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-white text-center py-5 mt-auto" style="background-color: var(--primary-blue) !important;">
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-dark text-white text-center py-5 mt-auto"
+            style="background-color: var(--primary-blue) !important;">
         <div class="container">
-            <h3 class="fw-bold mb-4" th:text="#{footer.cta}">Ready to Transform Your Learning?</h3>
-            <a th:href="@{/register}" class="btn btn-accent px-5" th:text="#{nav.register}">Register Now</a>
-            <p class="mt-5 mb-0 text-white-50" th:text="#{footer.rights}">© 2026 Muqarari+. All rights reserved.</p>
+            <h3 class="fw-bold mb-4" th:text="${content['footer.cta']}">Ready to Transform?</h3>
+            <a th:href="@{/register}"
+               class="btn btn-accent px-5"
+               th:text="${content['nav.register']}">Register Now</a>
+            <p class="mt-5 mb-0 text-white-50"
+               th:text="${content['footer.rights']}">© 2026 Muqarari+.</p>
         </div>
     </footer>
 
-    <!-- Bootstrap & Global Scripts -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script th:src="@{/js/main.js}"></script>
     <th:block th:insert="~{::script-extra} ?: _"/>
