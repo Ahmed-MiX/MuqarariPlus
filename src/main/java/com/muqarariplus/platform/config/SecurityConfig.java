@@ -29,9 +29,10 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable) // Simplified for the prototype
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/courses", "/course/**", "/css/**", "/js/**", "/img/**", "/fonts/**", "/login", "/register", "/error", "/favicon.ico").permitAll()
-                .requestMatchers("/expert", "/expert/**").hasAnyRole("EXPERT", "ADMIN")
-                .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
-                .requestMatchers("/student-dashboard", "/student-dashboard/**").hasAnyRole("STUDENT", "EXPERT", "ADMIN")
+                .requestMatchers("/super-admin", "/super-admin/**").hasRole("SUPER_ADMIN")
+                .requestMatchers("/expert", "/expert/**").hasAnyRole("EXPERT", "ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/admin", "/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/student-dashboard", "/student-dashboard/**").hasAnyRole("STUDENT", "EXPERT", "ADMIN", "SUPER_ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

@@ -17,11 +17,16 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(unique = true)
+    private String username;
+
     @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
     private String role; // ROLE_STUDENT, ROLE_EXPERT, ROLE_ADMIN
+
+    private String status;
 
     private String firstName;
     private String lastName;

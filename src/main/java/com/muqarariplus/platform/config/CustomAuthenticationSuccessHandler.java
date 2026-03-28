@@ -19,7 +19,10 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 
         for (GrantedAuthority authority : authorities) {
-            if (authority.getAuthority().equals("ROLE_ADMIN")) {
+            if (authority.getAuthority().equals("ROLE_SUPER_ADMIN")) {
+                response.sendRedirect("/super-admin");
+                return;
+            } else if (authority.getAuthority().equals("ROLE_ADMIN")) {
                 response.sendRedirect("/admin");
                 return;
             } else if (authority.getAuthority().equals("ROLE_EXPERT")) {

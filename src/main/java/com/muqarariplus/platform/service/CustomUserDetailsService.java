@@ -20,15 +20,34 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email);
-        
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        User user;
+
+        if (identifier.contains("@")) {
+            // It's an email - only Students & Experts allowed.
+            user = userRepository.findByEmail(identifier);
+            if (user != null && (user.getRole().equals("ROLE_ADMIN") || user.getRole().equals("ROLE_SUPER_ADMIN"))) {
+                throw new UsernameNotFoundException("Admins cannot login via email.");
+            }
+        } else {
+            // It's a username - only Admins & Super Admins allowed.
+            user = userRepository.findByUsername(identifier);
+            if (user != null && (!user.getRole().equals("ROLE_ADMIN") && !user.getRole().equals("ROLE_SUPER_ADMIN"))) {
+                throw new UsernameNotFoundException("Students and Experts must use email to login.");
+            }
+        }
+
         if (user == null) {
-            throw new UsernameNotFoundException("User not found with email: " + email);
+            throw new UsernameNotFoundException("User not found: " + identifier);
+        }
+
+        // Optional: Block pending experts from logging in
+        if ("PENDING".equals(user.getStatus())) {
+             throw new UsernameNotFoundException("Expert account is pending approval.");
         }
 
         return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
+                identifier,
                 user.getPassword(),
                 Collections.singletonList(new SimpleGrantedAuthority(user.getRole()))
         );

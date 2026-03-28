@@ -26,10 +26,7 @@ public class MainController {
 
 
 
-    @GetMapping("/admin")
-    public String adminDashboard() {
-        return "admin";
-    }
+
 
     @GetMapping("/student-dashboard")
     public String studentDashboard() {
