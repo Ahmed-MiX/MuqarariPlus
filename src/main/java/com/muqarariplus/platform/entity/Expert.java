@@ -27,13 +27,18 @@ public class Expert {
     private String bioEn;
 
     private String cvUrl;
+    private String cvFilePath;
     private String linkedinUrl;
 
-    private Boolean isVerified = false;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ExpertStatus status = ExpertStatus.NONE;
+
+    private LocalDateTime lastSubmissionTime;
 
     @Column
     private Double rating = 0.0;
-    
+
     @OneToMany(mappedBy = "expert")
     private List<CourseEnrichment> enrichments;
 }

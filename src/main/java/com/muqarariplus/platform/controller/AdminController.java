@@ -1,14 +1,19 @@
 package com.muqarariplus.platform.controller;
 
-import com.muqarariplus.platform.entity.User;
+import com.muqarariplus.platform.entity.Expert;
 import com.muqarariplus.platform.repository.UserRepository;
 import com.muqarariplus.platform.repository.CourseRepository;
 import com.muqarariplus.platform.repository.CourseEnrichmentRepository;
+import com.muqarariplus.platform.service.ExpertService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 public class AdminController {
@@ -16,42 +21,67 @@ public class AdminController {
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
     private final CourseEnrichmentRepository enrichmentRepository;
+    private final ExpertService expertService;
 
-    public AdminController(UserRepository userRepository, CourseRepository courseRepository, CourseEnrichmentRepository enrichmentRepository) {
+    public AdminController(UserRepository userRepository,
+                           CourseRepository courseRepository,
+                           CourseEnrichmentRepository enrichmentRepository,
+                           ExpertService expertService) {
         this.userRepository = userRepository;
         this.courseRepository = courseRepository;
         this.enrichmentRepository = enrichmentRepository;
+        this.expertService = expertService;
     }
 
     @GetMapping("/admin")
     public String adminDashboard(Model model) {
         model.addAttribute("totalStudents", userRepository.countByRole("ROLE_STUDENT"));
-        model.addAttribute("verifiedExperts", userRepository.countByRoleAndStatus("ROLE_EXPERT", "APPROVED"));
-        model.addAttribute("pendingExpertsCount", userRepository.countByRoleAndStatus("ROLE_EXPERT", "PENDING"));
-        model.addAttribute("coursesEnriched", enrichmentRepository.count()); // Simplistic aggregate metric
+        model.addAttribute("verifiedExperts", expertService.getApprovedExperts().size());
+        model.addAttribute("coursesEnriched", enrichmentRepository.count());
 
-        model.addAttribute("pendingExperts", userRepository.findByRoleAndStatus("ROLE_EXPERT", "PENDING"));
+        // Get pending experts from Expert entity (with CV/LinkedIn data)
+        List<Expert> pendingExperts = expertService.getPendingExperts();
+        model.addAttribute("pendingExperts", pendingExperts);
+        model.addAttribute("pendingExpertsCount", pendingExperts.size());
+
         model.addAttribute("allUsers", userRepository.findAll());
 
         return "admin";
     }
 
-    @PostMapping("/admin/approve-expert")
-    public String approveExpert(@RequestParam Long expertId) {
-        User expert = userRepository.findById(expertId).orElse(null);
-        if (expert != null && "ROLE_EXPERT".equals(expert.getRole())) {
-            expert.setStatus("APPROVED");
-            userRepository.save(expert);
+    @PostMapping("/admin/expert/approve/{id}")
+    public String approveExpert(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            expertService.approveExpert(id);
+            redirectAttributes.addFlashAttribute("successMsg", "Expert approved successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMsg", "Failed to approve expert: " + e.getMessage());
         }
         return "redirect:/admin";
     }
 
-    @PostMapping("/admin/reject-expert")
-    public String rejectExpert(@RequestParam Long expertId) {
-        User expert = userRepository.findById(expertId).orElse(null);
-        if (expert != null && "ROLE_EXPERT".equals(expert.getRole())) {
-            userRepository.delete(expert); // Full wipe or flag status as REJECTED. Choosing wipe to match strict requirements.
+    @PostMapping("/admin/expert/reject/{id}")
+    public String rejectExpert(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            expertService.rejectExpert(id);
+            redirectAttributes.addFlashAttribute("successMsg", "Expert rejected. Cooldown activated.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMsg", "Failed to reject expert: " + e.getMessage());
         }
         return "redirect:/admin";
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // Legacy endpoints kept for backward compatibility — redirect to new ones
+    // ════════════════════════════════════════════════════════════════
+
+    @PostMapping("/admin/approve-expert")
+    public String legacyApproveExpert(@RequestParam Long expertId, RedirectAttributes redirectAttributes) {
+        return approveExpert(expertId, redirectAttributes);
+    }
+
+    @PostMapping("/admin/reject-expert")
+    public String legacyRejectExpert(@RequestParam Long expertId, RedirectAttributes redirectAttributes) {
+        return rejectExpert(expertId, redirectAttributes);
     }
 }

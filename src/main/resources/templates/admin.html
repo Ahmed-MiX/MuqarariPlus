@@ -79,8 +79,8 @@
                             <tr th:each="expert : ${pendingExperts}">
                                 <td class="py-3 px-4">
                                     <div class="fw-bold text-dark"
-                                         th:text="${expert.firstName + ' ' + expert.lastName}">Name</div>
-                                    <div class="small text-muted" th:text="${expert.email}">email</div>
+                                         th:text="${expert.user.firstName + ' ' + expert.user.lastName}">Name</div>
+                                    <div class="small text-muted" th:text="${expert.user.email}">email</div>
                                 </td>
                                 <td class="py-3 px-4">
                                     <a th:href="${expert.cvUrl ?: '#'}" target="_blank"
@@ -93,15 +93,13 @@
                                        th:text="${content['admin.queue.linkedin.btn']}">LinkedIn &rarr;</a>
                                 </td>
                                 <td class="py-3 px-4 text-end">
-                                    <form th:action="@{/admin/approve-expert}" method="post" class="d-inline">
-                                        <input type="hidden" name="expertId" th:value="${expert.id}"/>
+                                    <form th:action="@{/admin/expert/approve/{id}(id=${expert.id})}" method="post" class="d-inline">
                                         <button type="submit"
                                                 class="btn btn-sm text-white rounded-pill px-4 fw-bold shadow-sm"
                                                 style="background-color: var(--secondary-teal);"
                                                 th:text="${content['admin.queue.approve']}">Approve</button>
                                     </form>
-                                    <form th:action="@{/admin/reject-expert}" method="post" class="d-inline ms-2">
-                                        <input type="hidden" name="expertId" th:value="${expert.id}"/>
+                                    <form th:action="@{/admin/expert/reject/{id}(id=${expert.id})}" method="post" class="d-inline ms-2">
                                         <button type="submit"
                                                 class="btn btn-sm btn-danger rounded-pill px-4 fw-bold shadow-sm border-0"
                                                 th:text="${content['admin.queue.reject']}">Reject</button>

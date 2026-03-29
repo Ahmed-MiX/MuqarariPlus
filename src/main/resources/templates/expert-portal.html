@@ -17,10 +17,13 @@
                     </div>
                     <div class="col-md-4 text-md-end mt-4 mt-md-0 d-flex justify-content-md-end">
                         <div class="d-inline-flex align-items-center bg-white text-dark rounded-pill shadow-sm px-4 py-3">
-                            <span class="fs-4 text-accent-orange me-3">🛡</span>
+                            <span class="fs-4 me-3"
+                                  th:text="${expertStatus == 'APPROVED' ? '✅' : (expertStatus == 'REJECTED' ? '❌' : (expertStatus == 'PENDING' ? '⏳' : '🛡'))}">🛡</span>
                             <div class="text-start">
                                 <span class="d-block fw-bold fs-6" th:text="${content['expert.status.title']}">Status</span>
-                                <span class="text-muted small fw-bold" th:text="${content['expert.status.pending']}">Pending</span>
+                                <span class="fw-bold small"
+                                      th:classappend="${expertStatus == 'APPROVED' ? 'text-success' : (expertStatus == 'REJECTED' ? 'text-danger' : 'text-muted')}"
+                                      th:text="${expertStatus == 'APPROVED' ? content['expert.status.approved'] : (expertStatus == 'REJECTED' ? content['expert.status.rejected'] : (expertStatus == 'PENDING' ? content['expert.status.pending'] : content['expert.status.none']))}">Status Value</span>
                             </div>
                         </div>
                     </div>
@@ -29,24 +32,69 @@
         </section>
 
         <section class="container py-5 mt-3">
+
+            <!-- ===== NOTIFICATION BANNERS ===== -->
+
+            <!-- APPROVED notification -->
+            <div th:if="${expertStatus == 'APPROVED'}" class="alert alert-success border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">🎉</span>
+                <div>
+                    <h5 class="fw-bold mb-1" th:text="${content['expert.notify.approved.title']}">Verification Approved</h5>
+                    <p class="mb-0" th:text="${content['expert.notify.approved']}">Your identity has been verified and approved on the platform.</p>
+                </div>
+            </div>
+
+            <!-- REJECTED notification -->
+            <div th:if="${expertStatus == 'REJECTED'}" class="alert alert-danger border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">⚠️</span>
+                <div>
+                    <h5 class="fw-bold mb-1" th:text="${content['expert.notify.rejected.title']}">Verification Rejected</h5>
+                    <p class="mb-0" th:text="${content['expert.notify.rejected']}">Your identity verification was rejected.</p>
+                </div>
+            </div>
+
+            <!-- PENDING notification -->
+            <div th:if="${expertStatus == 'PENDING'}" class="alert alert-warning border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">⏳</span>
+                <div>
+                    <h5 class="fw-bold mb-1" th:text="${content['expert.notify.pending.title']}">Under Review</h5>
+                    <p class="mb-0" th:text="${content['expert.notify.pending']}">Your submission is being reviewed by an administrator.</p>
+                </div>
+            </div>
+
+            <!-- Success flash message after submission -->
+            <div th:if="${successMsg == 'verification_submitted'}" class="alert alert-info border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">📤</span>
+                <p class="mb-0 fw-semibold" th:text="${content['expert.notify.submitted']}">Documents submitted successfully for review!</p>
+            </div>
+
+            <!-- Error flash message -->
+            <div th:if="${errorMsg}" class="alert alert-danger border-0 rounded-4 shadow-sm p-4 mb-4" role="alert">
+                <span class="fw-bold">⛔ Error:</span> <span th:text="${errorMsg}">Error message</span>
+            </div>
+
+
             <div class="row g-5">
 
                 <!-- Left: Verification + Enrichment Forms -->
                 <div class="col-lg-8">
 
-                    <!-- Identity Verification -->
-                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5 mb-5 border-start border-5 border-accent-orange">
+                    <!-- ===== IDENTITY VERIFICATION CARD ===== -->
+                    <!-- Show form when status is NONE, or REJECTED with expired cooldown -->
+                    <div th:if="${showVerificationForm}" class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5 mb-5 border-start border-5 border-accent-orange">
                         <h2 class="h3 fw-bold text-primary-blue mb-3"
                             th:text="${content['expert.verify.title']}">Identity Verification</h2>
                         <p class="text-muted fs-5 mb-4"
                            th:text="${content['expert.verify.desc']}">Upload credentials.</p>
 
-                        <form method="post" action="#" enctype="multipart/form-data">
+                        <form th:action="@{/expert/verify}" method="post" enctype="multipart/form-data">
                             <div class="mb-4">
                                 <label class="form-label fw-bold text-dark fs-6"
                                        th:text="${content['expert.verify.cv']}">Upload CV</label>
-                                <input type="file" name="cvurl"
+                                <input type="file" name="cvFile"
+                                       accept=".pdf,.doc,.docx"
                                        class="form-control form-control-lg bg-light border-0 shadow-sm" required>
+                                <div class="form-text text-muted small mt-1" th:text="${content['expert.verify.cv.hint']}">Accepted: PDF, DOC, DOCX. Max 10MB.</div>
                             </div>
                             <div class="mb-5">
                                 <label class="form-label fw-bold text-dark fs-6"
@@ -61,8 +109,77 @@
                         </form>
                     </div>
 
-                    <!-- Course Enrichment (Locked) -->
-                    <div class="card bg-light rounded-4 shadow-sm border-0 p-4 p-md-5">
+                    <!-- ===== COOLDOWN TIMER CARD ===== -->
+                    <!-- Show when REJECTED and cooldown is still active -->
+                    <div th:if="${showCooldownTimer}" class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5 mb-5 border-start border-5 border-danger">
+                        <div class="text-center py-4">
+                            <span class="fs-1 d-block mb-3">⏱️</span>
+                            <h2 class="h4 fw-bold text-danger mb-3" th:text="${content['expert.cooldown.title']}">Cooldown Active</h2>
+                            <p class="text-muted fs-6 mb-4" th:text="${content['expert.cooldown.msg']}">
+                                A 5-minute timer has been activated since the rejection. Please wait before resubmitting.
+                            </p>
+                            <!-- Live Countdown Display -->
+                            <div class="d-inline-flex align-items-center bg-light rounded-pill px-5 py-3 shadow-sm">
+                                <span class="fs-4 fw-bold text-danger" id="cooldown-display">--:--</span>
+                            </div>
+                            <p class="text-muted small mt-3" th:text="${content['expert.cooldown.note']}">The form will reappear automatically when the timer expires.</p>
+                        </div>
+                    </div>
+
+                    <!-- ===== PENDING STATUS CARD ===== -->
+                    <!-- Show when PENDING — documents submitted, awaiting review -->
+                    <div th:if="${expertStatus == 'PENDING'}" class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5 mb-5 border-start border-5 border-warning">
+                        <div class="text-center py-4">
+                            <span class="fs-1 d-block mb-3">📋</span>
+                            <h2 class="h4 fw-bold text-primary-blue mb-3" th:text="${content['expert.verify.title']}">Identity Verification</h2>
+                            <p class="text-muted fs-5" th:text="${content['expert.notify.pending']}">Your submission is under review.</p>
+                            <div class="mt-3">
+                                <span class="badge bg-warning text-dark rounded-pill px-4 py-2 fs-6 shadow-sm"
+                                      th:text="${content['expert.status.pending']}">Pending Verification</span>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- ===== COURSE ENRICHMENT SECTION ===== -->
+                    <!-- Unlocked when APPROVED, Locked otherwise -->
+                    <div th:if="${isApproved}" class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5">
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                            <h2 class="h4 fw-bold text-primary-blue mb-0"
+                                th:text="${content['expert.enrich.title']}">Submit Enrichment</h2>
+                            <span class="badge bg-success rounded-pill px-3 py-2 text-white shadow-sm"
+                                  th:text="${content['expert.status.approved']}">Verified</span>
+                        </div>
+                        <p class="text-muted mb-4"
+                           th:text="${content['expert.enrich.unlocked_msg'] ?: 'Select a course and share your professional insights.'}">Select a course and share your insights.</p>
+
+                        <form>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold"
+                                       th:text="${content['expert.enrich.course']}">Select Course</label>
+                                <select class="form-select form-select-lg bg-light border-0 shadow-sm">
+                                    <option>---------</option>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold"
+                                       th:text="${content['expert.enrich.pillar1']}">Pillar 1</label>
+                                <textarea rows="3" class="form-control bg-light border-0 shadow-sm"
+                                          th:placeholder="${content['expert.enrich.hp1']}"></textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold"
+                                       th:text="${content['expert.enrich.pillar2']}">Pillar 2</label>
+                                <textarea rows="3" class="form-control bg-light border-0 shadow-sm"
+                                          th:placeholder="${content['expert.enrich.hp2']}"></textarea>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-lg px-5 fw-bold rounded-pill"
+                                    th:text="${content['expert.enrich.btn']}">Submit</button>
+                        </form>
+                    </div>
+
+                    <!-- Locked Enrichment (shown when NOT approved) -->
+                    <div th:unless="${isApproved}" class="card bg-light rounded-4 shadow-sm border-0 p-4 p-md-5">
                         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
                             <h2 class="h4 fw-bold text-primary-blue mb-0"
                                 th:text="${content['expert.enrich.title']}">Submit Enrichment</h2>
@@ -121,6 +238,33 @@
             </div>
         </section>
     </div>
+
+    <!-- ===== COOLDOWN TIMER JAVASCRIPT ===== -->
+    <th:block th:fragment="script-extra">
+        <script th:if="${showCooldownTimer}" th:inline="javascript">
+            (function() {
+                var totalSeconds = /*[[${cooldownSeconds}]]*/ 0;
+                var display = document.getElementById('cooldown-display');
+                if (!display || totalSeconds <= 0) return;
+
+                function updateDisplay() {
+                    var mins = Math.floor(totalSeconds / 60);
+                    var secs = totalSeconds % 60;
+                    display.textContent = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+
+                    if (totalSeconds <= 0) {
+                        clearInterval(timer);
+                        // Auto-reload page to show the form again
+                        window.location.reload();
+                    }
+                    totalSeconds--;
+                }
+
+                updateDisplay();
+                var timer = setInterval(updateDisplay, 1000);
+            })();
+        </script>
+    </th:block>
 
 </body>
 </html>

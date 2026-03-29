@@ -1,14 +1,19 @@
 package com.muqarariplus.platform.config;
 
 import com.muqarariplus.platform.entity.Course;
+import com.muqarariplus.platform.entity.Expert;
+import com.muqarariplus.platform.entity.ExpertStatus;
 import com.muqarariplus.platform.entity.SiteContent;
 import com.muqarariplus.platform.entity.User;
 import com.muqarariplus.platform.repository.CourseRepository;
+import com.muqarariplus.platform.repository.ExpertRepository;
 import com.muqarariplus.platform.repository.SiteContentRepository;
 import com.muqarariplus.platform.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -18,21 +23,26 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
     private final SiteContentRepository siteContentRepository;
+    private final ExpertRepository expertRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DatabaseSeeder(UserRepository userRepository,
                           CourseRepository courseRepository,
                           SiteContentRepository siteContentRepository,
+                          ExpertRepository expertRepository,
                           PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.courseRepository = courseRepository;
         this.siteContentRepository = siteContentRepository;
+        this.expertRepository = expertRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
+    @Transactional
     public void run(String... args) throws Exception {
         seedUsers();
+        seedExperts();
         seedCourses();
         seedSiteContent();
     }
@@ -100,6 +110,21 @@ public class DatabaseSeeder implements CommandLineRunner {
             student.setStatus("APPROVED");
             userRepository.save(student);
             System.out.println("SEEDER: STUDENT User created (Email: student@muqarariplus.com)");
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // EXPERTS (Linked entities for ROLE_EXPERT users)
+    // ─────────────────────────────────────────────────────────────────────────
+    private void seedExperts() {
+        User expertUser = userRepository.findByEmail("expert@muqarariplus.com");
+        if (expertUser != null && expertRepository.findByUserId(expertUser.getId()).isEmpty()) {
+            Expert expert = new Expert();
+            expert.setUser(expertUser);
+            expert.setStatus(ExpertStatus.NONE);
+            expert.setRating(0.0);
+            expertRepository.save(expert);
+            System.out.println("SEEDER: Expert entity created for expert@muqarariplus.com");
         }
     }
 
@@ -328,16 +353,30 @@ public class DatabaseSeeder implements CommandLineRunner {
             {"expert.title",            "Welcome Back, Expert",                         "مرحباً بعودتك، أيها الخبير"},
             {"expert.subtitle",         "Enrich academic theory with your real-world industry experience.", "أثرِ الجانب الأكاديمي بخبراتك العملية الحقيقية في الصناعة."},
             {"expert.status.title",     "Verification Status",                          "حالة التحقق"},
+            {"expert.status.none",      "Not Submitted",                                "لم يتم الإرسال"},
             {"expert.status.pending",   "Pending Verification",                         "قيد التحقق"},
             {"expert.status.approved",  "Verified & Active",                            "موثَّق ونشط"},
+            {"expert.status.rejected",  "Rejected",                                     "مرفوض"},
             {"expert.verify.title",     "Identity Verification",                        "التحقق من الهوية"},
             {"expert.verify.desc",      "Upload your professional credentials. Once verified, you can submit enrichments.", "ارفع مستنداتك المهنية. بعد التحقق، ستتمكن من تقديم الإثراءات."},
             {"expert.verify.cv",        "CV / Resume Document (PDF or DOCX)",           "مستند السيرة الذاتية (PDF أو DOCX)"},
+            {"expert.verify.cv.hint",   "Accepted formats: PDF, DOC, DOCX. Maximum size: 10MB.", "الصيغ المقبولة: PDF, DOC, DOCX. الحد الأقصى: 10 ميجابايت."},
             {"expert.verify.linkedin",  "Your LinkedIn Profile URL",                    "رابط ملفك الشخصي على لينكد إن"},
             {"expert.verify.btn",       "Submit for Review",                            "إرسال للمراجعة"},
+            {"expert.notify.approved.title", "Identity Verified!",                       "تم التحقق من هويتك!"},
+            {"expert.notify.approved",  "Your data has been reviewed and your identity has been approved on the platform.", "بياناتك تمت مراجعتها و تم اعتماده في المنصة."},
+            {"expert.notify.rejected.title", "Verification Rejected",                    "تم رفض التحقق"},
+            {"expert.notify.rejected",  "Your data has been reviewed and the request was rejected.", "بياناتك تمت مراجعتها و رفض الطلب."},
+            {"expert.notify.pending.title",  "Under Review",                             "قيد المراجعة"},
+            {"expert.notify.pending",   "Your submission is being reviewed by an administrator. You will be notified of the result.", "طلبك قيد المراجعة من قبل المسؤول. سيتم إشعارك بالنتيجة."},
+            {"expert.notify.submitted", "Your documents have been submitted successfully for review!", "تم إرسال مستنداتك بنجاح للمراجعة!"},
+            {"expert.cooldown.title",   "Cooldown Active",                              "المؤقت نشط"},
+            {"expert.cooldown.msg",     "A 5-minute timer has been set since the rejection. Please wait before you can resubmit.", "تم وضع مؤقت مدته 5 دقائق منذ محاولة الرفع الأولى حتى تتمكن من إعادة المحاولة."},
+            {"expert.cooldown.note",    "The form will reappear automatically when the timer expires.", "سيظهر النموذج تلقائياً بعد انتهاء المؤقت."},
             {"expert.enrich.title",     "Submit a New Course Enrichment",               "تقديم إثراء جديد لمقرر"},
             {"expert.enrich.locked",    "Locked",                                       "مقفل"},
             {"expert.enrich.locked_msg","This section unlocks after identity verification.", "يُفتح هذا القسم تلقائياً بعد التحقق من هويتك."},
+            {"expert.enrich.unlocked_msg","Select a course and share your professional insights.", "اختر مقرراً وشارك رؤيتك المهنية."},
             {"expert.enrich.course",    "Select a University Course",                   "اختر المقرر الجامعي"},
             {"expert.enrich.pillar1",   "Pillar 1: Practical Applications",             "الركيزة الأولى: التطبيقات العملية"},
             {"expert.enrich.hp1",       "How is this topic applied in real industry environments?", "كيف يُطبَّق هذا الموضوع في بيئة العمل الحقيقية؟"},
