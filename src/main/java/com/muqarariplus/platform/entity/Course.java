@@ -39,6 +39,10 @@ public class Course {
     private String specialization;
     private String university;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "major_id")
+    private Major major;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
     

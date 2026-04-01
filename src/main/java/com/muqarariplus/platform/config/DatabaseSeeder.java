@@ -20,6 +20,9 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final ToolRepository toolRepository;
     private final ProfessionalCertificateRepository certRepository;
     private final CourseEnrichmentRepository enrichmentRepository;
+    private final UniversityRepository universityRepository;
+    private final CollegeRepository collegeRepository;
+    private final MajorRepository majorRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DatabaseSeeder(UserRepository userRepository, CourseRepository courseRepository,
@@ -27,6 +30,9 @@ public class DatabaseSeeder implements CommandLineRunner {
                           SkillRepository skillRepository, ToolRepository toolRepository,
                           ProfessionalCertificateRepository certRepository,
                           CourseEnrichmentRepository enrichmentRepository,
+                          UniversityRepository universityRepository,
+                          CollegeRepository collegeRepository,
+                          MajorRepository majorRepository,
                           PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.courseRepository = courseRepository;
@@ -36,6 +42,9 @@ public class DatabaseSeeder implements CommandLineRunner {
         this.toolRepository = toolRepository;
         this.certRepository = certRepository;
         this.enrichmentRepository = enrichmentRepository;
+        this.universityRepository = universityRepository;
+        this.collegeRepository = collegeRepository;
+        this.majorRepository = majorRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -44,6 +53,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     public void run(String... args) throws Exception {
         seedUsers();
         seedExperts();
+        seedAcademicHierarchy();
         seedCourses();
         seedSiteContent();
         seedIndustryHierarchy();
@@ -82,9 +92,43 @@ public class DatabaseSeeder implements CommandLineRunner {
         }
     }
 
+    private void seedAcademicHierarchy() {
+        if (universityRepository.count() > 0) return;
+
+        University university = new University();
+        university.setNameEn("Prince Sattam bin Abdulaziz University");
+        university.setNameAr("جامعة الأمير سطام بن عبدالعزيز");
+        university = universityRepository.save(university);
+
+        College college = new College();
+        college.setNameEn("Computer Engineering and Science College");
+        college.setNameAr("كلية الحاسب والهندسة");
+        college.setUniversity(university);
+        college = collegeRepository.save(college);
+
+        String[][] majorsData = {
+            {"Computer Science", "علوم الحاسب", "CS"},
+            {"Computer Engineering", "هندسة الحاسب", "CE"},
+            {"Software Engineering", "هندسة البرمجيات", "SE"},
+            {"Information Systems", "نظم المعلومات", "IS"}
+        };
+
+        for (String[] m : majorsData) {
+            Major major = new Major();
+            major.setNameEn(m[0]);
+            major.setNameAr(m[1]);
+            major.setCode(m[2]);
+            major.setCollege(college);
+            majorRepository.save(major);
+        }
+
+        System.out.println("SEEDER: Academic hierarchy seeded (1 university, 1 college, 4 majors).");
+    }
+
     private void seedCourses() {
         if (courseRepository.count() > 0) return;
-        String[][] courses = {
+
+        String[][] universityReqs = {
             {"IC 101","Introduction to Islamic Culture","المدخل إلى الثقافة الإسلامية"},
             {"IC 102","Islam and Building of Society","الإسلام وبناء المجتمع"},
             {"IC 103","Economic System in Islam","أسس النظام الاقتصادي في الإسلام"},
@@ -102,7 +146,11 @@ public class DatabaseSeeder implements CommandLineRunner {
             {"MATH 2220","Linear Algebra for Computer Students","الجبر الخطي لطلاب الحاسب"},
             {"STAT 1050","Probability and Statistics for Computer Students","الإحصاء والاحتمالات لطلبة الحاسب"},
             {"PHYS 1010","General Physics 1","فيزياء عامة (1)"},
-            {"PHYS 1040","General Physics 2","فيزياء عامة (2)"},
+            {"PHYS 1040","General Physics 2","فيزياء عامة (2)"}
+        };
+
+        String[][] seOnlyCourses = {
+            {"MATH 3310","Differential Equations for Computer Students","المعادلات التفاضلية لطلبة الحاسب"},
             {"CS 1112","Discrete Mathematics","الرياضيات المتقطعة"},
             {"CS 1301","Computer Programming 1","برمجة الحاسب 1"},
             {"CS 2301","Computer Programming 2","برمجة الحاسب 2"},
@@ -112,7 +160,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             {"CE 1111","Logic Design","التصميم المنطقي"},
             {"CE 2121","Logic Design Lab","معمل التصميم المنطقي"},
             {"CS 2321","Data Structures and Algorithms","الخوارزميات وتراكيب البيانات"},
-            {"MATH 3310","Differential Equations for Computer Students","المعادلات التفاضلية لطلبة الحاسب"},
             {"CE 2501","Electrical Circuits","الدوائر الكهربائية"},
             {"CE 2401","Computer Organ. & Design","تنظيم وتصميم الحاسب"},
             {"CE 2511","Electrical Circuits Lab","معمل الدوائر الكهربائية"},
@@ -159,12 +206,41 @@ public class DatabaseSeeder implements CommandLineRunner {
             {"CE 4561","Industrial Automation","الأتمتة الصناعية"},
             {"CE 3421","High Per. Computing","الحوسبة عالية الأداء"}
         };
-        for (String[] c : courses) {
-            Course co = new Course(); co.setCode(c[0]); co.setNameEn(c[1]); co.setNameAr(c[2]);
-            co.setDescriptionEn("CCIS standard course."); co.setDescriptionAr("مقرر ضمن كلية علوم الحاسب والمعلومات.");
-            co.setUniversity("CCIS"); courseRepository.save(co);
+
+        Major csMajor = majorRepository.findAll().stream().filter(m -> "CS".equals(m.getCode())).findFirst().orElseThrow();
+        Major ceMajor = majorRepository.findAll().stream().filter(m -> "CE".equals(m.getCode())).findFirst().orElseThrow();
+        Major seMajor = majorRepository.findAll().stream().filter(m -> "SE".equals(m.getCode())).findFirst().orElseThrow();
+        Major isMajor = majorRepository.findAll().stream().filter(m -> "IS".equals(m.getCode())).findFirst().orElseThrow();
+
+        Major[] allMajors = {csMajor, ceMajor, seMajor, isMajor};
+
+        for (Major major : allMajors) {
+            for (String[] c : universityReqs) {
+                Course co = new Course();
+                co.setCode(c[0]);
+                co.setNameEn(c[1]);
+                co.setNameAr(c[2]);
+                co.setDescriptionEn("CCIS standard course.");
+                co.setDescriptionAr("مقرر ضمن كلية علوم الحاسب والمعلومات.");
+                co.setUniversity("CCIS");
+                co.setMajor(major);
+                courseRepository.save(co);
+            }
         }
-        System.out.println("SEEDER: 73 courses seeded.");
+
+        for (String[] c : seOnlyCourses) {
+            Course co = new Course();
+            co.setCode(c[0]);
+            co.setNameEn(c[1]);
+            co.setNameAr(c[2]);
+            co.setDescriptionEn("CCIS standard course.");
+            co.setDescriptionAr("مقرر ضمن كلية علوم الحاسب والمعلومات.");
+            co.setUniversity("CCIS");
+            co.setMajor(seMajor);
+            courseRepository.save(co);
+        }
+
+        System.out.println("SEEDER: " + courseRepository.count() + " courses seeded across all majors.");
     }
 
     // ── SITE CONTENT (kept via helper to save space) ─────────────────────
@@ -588,9 +664,10 @@ public class DatabaseSeeder implements CommandLineRunner {
             expert = expertRepository.save(expert);
         }
 
-        // 3. Find the Course
+        // 3. Find the Course (SE major version)
         List<Course> matchingCourses = courseRepository.findAll().stream()
-                .filter(c -> c.getCode().equals(courseCode)).toList();
+                .filter(c -> c.getCode().equals(courseCode) && c.getMajor() != null && "SE".equals(c.getMajor().getCode()))
+                .toList();
         if (matchingCourses.isEmpty()) return;
         Course course = matchingCourses.get(0);
 
