@@ -133,10 +133,11 @@
                                     </div>
                                 </div>
 
-                                <!-- Card Footer: Skills & Tools Badges -->
-                                <div class="card-footer bg-white border-top p-4"
-                                     th:if="${!enrichment.skills.isEmpty() || !enrichment.tools.isEmpty()}">
-                                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <!-- Card Footer: Skills & Tools Badges + Engagement -->
+                                <div class="card-footer bg-white border-top p-4">
+                                    <!-- Skills & Tools Badges -->
+                                    <div class="d-flex flex-wrap gap-2 align-items-center"
+                                         th:if="${!enrichment.skills.isEmpty() || !enrichment.tools.isEmpty()}">
 
                                         <!-- Skills Badges -->
                                         <span th:each="skill : ${enrichment.skills}"
@@ -153,6 +154,41 @@
                                             <span class="me-1">🔧</span>
                                             <span th:text="${#locale.language == 'ar' ? tool.nameAr : tool.nameEn}">Tool</span>
                                         </span>
+                                    </div>
+
+                                    <!-- Certification Badges -->
+                                    <div class="d-flex flex-wrap gap-2 align-items-center mt-2"
+                                         th:if="${!enrichment.certificates.isEmpty()}">
+                                        <span th:each="cert : ${enrichment.certificates}"
+                                              class="badge rounded-pill px-3 py-2 fw-semibold shadow-sm"
+                                              style="background-color: rgba(255, 193, 7, 0.12); color: #D4A017; font-size: 0.8rem; border: 1px solid rgba(255, 193, 7, 0.3);">
+                                            <span class="me-1">📜</span>
+                                            <span th:text="${#locale.language == 'ar' ? cert.nameAr : cert.nameEn}">Cert</span>
+                                            <span class="text-muted" th:text="${' (' + cert.issuingBody + ')'}"> (AWS)</span>
+                                        </span>
+                                    </div>
+
+                                    <!-- ── ENGAGEMENT ACTIONS ── -->
+                                    <div class="d-flex align-items-center gap-3 mt-3 pt-3 border-top">
+                                        <!-- Upvote Button -->
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold engage-upvote"
+                                                th:data-id="${enrichment.id}"
+                                                th:title="${#locale.language == 'ar' ? 'تصويت' : 'Upvote'}">
+                                            <span class="upvote-icon">👍</span>
+                                            <span th:text="${#locale.language == 'ar' ? 'تصويت' : 'Upvote'}">Upvote</span>
+                                            <span class="badge bg-primary rounded-pill ms-1 upvote-count"
+                                                  th:text="${enrichment.upvoteCount}">0</span>
+                                        </button>
+
+                                        <!-- Bookmark Button -->
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-semibold engage-bookmark"
+                                                th:data-id="${enrichment.id}"
+                                                th:title="${#locale.language == 'ar' ? 'حفظ' : 'Save'}">
+                                            <span class="bookmark-icon">🔖</span>
+                                            <span th:text="${#locale.language == 'ar' ? 'حفظ' : 'Save'}">Save</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -320,8 +356,79 @@
             .enrichment-content::-webkit-scrollbar-thumb:hover {
                 background: rgba(0, 180, 216, 0.5);
             }
+
+            /* Engagement buttons */
+            .engage-upvote, .engage-bookmark {
+                transition: all 0.2s ease;
+            }
+            .engage-upvote:hover {
+                transform: scale(1.05);
+            }
+            .engage-bookmark:hover {
+                transform: scale(1.05);
+            }
+            .engage-upvote.active {
+                background-color: var(--bs-primary) !important;
+                color: white !important;
+                border-color: var(--bs-primary) !important;
+            }
+            .engage-bookmark.active {
+                background-color: #ffc107 !important;
+                color: #333 !important;
+                border-color: #ffc107 !important;
+            }
+            @keyframes engagePulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.2); }
+                100% { transform: scale(1); }
+            }
+            .engage-pulse {
+                animation: engagePulse 0.3s ease;
+            }
         </style>
-    </th:block>
+
+        <!-- AJAX Engagement Script -->
+        <script>
+            (function() {
+                // ── UPVOTE TOGGLE ────────────────────────────────────
+                document.querySelectorAll('.engage-upvote').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        var id = btn.getAttribute('data-id');
+                        fetch('/api/engagement/' + id + '/upvote', { method: 'POST' })
+                            .then(function(res) { return res.json(); })
+                            .then(function(data) {
+                                if (data.status === 'success') {
+                                    btn.classList.toggle('active');
+                                    var countEl = btn.querySelector('.upvote-count');
+                                    if (countEl) countEl.textContent = data.upvoteCount;
+                                    btn.classList.add('engage-pulse');
+                                    setTimeout(function() { btn.classList.remove('engage-pulse'); }, 300);
+                                }
+                            })
+                            .catch(function(err) { console.error('Upvote error:', err); });
+                    });
+                });
+
+                // ── BOOKMARK TOGGLE ──────────────────────────────────
+                document.querySelectorAll('.engage-bookmark').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        var id = btn.getAttribute('data-id');
+                        fetch('/api/engagement/' + id + '/bookmark', { method: 'POST' })
+                            .then(function(res) { return res.json(); })
+                            .then(function(data) {
+                                if (data.status === 'success') {
+                                    btn.classList.toggle('active', data.bookmarked);
+                                    var icon = btn.querySelector('.bookmark-icon');
+                                    if (icon) icon.textContent = data.bookmarked ? '📌' : '🔖';
+                                    btn.classList.add('engage-pulse');
+                                    setTimeout(function() { btn.classList.remove('engage-pulse'); }, 300);
+                                }
+                            })
+                            .catch(function(err) { console.error('Bookmark error:', err); });
+                    });
+                });
+            })();
+        </script>
 
 </body>
 </html>

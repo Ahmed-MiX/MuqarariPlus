@@ -112,4 +112,23 @@ public class StudentDashboardService {
         }
         return tools;
     }
+
+    /**
+     * THE MAGIC ENGINE: Extracts all unique Professional Certifications from
+     * APPROVED enrichments across all of the student's enrolled courses.
+     */
+    @Transactional(readOnly = true)
+    public Set<ProfessionalCertificate> getAcquiredCertificates(String identifier) {
+        User user = resolveUser(identifier);
+        Set<ProfessionalCertificate> certs = new LinkedHashSet<>();
+
+        for (Course course : user.getEnrolledCourses()) {
+            List<CourseEnrichment> enrichments = enrichmentRepository
+                    .findByCourseIdAndStatus(course.getId(), EnrichmentStatus.APPROVED);
+            for (CourseEnrichment enrichment : enrichments) {
+                certs.addAll(enrichment.getCertificates());
+            }
+        }
+        return certs;
+    }
 }

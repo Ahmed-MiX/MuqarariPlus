@@ -51,6 +51,32 @@ public class CourseEnrichment {
     )
     private Set<Tool> tools = new HashSet<>();
 
+    // ── Engagement: Upvotes & Bookmarks ─────────────────────────────────
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "enrichment_upvotes",
+        joinColumns = @JoinColumn(name = "enrichment_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> upvotedByUsers = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "enrichment_bookmarks",
+        joinColumns = @JoinColumn(name = "enrichment_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> bookmarkedByUsers = new HashSet<>();
+
+    // ── Engagement: Professional Certifications ─────────────────────────
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "enrichment_certificates",
+        joinColumns = @JoinColumn(name = "enrichment_id"),
+        inverseJoinColumns = @JoinColumn(name = "certificate_id")
+    )
+    private Set<ProfessionalCertificate> certificates = new HashSet<>();
+
     // ── Status ──────────────────────────────────────────────────────────
     @Enumerated(EnumType.STRING)
     @Column(name = "verification_status", nullable = false)
@@ -78,4 +104,38 @@ public class CourseEnrichment {
 
     @Column(columnDefinition = "TEXT")
     private String resourcesEn;
+
+    // ── Engagement Helpers ──────────────────────────────────────────────
+
+    public int getUpvoteCount() {
+        return upvotedByUsers != null ? upvotedByUsers.size() : 0;
+    }
+
+    public int getBookmarkCount() {
+        return bookmarkedByUsers != null ? bookmarkedByUsers.size() : 0;
+    }
+
+    public boolean isUpvotedBy(User user) {
+        return upvotedByUsers != null && upvotedByUsers.contains(user);
+    }
+
+    public boolean isBookmarkedBy(User user) {
+        return bookmarkedByUsers != null && bookmarkedByUsers.contains(user);
+    }
+
+    public void addUpvote(User user) {
+        this.upvotedByUsers.add(user);
+    }
+
+    public void removeUpvote(User user) {
+        this.upvotedByUsers.remove(user);
+    }
+
+    public void addBookmark(User user) {
+        this.bookmarkedByUsers.add(user);
+    }
+
+    public void removeBookmark(User user) {
+        this.bookmarkedByUsers.remove(user);
+    }
 }

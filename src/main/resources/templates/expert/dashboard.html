@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${#locale.language == 'ar' ? 'مركز قيادة الخبير | مقرري+' : 'Expert Command Center | Muqarari+'}">Expert Command Center | Muqarari+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <div th:fragment="main-content">
+
+        <!-- ===== HERO HEADER ===== -->
+        <section class="text-white py-5" style="background: linear-gradient(135deg, #0A192F 0%, #132F4C 50%, #00B4D8 100%);">
+            <div class="container py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <span class="badge bg-white bg-opacity-10 text-white rounded-pill px-4 py-2 mb-3 shadow-sm"
+                              style="backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15);">
+                            <span th:text="${#locale.language == 'ar' ? '🏭 بوابة الخبير' : '🏭 Expert Portal'}">🏭 Expert Portal</span>
+                        </span>
+                        <h1 class="display-6 fw-bold mb-2 text-white"
+                            th:text="${content['expert.title'] ?: (#locale.language == 'ar' ? 'مركز قيادة الخبير' : 'Expert Command Center')}">Expert Command Center</h1>
+                        <p class="text-white-50 fs-5 mb-0"
+                           th:text="${content['expert.subtitle'] ?: (#locale.language == 'ar' ? 'أثرِ المقررات الأكاديمية بخبراتك المهنية.' : 'Enrich academic courses with your professional experience.')}">
+                            Enrich academic courses with your professional experience.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-4 mt-md-0">
+                        <div class="d-inline-flex align-items-center bg-white text-dark rounded-pill shadow-sm px-4 py-3">
+                            <span class="fs-4 me-3"
+                                  th:text="${expertStatus == 'APPROVED' ? '✅' : (expertStatus == 'REJECTED' ? '❌' : (expertStatus == 'PENDING' ? '⏳' : '🛡️'))}">🛡️</span>
+                            <div class="text-start">
+                                <span class="d-block fw-bold fs-6"
+                                      th:text="${content['expert.status.title'] ?: (#locale.language == 'ar' ? 'حالة التحقق' : 'Verification Status')}">Status</span>
+                                <span class="fw-bold small"
+                                      th:classappend="${expertStatus == 'APPROVED' ? 'text-success' : (expertStatus == 'REJECTED' ? 'text-danger' : 'text-muted')}"
+                                      th:text="${expertStatus == 'APPROVED' ? (content['expert.status.approved'] ?: 'Verified') : (expertStatus == 'REJECTED' ? (content['expert.status.rejected'] ?: 'Rejected') : (expertStatus == 'PENDING' ? (content['expert.status.pending'] ?: 'Pending') : (content['expert.status.none'] ?: 'Not Submitted')))}">Status Value</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container py-5 mt-2">
+
+            <!-- ===== NOTIFICATION BANNERS ===== -->
+            <div th:if="${expertStatus == 'APPROVED'}" class="alert alert-success border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">🎉</span>
+                <div>
+                    <h5 class="fw-bold mb-1" th:text="${content['expert.notify.approved.title'] ?: (#locale.language == 'ar' ? 'تم اعتماد هويتك!' : 'Identity Approved!')}">Verified</h5>
+                    <p class="mb-0" th:text="${content['expert.notify.approved'] ?: (#locale.language == 'ar' ? 'تم التحقق من هويتك واعتمادها على المنصة.' : 'Your identity has been verified and approved.')}">Approved text</p>
+                </div>
+            </div>
+            <div th:if="${expertStatus == 'REJECTED'}" class="alert alert-danger border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">⚠️</span>
+                <div>
+                    <h5 class="fw-bold mb-1" th:text="${content['expert.notify.rejected.title'] ?: 'Verification Rejected'}">Rejected</h5>
+                    <p class="mb-0" th:text="${content['expert.notify.rejected'] ?: 'Your verification was rejected.'}">Rejected text</p>
+                </div>
+            </div>
+            <div th:if="${expertStatus == 'PENDING'}" class="alert alert-warning border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">⏳</span>
+                <div>
+                    <h5 class="fw-bold mb-1" th:text="${content['expert.notify.pending.title'] ?: 'Under Review'}">Under Review</h5>
+                    <p class="mb-0" th:text="${content['expert.notify.pending'] ?: 'Your submission is being reviewed.'}">Pending text</p>
+                </div>
+            </div>
+            <div th:if="${successMsg == 'verification_submitted'}" class="alert alert-info border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">📤</span>
+                <p class="mb-0 fw-semibold" th:text="${content['expert.notify.submitted'] ?: 'Documents submitted for review!'}">Submitted</p>
+            </div>
+            <div th:if="${successMsg == 'enrichment_submitted'}" class="alert alert-success border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">🚀</span>
+                <p class="mb-0 fw-semibold" th:text="${#locale.language == 'ar' ? 'تم إرسال الإثراء بنجاح! سيتم مراجعته من قِبل الإدارة.' : 'Enrichment submitted successfully! It will be reviewed by the admin.'}">Enrichment submitted!</p>
+            </div>
+            <div th:if="${errorMsg}" class="alert alert-danger border-0 rounded-4 shadow-sm p-4 mb-4" role="alert">
+                <span class="fw-bold">⛔</span> <span th:text="${errorMsg}">Error</span>
+            </div>
+
+            <!-- ════════════════════════════════════════════════════════════ -->
+            <!-- APPROVED EXPERT: FULL COMMAND CENTER                       -->
+            <!-- ════════════════════════════════════════════════════════════ -->
+            <div th:if="${isApproved}">
+
+                <!-- ── IMPACT STAT CARDS ────────────────────────────────── -->
+                <div class="row g-4 mb-5">
+                    <div class="col-md-4">
+                        <div class="card stat-card rounded-4 border-0 shadow-sm p-4 h-100">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width: 56px; height: 56px; background: linear-gradient(135deg, #198754, #157347);">
+                                    <span class="fs-3 text-white">✅</span>
+                                </div>
+                                <div>
+                                    <span class="d-block fs-2 fw-bold text-primary-blue" th:text="${approvedCount}">0</span>
+                                    <span class="text-muted small fw-semibold"
+                                          th:text="${#locale.language == 'ar' ? 'إثراء معتمد' : 'Approved Insights'}">Approved Insights</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stat-card rounded-4 border-0 shadow-sm p-4 h-100">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width: 56px; height: 56px; background: linear-gradient(135deg, #ffc107, #e0a800);">
+                                    <span class="fs-3 text-white">⏳</span>
+                                </div>
+                                <div>
+                                    <span class="d-block fs-2 fw-bold text-primary-blue" th:text="${pendingCount}">0</span>
+                                    <span class="text-muted small fw-semibold"
+                                          th:text="${#locale.language == 'ar' ? 'بانتظار المراجعة' : 'Pending Review'}">Pending Review</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stat-card rounded-4 border-0 shadow-sm p-4 h-100">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width: 56px; height: 56px; background: linear-gradient(135deg, #0A192F, #00B4D8);">
+                                    <span class="fs-3 text-white">🎓</span>
+                                </div>
+                                <div>
+                                    <span class="d-block fs-2 fw-bold text-primary-blue" th:text="${studentImpact}">0</span>
+                                    <span class="text-muted small fw-semibold"
+                                          th:text="${#locale.language == 'ar' ? 'طالب مستفيد' : 'Students Impacted'}">Students Impacted</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── CTA: CREATE NEW INSIGHT ─────────────────────────── -->
+                <div class="text-center mb-5">
+                    <a th:href="@{/expert/enrichment/new}"
+                       class="btn btn-accent btn-lg px-5 py-3 fw-bold rounded-pill shadow"
+                       style="font-size: 1.15rem;">
+                        <span class="me-2">✍️</span>
+                        <span th:text="${#locale.language == 'ar' ? 'إضافة إثراء جديد' : 'Create New Insight'}">Create New Insight</span>
+                    </a>
+                </div>
+
+                <!-- ── MY SUBMISSIONS TABLE ─────────────────────────────── -->
+                <div class="card bg-white rounded-4 shadow-sm border-0 p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                        <h3 class="h5 fw-bold text-primary-blue mb-0">
+                            <span class="me-2">📋</span>
+                            <span th:text="${#locale.language == 'ar' ? 'إثراءاتي' : 'My Submissions'}">My Submissions</span>
+                        </h3>
+                        <span class="badge bg-light text-primary-blue border rounded-pill px-3 py-2 shadow-sm"
+                              th:text="${#lists.size(myEnrichments) + (#locale.language == 'ar' ? ' إثراء' : ' insights')}">0 insights</span>
+                    </div>
+
+                    <!-- Submissions List -->
+                    <div th:unless="${#lists.isEmpty(myEnrichments)}">
+                        <div th:each="item : ${myEnrichments}" class="enrichment-item d-flex align-items-center justify-content-between p-3 mb-2 bg-light rounded-3">
+                            <div class="d-flex align-items-center gap-3 flex-grow-1" style="min-width: 0;">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center fw-bold text-white shadow-sm flex-shrink-0"
+                                     style="width: 44px; height: 44px; background: linear-gradient(135deg, #0A192F, #00B4D8); font-size: 0.6rem;">
+                                    <span th:text="${item.course.code}">CS</span>
+                                </div>
+                                <div style="min-width: 0;">
+                                    <a th:href="@{'/course/' + ${item.course.id}}" class="fw-bold text-primary-blue text-decoration-none d-block text-truncate"
+                                       th:text="${#locale.language == 'ar' ? item.course.nameAr : item.course.nameEn}">Course Name</a>
+                                    <span class="text-muted small" th:text="${#temporals.format(item.createdAt, 'yyyy-MM-dd')}">2026-01-01</span>
+                                </div>
+                            </div>
+                            <span class="badge rounded-pill px-3 py-2 fw-semibold shadow-sm flex-shrink-0 ms-2"
+                                  th:classappend="${item.status.name() == 'APPROVED' ? 'bg-success text-white' : (item.status.name() == 'PENDING' ? 'bg-warning text-dark' : 'bg-danger text-white')}"
+                                  th:text="${item.status.name() == 'APPROVED' ? (#locale.language == 'ar' ? '✅ معتمد' : '✅ Approved') : (item.status.name() == 'PENDING' ? (#locale.language == 'ar' ? '⏳ قيد المراجعة' : '⏳ Pending') : (#locale.language == 'ar' ? '❌ مرفوض' : '❌ Rejected'))}">Status</span>
+                        </div>
+                    </div>
+
+                    <!-- Empty state -->
+                    <div th:if="${#lists.isEmpty(myEnrichments)}" class="text-center py-5">
+                        <div class="bg-light rounded-circle d-inline-flex justify-content-center align-items-center mb-3"
+                             style="width: 80px; height: 80px;">
+                            <span class="fs-1">📚</span>
+                        </div>
+                        <h5 class="fw-bold text-primary-blue"
+                            th:text="${#locale.language == 'ar' ? 'لم تقدم أي إثراءات بعد' : 'No submissions yet'}">No submissions yet</h5>
+                        <p class="text-muted small"
+                           th:text="${#locale.language == 'ar' ? 'ابدأ بإثراء المقررات الأكاديمية بخبرتك المهنية.' : 'Start enriching academic courses with your professional insights.'}">
+                            Start enriching courses.
+                        </p>
+                        <a th:href="@{/expert/enrichment/new}" class="btn btn-primary btn-lg px-5 fw-bold rounded-pill shadow-sm mt-2">
+                            <span th:text="${#locale.language == 'ar' ? '✍️ أضف أول إثراء' : '✍️ Add Your First Insight'}">✍️ Add Your First Insight</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ════════════════════════════════════════════════════════════ -->
+            <!-- NON-APPROVED: VERIFICATION FLOW                            -->
+            <!-- ════════════════════════════════════════════════════════════ -->
+            <div th:unless="${isApproved}" class="row g-5">
+                <div class="col-lg-8">
+
+                    <!-- IDENTITY VERIFICATION FORM -->
+                    <div th:if="${showVerificationForm}" class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5 mb-5 border-start border-5" style="border-color: var(--accent-orange) !important;">
+                        <h2 class="h3 fw-bold text-primary-blue mb-3"
+                            th:text="${content['expert.verify.title'] ?: (#locale.language == 'ar' ? 'التحقق من الهوية' : 'Identity Verification')}">Identity Verification</h2>
+                        <p class="text-muted fs-5 mb-4"
+                           th:text="${content['expert.verify.desc'] ?: (#locale.language == 'ar' ? 'ارفع بيانات اعتمادك.' : 'Upload your credentials.')}">Upload credentials.</p>
+
+                        <form th:action="@{/expert/verify}" method="post" enctype="multipart/form-data">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark fs-6"
+                                       th:text="${content['expert.verify.cv'] ?: 'Upload CV'}">Upload CV</label>
+                                <input type="file" name="cvFile" accept=".pdf,.doc,.docx"
+                                       class="form-control form-control-lg bg-light border-0 shadow-sm" required>
+                                <div class="form-text text-muted small mt-1"
+                                     th:text="${content['expert.verify.cv.hint'] ?: 'Accepted: PDF, DOC, DOCX. Max 10MB.'}">Accepted formats</div>
+                            </div>
+                            <div class="mb-5">
+                                <label class="form-label fw-bold text-dark fs-6"
+                                       th:text="${content['expert.verify.linkedin'] ?: 'LinkedIn URL'}">LinkedIn URL</label>
+                                <input type="url" name="linkedinUrl"
+                                       class="form-control form-control-lg bg-light border-0 shadow-sm"
+                                       placeholder="https://linkedin.com/in/username" required>
+                            </div>
+                            <button type="submit"
+                                    class="btn btn-accent btn-lg px-5 fw-bold shadow-sm rounded-pill w-100"
+                                    th:text="${content['expert.verify.btn'] ?: 'Submit for Review'}">Submit for Review</button>
+                        </form>
+                    </div>
+
+                    <!-- COOLDOWN TIMER -->
+                    <div th:if="${showCooldownTimer}" class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5 mb-5 border-start border-5 border-danger">
+                        <div class="text-center py-4">
+                            <span class="fs-1 d-block mb-3">⏱️</span>
+                            <h2 class="h4 fw-bold text-danger mb-3"
+                                th:text="${content['expert.cooldown.title'] ?: 'Cooldown Active'}">Cooldown Active</h2>
+                            <p class="text-muted fs-6 mb-4"
+                               th:text="${content['expert.cooldown.msg'] ?: 'A 5-minute timer has been activated. Please wait before resubmitting.'}">Cooldown msg</p>
+                            <div class="d-inline-flex align-items-center bg-light rounded-pill px-5 py-3 shadow-sm">
+                                <span class="fs-4 fw-bold text-danger" id="cooldown-display">--:--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PENDING STATUS -->
+                    <div th:if="${expertStatus == 'PENDING'}" class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5 mb-5 border-start border-5 border-warning">
+                        <div class="text-center py-4">
+                            <span class="fs-1 d-block mb-3">📋</span>
+                            <h2 class="h4 fw-bold text-primary-blue mb-3"
+                                th:text="${content['expert.verify.title'] ?: 'Identity Verification'}">Identity Verification</h2>
+                            <p class="text-muted fs-5"
+                               th:text="${content['expert.notify.pending'] ?: 'Your submission is under review.'}">Under review</p>
+                            <div class="mt-3">
+                                <span class="badge bg-warning text-dark rounded-pill px-4 py-2 fs-6 shadow-sm"
+                                      th:text="${content['expert.status.pending'] ?: 'Pending'}">Pending</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LOCKED ENRICHMENT PREVIEW -->
+                    <div class="card bg-light rounded-4 shadow-sm border-0 p-4 p-md-5">
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                            <h2 class="h4 fw-bold text-primary-blue mb-0"
+                                th:text="${content['expert.enrich.title'] ?: 'Course Enrichment'}">Course Enrichment</h2>
+                            <span class="badge bg-secondary rounded-pill px-3 py-2 text-white shadow-sm"
+                                  th:text="${content['expert.enrich.locked'] ?: '🔒 Locked'}">🔒 Locked</span>
+                        </div>
+                        <p class="text-muted fst-italic"
+                           th:text="${content['expert.enrich.locked_msg'] ?: (#locale.language == 'ar' ? 'يُفعّل بعد اعتماد هويتك.' : 'Unlocks after identity verification.')}">Unlocks after verification.</p>
+                        <form class="opacity-50 pe-none">
+                            <select class="form-select form-select-lg bg-white border-0 shadow-sm mb-3" disabled>
+                                <option>---------</option>
+                            </select>
+                            <textarea rows="3" class="form-control bg-white border-0 shadow-sm mb-3" disabled></textarea>
+                            <button type="button" class="btn btn-primary btn-lg px-5 fw-bold rounded-pill" disabled>Submit</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- SIDEBAR -->
+                <div class="col-lg-4">
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5">
+                        <h3 class="h5 fw-bold text-secondary-teal border-bottom border-2 pb-3 mb-4"
+                            th:text="${content['expert.contrib.title'] ?: (#locale.language == 'ar' ? 'مساهماتي' : 'My Contributions')}">My Contributions</h3>
+                        <div class="text-center py-5">
+                            <div class="bg-light rounded-circle d-inline-flex justify-content-center align-items-center mb-3"
+                                 style="width: 80px; height: 80px;">
+                                <span class="fs-1">📚</span>
+                            </div>
+                            <h4 class="h5 text-primary-blue fw-bold"
+                                th:text="${content['expert.contrib.empty'] ?: (#locale.language == 'ar' ? 'لا توجد مساهمات بعد.' : 'No contributions yet.')}">No contributions</h4>
+                            <p class="text-muted small"
+                               th:text="${content['expert.contrib.empty_msg'] ?: (#locale.language == 'ar' ? 'ستظهر إثراءاتك هنا.' : 'Your enrichments will appear here.')}">Will appear here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </div>
+
+    <th:block th:fragment="script-extra">
+        <style>
+            .stat-card {
+                transition: all 0.3s ease;
+                border-left: 4px solid transparent !important;
+            }
+            .stat-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+                border-left-color: var(--secondary-teal) !important;
+            }
+            .enrichment-item {
+                transition: all 0.2s ease;
+                border: 2px solid transparent;
+            }
+            .enrichment-item:hover {
+                border-color: var(--secondary-teal);
+                transform: translateX(4px);
+            }
+        </style>
+        <script th:if="${showCooldownTimer}" th:inline="javascript">
+            (function() {
+                var totalSeconds = /*[[${cooldownSeconds}]]*/ 0;
+                var display = document.getElementById('cooldown-display');
+                if (!display || totalSeconds <= 0) return;
+
+                function updateDisplay() {
+                    var mins = Math.floor(totalSeconds / 60);
+                    var secs = totalSeconds % 60;
+                    display.textContent = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+                    if (totalSeconds <= 0) {
+                        clearInterval(timer);
+                        window.location.reload();
+                    }
+                    totalSeconds--;
+                }
+
+                updateDisplay();
+                var timer = setInterval(updateDisplay, 1000);
+            })();
+        </script>
+    </th:block>
+
+</body>
+</html>

@@ -1,9 +1,11 @@
 package com.muqarariplus.platform.controller;
 
 import com.muqarariplus.platform.entity.Course;
+import com.muqarariplus.platform.entity.ProfessionalCertificate;
 import com.muqarariplus.platform.entity.Skill;
 import com.muqarariplus.platform.entity.Tool;
 import com.muqarariplus.platform.repository.CourseRepository;
+import com.muqarariplus.platform.repository.ProfessionalCertificateRepository;
 import com.muqarariplus.platform.repository.SkillRepository;
 import com.muqarariplus.platform.repository.ToolRepository;
 import com.muqarariplus.platform.service.CourseEnrichmentService;
@@ -26,15 +28,18 @@ public class ExpertEnrichmentController {
     private final CourseRepository courseRepository;
     private final SkillRepository skillRepository;
     private final ToolRepository toolRepository;
+    private final ProfessionalCertificateRepository certRepository;
 
     public ExpertEnrichmentController(CourseEnrichmentService enrichmentService,
                                      CourseRepository courseRepository,
                                      SkillRepository skillRepository,
-                                     ToolRepository toolRepository) {
+                                     ToolRepository toolRepository,
+                                     ProfessionalCertificateRepository certRepository) {
         this.enrichmentService = enrichmentService;
         this.courseRepository = courseRepository;
         this.skillRepository = skillRepository;
         this.toolRepository = toolRepository;
+        this.certRepository = certRepository;
     }
 
     /**
@@ -46,10 +51,12 @@ public class ExpertEnrichmentController {
         List<Course> courses = courseRepository.findAll();
         List<Skill> skills = skillRepository.findAll();
         List<Tool> tools = toolRepository.findAll();
+        List<ProfessionalCertificate> certs = certRepository.findAll();
 
         model.addAttribute("courses", courses);
         model.addAttribute("skills", skills);
         model.addAttribute("tools", tools);
+        model.addAttribute("certificates", certs);
 
         return "expert/add-enrichment";
     }
@@ -63,6 +70,7 @@ public class ExpertEnrichmentController {
                                    @RequestParam("content") String content,
                                    @RequestParam(value = "skillIds", required = false) List<Long> skillIds,
                                    @RequestParam(value = "toolIds", required = false) List<Long> toolIds,
+                                   @RequestParam(value = "certIds", required = false) List<Long> certIds,
                                    Principal principal,
                                    RedirectAttributes redirectAttributes) {
         try {
@@ -71,7 +79,8 @@ public class ExpertEnrichmentController {
                     courseId,
                     content,
                     skillIds,
-                    toolIds
+                    toolIds,
+                    certIds
             );
             redirectAttributes.addFlashAttribute("successMsg", "enrichment_submitted");
         } catch (IllegalArgumentException | IllegalStateException e) {

@@ -17,35 +17,31 @@ public class CourseEnrichmentService {
     private final UserRepository userRepository;
     private final SkillRepository skillRepository;
     private final ToolRepository toolRepository;
+    private final ProfessionalCertificateRepository certRepository;
 
     public CourseEnrichmentService(CourseEnrichmentRepository enrichmentRepository,
                                   CourseRepository courseRepository,
                                   ExpertRepository expertRepository,
                                   UserRepository userRepository,
                                   SkillRepository skillRepository,
-                                  ToolRepository toolRepository) {
+                                  ToolRepository toolRepository,
+                                  ProfessionalCertificateRepository certRepository) {
         this.enrichmentRepository = enrichmentRepository;
         this.courseRepository = courseRepository;
         this.expertRepository = expertRepository;
         this.userRepository = userRepository;
         this.skillRepository = skillRepository;
         this.toolRepository = toolRepository;
+        this.certRepository = certRepository;
     }
 
     /**
      * Creates a new course enrichment submitted by a verified expert.
-     *
-     * @param loginIdentifier The expert's login identifier (email or username from Principal)
-     * @param courseId        The target course ID
-     * @param content         The rich-text / markdown content
-     * @param skillIds        List of Skill IDs to tag
-     * @param toolIds         List of Tool IDs to tag
      */
     @Transactional
     public void createEnrichment(String loginIdentifier, Long courseId, String content,
-                                 List<Long> skillIds, List<Long> toolIds) {
+                                 List<Long> skillIds, List<Long> toolIds, List<Long> certIds) {
 
-        // 1. Resolve the User — supports both email and username login
         User user = userRepository.findByEmail(loginIdentifier);
         if (user == null) {
             user = userRepository.findByUsername(loginIdentifier);
@@ -54,32 +50,29 @@ public class CourseEnrichmentService {
             throw new IllegalArgumentException("User not found for identifier: " + loginIdentifier);
         }
 
-        // 2. Fetch the Expert entity linked to this user
         Expert expert = expertRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "No Expert profile found for user: " + loginIdentifier));
 
-        // 3. Verify the expert is APPROVED
         if (expert.getStatus() != ExpertStatus.APPROVED) {
             throw new IllegalStateException("Only verified experts may submit enrichments.");
         }
 
-        // 4. Fetch the target Course
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Course not found with ID: " + courseId));
 
-        // 5. Fetch tagged Skills and Tools
         var skills = skillRepository.findAllById(skillIds != null ? skillIds : List.of());
         var tools = toolRepository.findAllById(toolIds != null ? toolIds : List.of());
+        var certs = certRepository.findAllById(certIds != null ? certIds : List.of());
 
-        // 6. Build and persist the enrichment
         CourseEnrichment enrichment = new CourseEnrichment();
         enrichment.setExpert(expert);
         enrichment.setCourse(course);
         enrichment.setContent(content);
         enrichment.setSkills(new HashSet<>(skills));
         enrichment.setTools(new HashSet<>(tools));
+        enrichment.setCertificates(new HashSet<>(certs));
         enrichment.setStatus(EnrichmentStatus.PENDING);
 
         enrichmentRepository.save(enrichment);
@@ -136,4 +129,73 @@ public class CourseEnrichmentService {
         enrichment.setStatus(EnrichmentStatus.REJECTED);
         enrichmentRepository.save(enrichment);
     }
+
+    // ── Expert Impact Metrics ───────────────────────────────────────────
+
+    /**
+     * Count of APPROVED enrichments by an expert (identified by login identifier).
+     */
+    public long countApprovedEnrichmentsByExpert(String identifier) {
+        User user = resolveUser(identifier);
+        return enrichmentRepository.findByExpertUserId(user.getId()).stream()
+                .filter(e -> e.getStatus() == EnrichmentStatus.APPROVED)
+                .count();
+    }
+
+    /**
+     * Count of PENDING enrichments by an expert.
+     */
+    public long countPendingEnrichmentsByExpert(String identifier) {
+        User user = resolveUser(identifier);
+        return enrichmentRepository.findByExpertUserId(user.getId()).stream()
+                .filter(e -> e.getStatus() == EnrichmentStatus.PENDING)
+                .count();
+    }
+
+    /**
+     * THE IMPACT ENGINE: Calculates total students impacted by this expert.
+     * Finds all courses in the expert's APPROVED enrichments, then sums up
+     * students enrolled in those courses across the platform.
+     */
+    @Transactional(readOnly = true)
+    public long calculateTotalStudentImpact(String identifier) {
+        User user = resolveUser(identifier);
+        List<CourseEnrichment> approved = enrichmentRepository.findByExpertUserId(user.getId()).stream()
+                .filter(e -> e.getStatus() == EnrichmentStatus.APPROVED)
+                .toList();
+
+        // Collect unique course IDs that this expert has enriched
+        var enrichedCourseIds = approved.stream()
+                .map(e -> e.getCourse().getId())
+                .collect(java.util.stream.Collectors.toSet());
+
+        // Count students enrolled in those specific courses
+        return userRepository.findByRole("ROLE_STUDENT").stream()
+                .filter(student -> student.getEnrolledCourses().stream()
+                        .anyMatch(c -> enrichedCourseIds.contains(c.getId())))
+                .count();
+    }
+
+    /**
+     * Returns all enrichments by an expert (all statuses).
+     */
+    public List<CourseEnrichment> getAllEnrichmentsByExpert(String identifier) {
+        User user = resolveUser(identifier);
+        return enrichmentRepository.findByExpertUserId(user.getId());
+    }
+
+    /**
+     * Resolves User from login identifier (email or username).
+     */
+    private User resolveUser(String identifier) {
+        User user = userRepository.findByEmail(identifier);
+        if (user == null) {
+            user = userRepository.findByUsername(identifier);
+        }
+        if (user == null) {
+            throw new IllegalArgumentException("User not found: " + identifier);
+        }
+        return user;
+    }
 }
+

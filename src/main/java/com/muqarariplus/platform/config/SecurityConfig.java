@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .requestMatchers("/super-admin", "/super-admin/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/expert", "/expert/**").hasAnyRole("EXPERT", "ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/admin", "/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-                .requestMatchers("/student-dashboard", "/student-dashboard/**", "/student", "/student/**").hasAnyRole("STUDENT", "EXPERT", "ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/student-dashboard", "/student-dashboard/**", "/student", "/student/**", "/api/engagement/**").hasAnyRole("STUDENT", "EXPERT", "ADMIN", "SUPER_ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

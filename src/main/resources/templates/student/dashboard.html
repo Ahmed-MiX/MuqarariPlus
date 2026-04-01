@@ -207,6 +207,29 @@
                             </p>
                         </div>
 
+                        <!-- Acquired Certifications -->
+                        <div class="mb-4">
+                            <h4 class="h6 fw-bold mb-3" style="color: #D4A017;">
+                                <span class="me-2">📜</span>
+                                <span th:text="${#locale.language == 'ar' ? 'الشهادات المهنية المكتسبة' : 'Acquired Certifications'}">Acquired Certifications</span>
+                                <span class="badge bg-light border rounded-pill px-2 py-1 ms-2 small" style="color: #D4A017;"
+                                      th:text="${certCount}">0</span>
+                            </h4>
+                            <div th:unless="${#sets.isEmpty(acquiredCerts)}" class="d-flex flex-wrap gap-2">
+                                <span th:each="cert : ${acquiredCerts}"
+                                      class="badge rounded-pill px-3 py-2 fw-semibold shadow-sm cv-cert-badge"
+                                      style="background-color: rgba(255, 193, 7, 0.12); color: #D4A017; font-size: 0.85rem; border: 1px solid rgba(255, 193, 7, 0.3);">
+                                    <span class="me-1">📜</span>
+                                    <span th:text="${#locale.language == 'ar' ? cert.nameAr : cert.nameEn}">Cert</span>
+                                    <span class="text-muted" th:text="${' (' + cert.issuingBody + ')'}"> (AWS)</span>
+                                </span>
+                            </div>
+                            <p th:if="${#sets.isEmpty(acquiredCerts)}" class="text-muted small fst-italic mb-0"
+                               th:text="${#locale.language == 'ar' ? 'سجّل في مقررات ذات إثراءات لاكتشاف الشهادات المطلوبة.' : 'Enroll in enriched courses to discover required certifications.'}">
+                                Enroll in enriched courses to discover required certifications.
+                            </p>
+                        </div>
+
                         <!-- Print CV Button -->
                         <div class="text-center pt-3 border-top" th:if="${skillCount > 0 or toolCount > 0}">
                             <button onclick="window.print()"
@@ -217,7 +240,68 @@
                             </button>
                         </div>
                     </div>
-                </div>
+
+                    <!-- ══════════════════════════════════════════════════════ -->
+                    <!-- SECTION 4: SAVED INSIGHTS (BOOKMARKS)                -->
+                    <!-- ══════════════════════════════════════════════════════ -->
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 mt-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                            <h3 class="h5 fw-bold text-primary-blue mb-0">
+                                <span class="me-2">📌</span>
+                                <span th:text="${#locale.language == 'ar' ? 'إثراءاتي المحفوظة' : 'My Saved Insights'}">My Saved Insights</span>
+                            </h3>
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 shadow-sm"
+                                  th:text="${savedCount + (#locale.language == 'ar' ? ' محفوظ' : ' saved')}">0 saved</span>
+                        </div>
+
+                        <!-- Saved enrichment cards -->
+                        <div th:unless="${#lists.isEmpty(savedInsights)}">
+                            <div th:each="insight : ${savedInsights}" class="saved-insight-item bg-light rounded-3 p-3 mb-3">
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="rounded-3 d-flex align-items-center justify-content-center fw-bold text-white shadow-sm flex-shrink-0"
+                                         style="width: 44px; height: 44px; background: linear-gradient(135deg, #0A192F, #00B4D8); font-size: 0.6rem;">
+                                        <span th:text="${insight.course.code}">CS</span>
+                                    </div>
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-2">
+                                            <a th:href="@{'/course/' + ${insight.course.id}}" class="fw-bold text-primary-blue text-decoration-none"
+                                               th:text="${#locale.language == 'ar' ? insight.course.nameAr : insight.course.nameEn}">Course Name</a>
+                                            <span class="text-muted small"
+                                                  th:text="${'by ' + insight.expert.user.firstName + ' ' + insight.expert.user.lastName}">by Expert</span>
+                                        </div>
+                                        <p class="text-muted small mb-2" style="line-height: 1.6;"
+                                           th:text="${#strings.abbreviate(insight.content, 150)}">Content preview...</p>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            <span th:each="skill : ${insight.skills}"
+                                                  class="badge rounded-pill px-2 py-1 small"
+                                                  style="background-color: rgba(0, 180, 216, 0.1); color: #00B4D8; font-size: 0.7rem;">
+                                                🧠 <span th:text="${#locale.language == 'ar' ? skill.nameAr : skill.nameEn}">Skill</span>
+                                            </span>
+                                            <span th:each="tool : ${insight.tools}"
+                                                  class="badge rounded-pill px-2 py-1 small"
+                                                  style="background-color: rgba(255, 77, 77, 0.08); color: #FF4D4D; font-size: 0.7rem;">
+                                                🔧 <span th:text="${#locale.language == 'ar' ? tool.nameAr : tool.nameEn}">Tool</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div th:if="${#lists.isEmpty(savedInsights)}" class="text-center py-4">
+                            <div class="bg-light rounded-circle d-inline-flex justify-content-center align-items-center mb-3"
+                                 style="width: 70px; height: 70px;">
+                                <span class="fs-1">📌</span>
+                            </div>
+                            <h5 class="fw-bold text-primary-blue"
+                                th:text="${#locale.language == 'ar' ? 'لا توجد إثراءات محفوظة' : 'No saved insights yet'}">No saved insights yet</h5>
+                            <p class="text-muted small"
+                               th:text="${#locale.language == 'ar' ? 'احفظ إثراءات الخبراء من صفحات المقررات لتجدها هنا.' : 'Bookmark expert insights from course pages to find them here.'}">
+                                Bookmark insights from course pages.
+                            </p>
+                        </div>
+                    </div>
 
                 <!-- ===== RIGHT SIDEBAR ===== -->
                 <div class="col-lg-4">
@@ -306,6 +390,14 @@
             .cv-tool-badge:hover {
                 background-color: rgba(255, 77, 77, 0.15) !important;
                 transform: scale(1.08);
+            }
+            .saved-insight-item {
+                transition: all 0.2s ease;
+                border: 2px solid transparent;
+            }
+            .saved-insight-item:hover {
+                border-color: #ffc107;
+                transform: translateX(4px);
             }
 
             /* ===== PRINT STYLES ===== */

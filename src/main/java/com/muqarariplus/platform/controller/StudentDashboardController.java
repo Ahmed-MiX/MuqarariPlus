@@ -1,9 +1,11 @@
 package com.muqarariplus.platform.controller;
 
 import com.muqarariplus.platform.entity.Course;
+import com.muqarariplus.platform.entity.CourseEnrichment;
 import com.muqarariplus.platform.entity.Skill;
 import com.muqarariplus.platform.entity.Tool;
 import com.muqarariplus.platform.repository.CourseRepository;
+import com.muqarariplus.platform.service.EngagementService;
 import com.muqarariplus.platform.service.StudentDashboardService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,16 +25,19 @@ public class StudentDashboardController {
 
     private final StudentDashboardService dashboardService;
     private final CourseRepository courseRepository;
+    private final EngagementService engagementService;
 
     public StudentDashboardController(StudentDashboardService dashboardService,
-                                     CourseRepository courseRepository) {
+                                     CourseRepository courseRepository,
+                                     EngagementService engagementService) {
         this.dashboardService = dashboardService;
         this.courseRepository = courseRepository;
+        this.engagementService = engagementService;
     }
 
     /**
      * GET /student/dashboard — Main student dashboard with enrolled courses,
-     * acquired skills, and acquired tools.
+     * acquired skills, acquired tools, and saved insights.
      */
     @GetMapping("/dashboard")
     public String dashboard(Principal principal, Model model) {
@@ -41,19 +46,27 @@ public class StudentDashboardController {
         // Enrolled courses
         Set<Course> enrolledCourses = dashboardService.getEnrolledCourses(identifier);
 
-        // The Magic: dynamically acquired Skills & Tools
+        // The Magic: dynamically acquired Skills & Tools & Certs
         Set<Skill> acquiredSkills = dashboardService.getAcquiredSkills(identifier);
         Set<Tool> acquiredTools = dashboardService.getAcquiredTools(identifier);
+        Set<com.muqarariplus.platform.entity.ProfessionalCertificate> acquiredCerts = dashboardService.getAcquiredCertificates(identifier);
 
         // All available courses (for the enrollment dropdown)
         List<Course> allCourses = courseRepository.findAll();
 
+        // Bookmarked / Saved Enrichments
+        List<CourseEnrichment> savedInsights = engagementService.getBookmarkedEnrichments(identifier);
+
         model.addAttribute("enrolledCourses", enrolledCourses);
         model.addAttribute("acquiredSkills", acquiredSkills);
         model.addAttribute("acquiredTools", acquiredTools);
+        model.addAttribute("acquiredCerts", acquiredCerts);
         model.addAttribute("allCourses", allCourses);
         model.addAttribute("skillCount", acquiredSkills.size());
         model.addAttribute("toolCount", acquiredTools.size());
+        model.addAttribute("certCount", acquiredCerts.size());
+        model.addAttribute("savedInsights", savedInsights);
+        model.addAttribute("savedCount", savedInsights.size());
 
         return "student/dashboard";
     }
