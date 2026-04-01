@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${#locale.language == 'ar' ? 'لوحة الطالب | مقرري+' : 'Student Dashboard | Muqarari+'}">Student Dashboard | Muqarari+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <div th:fragment="main-content">
+
+        <!-- ===== HERO HEADER ===== -->
+        <section class="text-white py-5" style="background: linear-gradient(135deg, #0A192F 0%, #132F4C 50%, #00B4D8 100%);">
+            <div class="container py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-7">
+                        <span class="badge bg-white bg-opacity-10 text-white rounded-pill px-4 py-2 mb-3 shadow-sm"
+                              style="backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15);">
+                            <span th:text="${content['student.badge'] ?: (#locale.language == 'ar' ? '🎓 بوابة الطالب' : '🎓 Student Portal')}">🎓 Student Portal</span>
+                        </span>
+                        <h1 class="display-6 fw-bold mb-2 text-white"
+                            th:text="${content['student.title'] ?: (#locale.language == 'ar' ? 'مرحباً بك في مسارك التعليمي' : 'Welcome to Your Learning Path')}">Welcome to Your Learning Path</h1>
+                        <p class="text-white-50 fs-5 mb-0"
+                           th:text="${content['student.subtitle'] ?: (#locale.language == 'ar' ? 'تتبع مقرراتك واكتشف مهاراتك المكتسبة.' : 'Track your courses and discover your acquired skills.')}">
+                            Track your courses and discover your acquired skills.
+                        </p>
+                    </div>
+                    <div class="col-md-5 mt-4 mt-md-0">
+                        <div class="row g-3 text-center">
+                            <div class="col-4">
+                                <div class="bg-white bg-opacity-10 rounded-4 p-3 shadow-sm" style="backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1);">
+                                    <span class="d-block fs-2 fw-bold text-white" th:text="${#sets.size(enrolledCourses)}">0</span>
+                                    <span class="text-white-50 small" th:text="${#locale.language == 'ar' ? 'مقرر' : 'Courses'}">Courses</span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-white bg-opacity-10 rounded-4 p-3 shadow-sm" style="backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1);">
+                                    <span class="d-block fs-2 fw-bold text-white" th:text="${skillCount}">0</span>
+                                    <span class="text-white-50 small" th:text="${#locale.language == 'ar' ? 'مهارة' : 'Skills'}">Skills</span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-white bg-opacity-10 rounded-4 p-3 shadow-sm" style="backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1);">
+                                    <span class="d-block fs-2 fw-bold text-white" th:text="${toolCount}">0</span>
+                                    <span class="text-white-50 small" th:text="${#locale.language == 'ar' ? 'أداة' : 'Tools'}">Tools</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container py-5 mt-2">
+
+            <!-- Flash Messages -->
+            <div th:if="${successMsg == 'course_enrolled'}" class="alert alert-success border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">✅</span>
+                <span class="fw-semibold" th:text="${#locale.language == 'ar' ? 'تم تسجيل المقرر بنجاح!' : 'Course enrolled successfully!'}">Course enrolled successfully!</span>
+            </div>
+            <div th:if="${successMsg == 'course_unenrolled'}" class="alert alert-info border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">📤</span>
+                <span class="fw-semibold" th:text="${#locale.language == 'ar' ? 'تم إلغاء تسجيل المقرر.' : 'Course unenrolled.'}">Course unenrolled.</span>
+            </div>
+            <div th:if="${errorMsg}" class="alert alert-danger border-0 rounded-4 shadow-sm p-4 mb-4" role="alert">
+                <span class="fw-bold">⛔</span> <span th:text="${errorMsg}">Error</span>
+            </div>
+
+            <div class="row g-5">
+
+                <!-- ===== LEFT COLUMN ===== -->
+                <div class="col-lg-8">
+
+                    <!-- ══════════════════════════════════════════════ -->
+                    <!-- SECTION 1: ENROLL IN A COURSE                -->
+                    <!-- ══════════════════════════════════════════════ -->
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 mb-4">
+                        <h3 class="h5 fw-bold text-primary-blue mb-3">
+                            <span class="me-2">➕</span>
+                            <span th:text="${#locale.language == 'ar' ? 'تسجيل مقرر جديد' : 'Enroll in a Course'}">Enroll in a Course</span>
+                        </h3>
+                        <form th:action="@{/student/enroll}" method="post" class="d-flex gap-3 align-items-end flex-wrap">
+                            <div class="flex-grow-1">
+                                <select name="courseId" class="form-select form-select-lg bg-light border-0 shadow-sm" required>
+                                    <option value="" disabled selected
+                                            th:text="${#locale.language == 'ar' ? '— اختر مقرراً للتسجيل —' : '— Select a course to enroll —'}">— Select a course —</option>
+                                    <option th:each="course : ${allCourses}"
+                                            th:value="${course.id}"
+                                            th:text="${course.code + ' — ' + (#locale.language == 'ar' ? course.nameAr : course.nameEn)}">
+                                        CS 1301 — Programming
+                                    </option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg px-4 fw-bold rounded-pill shadow-sm flex-shrink-0">
+                                <span th:text="${#locale.language == 'ar' ? 'تسجيل' : 'Enroll'}">Enroll</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- ══════════════════════════════════════════════ -->
+                    <!-- SECTION 2: MY ENROLLED COURSES               -->
+                    <!-- ══════════════════════════════════════════════ -->
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                            <h3 class="h5 fw-bold text-primary-blue mb-0">
+                                <span class="me-2">📚</span>
+                                <span th:text="${#locale.language == 'ar' ? 'مقرراتي المسجلة' : 'My Enrolled Courses'}">My Enrolled Courses</span>
+                            </h3>
+                            <span class="badge bg-light text-primary-blue border rounded-pill px-3 py-2 shadow-sm"
+                                  th:text="${#sets.size(enrolledCourses) + (#locale.language == 'ar' ? ' مقرر' : ' courses')}">0 courses</span>
+                        </div>
+
+                        <!-- Enrolled courses list -->
+                        <div th:unless="${#sets.isEmpty(enrolledCourses)}">
+                            <div th:each="course : ${enrolledCourses}" class="enrolled-course-item d-flex align-items-center justify-content-between p-3 mb-2 bg-light rounded-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-3 d-flex align-items-center justify-content-center fw-bold text-white shadow-sm flex-shrink-0"
+                                         style="width: 48px; height: 48px; background: linear-gradient(135deg, #0A192F, #00B4D8); font-size: 0.7rem;">
+                                        <span th:text="${course.code}">CS</span>
+                                    </div>
+                                    <div>
+                                        <a th:href="@{'/course/' + ${course.id}}" class="fw-bold text-primary-blue text-decoration-none d-block"
+                                           th:text="${#locale.language == 'ar' ? course.nameAr : course.nameEn}">Course Name</a>
+                                        <span class="text-muted small" th:text="${course.code}">CS 1301</span>
+                                    </div>
+                                </div>
+                                <form th:action="@{/student/unenroll}" method="post" class="m-0">
+                                    <input type="hidden" name="courseId" th:value="${course.id}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-semibold shadow-sm"
+                                            onclick="return confirm(this.dataset.msg)"
+                                            th:data-msg="${#locale.language == 'ar' ? 'هل تريد إلغاء تسجيل هذا المقرر؟' : 'Unenroll from this course?'}">
+                                        <span th:text="${#locale.language == 'ar' ? 'إلغاء' : 'Unenroll'}">Unenroll</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div th:if="${#sets.isEmpty(enrolledCourses)}" class="text-center py-5">
+                            <div class="bg-light rounded-circle d-inline-flex justify-content-center align-items-center mb-3"
+                                 style="width: 80px; height: 80px;">
+                                <span class="fs-1">📖</span>
+                            </div>
+                            <h5 class="fw-bold text-primary-blue"
+                                th:text="${#locale.language == 'ar' ? 'لم تسجل في أي مقرر بعد' : 'No courses enrolled yet'}">No courses enrolled yet</h5>
+                            <p class="text-muted small"
+                               th:text="${#locale.language == 'ar' ? 'ابدأ بإضافة مقرراتك الجامعية لاكتشاف المهارات والأدوات المطلوبة في سوق العمل.' : 'Start by adding your university courses to discover industry-relevant skills and tools.'}">
+                                Start by adding your courses.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- ══════════════════════════════════════════════════════ -->
+                    <!-- SECTION 3: MY INDUSTRY VALUE — THE MAGIC             -->
+                    <!-- ══════════════════════════════════════════════════════ -->
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4" id="skills-cv-section">
+
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                            <h3 class="h5 fw-bold text-primary-blue mb-0">
+                                <span class="me-2">⚡</span>
+                                <span th:text="${#locale.language == 'ar' ? 'قيمتي في سوق العمل' : 'My Industry Value'}">My Industry Value</span>
+                            </h3>
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fw-bold shadow-sm" style="font-size: 0.78rem;">
+                                <span th:text="${#locale.language == 'ar' ? '✨ مستخرج تلقائياً من إثراءات المقررات' : '✨ Auto-extracted from course enrichments'}">✨ Auto-extracted</span>
+                            </span>
+                        </div>
+
+                        <!-- Acquired Skills -->
+                        <div class="mb-4 pb-4 border-bottom">
+                            <h4 class="h6 fw-bold text-secondary-teal mb-3">
+                                <span class="me-2">🧠</span>
+                                <span th:text="${#locale.language == 'ar' ? 'المهارات المكتسبة' : 'Acquired Skills'}">Acquired Skills</span>
+                                <span class="badge bg-light text-secondary-teal border rounded-pill px-2 py-1 ms-2 small"
+                                      th:text="${skillCount}">0</span>
+                            </h4>
+                            <div th:unless="${#sets.isEmpty(acquiredSkills)}" class="d-flex flex-wrap gap-2">
+                                <span th:each="skill : ${acquiredSkills}"
+                                      class="badge rounded-pill px-3 py-2 fw-semibold shadow-sm cv-skill-badge"
+                                      style="background-color: rgba(0, 180, 216, 0.1); color: #00B4D8; font-size: 0.85rem; border: 1px solid rgba(0, 180, 216, 0.2);">
+                                    <span class="me-1">🧠</span>
+                                    <span th:text="${#locale.language == 'ar' ? skill.nameAr : skill.nameEn}">Skill</span>
+                                </span>
+                            </div>
+                            <p th:if="${#sets.isEmpty(acquiredSkills)}" class="text-muted small fst-italic mb-0"
+                               th:text="${#locale.language == 'ar' ? 'سجّل في مقررات ذات إثراءات لاكتشاف مهاراتك.' : 'Enroll in enriched courses to discover your skills.'}">
+                                Enroll in enriched courses to discover your skills.
+                            </p>
+                        </div>
+
+                        <!-- Acquired Tools -->
+                        <div class="mb-4">
+                            <h4 class="h6 fw-bold mb-3" style="color: var(--accent-orange);">
+                                <span class="me-2">🔧</span>
+                                <span th:text="${#locale.language == 'ar' ? 'الأدوات المكتسبة' : 'Acquired Tools'}">Acquired Tools</span>
+                                <span class="badge bg-light border rounded-pill px-2 py-1 ms-2 small" style="color: var(--accent-orange);"
+                                      th:text="${toolCount}">0</span>
+                            </h4>
+                            <div th:unless="${#sets.isEmpty(acquiredTools)}" class="d-flex flex-wrap gap-2">
+                                <span th:each="tool : ${acquiredTools}"
+                                      class="badge rounded-pill px-3 py-2 fw-semibold shadow-sm cv-tool-badge"
+                                      style="background-color: rgba(255, 77, 77, 0.08); color: #FF4D4D; font-size: 0.85rem; border: 1px solid rgba(255, 77, 77, 0.15);">
+                                    <span class="me-1">🔧</span>
+                                    <span th:text="${#locale.language == 'ar' ? tool.nameAr : tool.nameEn}">Tool</span>
+                                </span>
+                            </div>
+                            <p th:if="${#sets.isEmpty(acquiredTools)}" class="text-muted small fst-italic mb-0"
+                               th:text="${#locale.language == 'ar' ? 'سجّل في مقررات ذات إثراءات لاكتشاف أدواتك.' : 'Enroll in enriched courses to discover your tools.'}">
+                                Enroll in enriched courses to discover your tools.
+                            </p>
+                        </div>
+
+                        <!-- Print CV Button -->
+                        <div class="text-center pt-3 border-top" th:if="${skillCount > 0 or toolCount > 0}">
+                            <button onclick="window.print()"
+                                    class="btn btn-accent btn-lg px-5 fw-bold rounded-pill shadow no-print"
+                                    style="font-size: 1.1rem;">
+                                <span class="me-2">🖨️</span>
+                                <span th:text="${#locale.language == 'ar' ? 'طباعة السيرة الذاتية التقنية' : 'Print Skills-Driven CV'}">Print Skills-Driven CV</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== RIGHT SIDEBAR ===== -->
+                <div class="col-lg-4">
+
+                    <!-- Quick Stats Card -->
+                    <div class="card rounded-4 shadow-sm border-0 p-4 mb-4 text-white"
+                         style="background: linear-gradient(135deg, #0A192F 0%, #00B4D8 100%);">
+                        <h3 class="h5 fw-bold text-white mb-4">
+                            <span class="me-2">📊</span>
+                            <span th:text="${#locale.language == 'ar' ? 'ملخص مسارك' : 'Your Path Summary'}">Your Path Summary</span>
+                        </h3>
+                        <div class="d-flex justify-content-around text-center">
+                            <div>
+                                <span class="d-block fs-1 fw-bold" th:text="${#sets.size(enrolledCourses)}">0</span>
+                                <span class="text-white-50 small" th:text="${#locale.language == 'ar' ? 'مقررات' : 'Courses'}">Courses</span>
+                            </div>
+                            <div class="border-start border-end px-4" style="border-color: rgba(255,255,255,0.2) !important;">
+                                <span class="d-block fs-1 fw-bold" th:text="${skillCount}">0</span>
+                                <span class="text-white-50 small" th:text="${#locale.language == 'ar' ? 'مهارات' : 'Skills'}">Skills</span>
+                            </div>
+                            <div>
+                                <span class="d-block fs-1 fw-bold" th:text="${toolCount}">0</span>
+                                <span class="text-white-50 small" th:text="${#locale.language == 'ar' ? 'أدوات' : 'Tools'}">Tools</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- How It Works Card -->
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 mb-4 border-start border-5"
+                         style="border-color: var(--secondary-teal) !important;">
+                        <h3 class="h5 fw-bold text-secondary-teal mb-3">
+                            <span th:text="${#locale.language == 'ar' ? '🪄 كيف يعمل السحر؟' : '🪄 How Does the Magic Work?'}">🪄 How Does the Magic Work?</span>
+                        </h3>
+                        <ol class="list-unstyled mb-0">
+                            <li class="d-flex align-items-start mb-3">
+                                <span class="badge bg-primary rounded-circle me-3 flex-shrink-0 d-flex align-items-center justify-content-center"
+                                      style="width: 28px; height: 28px; font-size: 0.8rem;">1</span>
+                                <span class="small" th:text="${#locale.language == 'ar' ? 'سجّل في مقرراتك الجامعية الحالية.' : 'Enroll in your current university courses.'}">
+                                    Enroll in your current university courses.
+                                </span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <span class="badge bg-primary rounded-circle me-3 flex-shrink-0 d-flex align-items-center justify-content-center"
+                                      style="width: 28px; height: 28px; font-size: 0.8rem;">2</span>
+                                <span class="small" th:text="${#locale.language == 'ar' ? 'يستخرج النظام تلقائياً المهارات والأدوات من إثراءات الخبراء المعتمدة.' : 'The system auto-extracts skills & tools from approved expert enrichments.'}">
+                                    The system auto-extracts skills & tools from approved expert enrichments.
+                                </span>
+                            </li>
+                            <li class="d-flex align-items-start">
+                                <span class="badge bg-primary rounded-circle me-3 flex-shrink-0 d-flex align-items-center justify-content-center"
+                                      style="width: 28px; height: 28px; font-size: 0.8rem;">3</span>
+                                <span class="small" th:text="${#locale.language == 'ar' ? 'اطبع سيرتك الذاتية التقنية المبنية على مقرراتك!' : 'Print your skills-driven CV built from your courses!'}">
+                                    Print your skills-driven CV built from your courses!
+                                </span>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <!-- Browse Courses CTA -->
+                    <a th:href="@{/courses}" class="btn btn-outline-secondary btn-lg w-100 fw-bold rounded-pill shadow-sm">
+                        <span th:text="${#locale.language == 'ar' ? '🔍 تصفح كتالوج المقررات' : '🔍 Browse Course Catalog'}">🔍 Browse Course Catalog</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===== STYLES & PRINT SUPPORT ===== -->
+    <th:block th:fragment="script-extra">
+        <style>
+            .enrolled-course-item {
+                transition: all 0.2s ease;
+                border: 2px solid transparent;
+            }
+            .enrolled-course-item:hover {
+                border-color: var(--secondary-teal);
+                transform: translateX(4px);
+            }
+            .cv-skill-badge, .cv-tool-badge {
+                transition: all 0.2s ease;
+            }
+            .cv-skill-badge:hover {
+                background-color: rgba(0, 180, 216, 0.2) !important;
+                transform: scale(1.08);
+            }
+            .cv-tool-badge:hover {
+                background-color: rgba(255, 77, 77, 0.15) !important;
+                transform: scale(1.08);
+            }
+
+            /* ===== PRINT STYLES ===== */
+            @media print {
+                nav, footer, .no-print, form, button,
+                .navbar, .btn, .alert, .col-lg-4 {
+                    display: none !important;
+                }
+                body {
+                    background: white !important;
+                    color: black !important;
+                    font-size: 12pt !important;
+                }
+                .container {
+                    max-width: 100% !important;
+                    padding: 0 !important;
+                }
+                .card {
+                    box-shadow: none !important;
+                    border: 1px solid #ddd !important;
+                    page-break-inside: avoid;
+                }
+                section[style*="gradient"] {
+                    background: white !important;
+                    color: black !important;
+                    padding: 1rem 0 !important;
+                }
+                section[style*="gradient"] * {
+                    color: black !important;
+                }
+                #skills-cv-section {
+                    border: 2px solid #0A192F !important;
+                    padding: 2rem !important;
+                }
+                #skills-cv-section::before {
+                    content: "Skills-Driven CV — Muqarari+ | السيرة الذاتية التقنية — مقرري+";
+                    display: block;
+                    font-size: 18pt;
+                    font-weight: bold;
+                    text-align: center;
+                    margin-bottom: 1rem;
+                    padding-bottom: 0.5rem;
+                    border-bottom: 2px solid #0A192F;
+                }
+                .cv-skill-badge, .cv-tool-badge {
+                    border: 1px solid #333 !important;
+                    color: #333 !important;
+                    background: white !important;
+                }
+                .col-lg-8 {
+                    width: 100% !important;
+                    flex: 0 0 100% !important;
+                    max-width: 100% !important;
+                }
+            }
+        </style>
+    </th:block>
+
+</body>
+</html>

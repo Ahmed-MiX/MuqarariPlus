@@ -47,6 +47,21 @@
                            th:text="${content['nav.courses']}">Courses</a>
                     </li>
 
+                    <!-- Global Smart Search -->
+                    <li class="nav-item">
+                        <form action="/search" method="GET" class="d-flex align-items-center m-0">
+                            <div class="input-group input-group-sm" style="min-width: 200px;">
+                                <input type="text" name="q" class="form-control border-end-0 shadow-none"
+                                       th:placeholder="${#locale.language == 'ar' ? 'ابحث عن مهارة، أداة، مقرر...' : 'Search skills, tools, courses...'}"
+                                       style="border-color: var(--border-color); font-size: 0.85rem;">
+                                <button type="submit" class="btn btn-outline-secondary border-start-0 shadow-none"
+                                        style="border-color: var(--border-color);">
+                                    🔍
+                                </button>
+                            </div>
+                        </form>
+                    </li>
+
                     <!-- ANONYMOUS ONLY -->
                     <th:block sec:authorize="isAnonymous()">
                         <li class="nav-item">

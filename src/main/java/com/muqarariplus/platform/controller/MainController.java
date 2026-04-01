@@ -2,8 +2,8 @@ package com.muqarariplus.platform.controller;
 
 import com.muqarariplus.platform.entity.Course;
 import com.muqarariplus.platform.entity.CourseEnrichment;
-import com.muqarariplus.platform.repository.CourseEnrichmentRepository;
 import com.muqarariplus.platform.repository.CourseRepository;
+import com.muqarariplus.platform.service.CourseEnrichmentService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,20 +17,17 @@ import java.util.Optional;
 public class MainController {
 
     private final CourseRepository courseRepository;
-    private final CourseEnrichmentRepository enrichmentRepository;
+    private final CourseEnrichmentService enrichmentService;
 
-    public MainController(CourseRepository courseRepository, CourseEnrichmentRepository enrichmentRepository) {
+    public MainController(CourseRepository courseRepository,
+                          CourseEnrichmentService enrichmentService) {
         this.courseRepository = courseRepository;
-        this.enrichmentRepository = enrichmentRepository;
+        this.enrichmentService = enrichmentService;
     }
 
-
-
-
-
     @GetMapping("/student-dashboard")
-    public String studentDashboard() {
-        return "student-dashboard";
+    public String studentDashboardLegacy() {
+        return "redirect:/student/dashboard";
     }
 
     @GetMapping("/")
@@ -46,7 +43,7 @@ public class MainController {
         } else {
             courses = courseRepository.findAll();
         }
-        
+
         model.addAttribute("courses", courses);
         return "courses";
     }
@@ -57,12 +54,13 @@ public class MainController {
         if (courseOpt.isEmpty()) {
              return "redirect:/courses";
         }
-        
+
         Course course = courseOpt.get();
-        List<CourseEnrichment> enrichments = enrichmentRepository.findByCourseIdAndVerificationStatus(id, "APPROVED");
-        
+        List<CourseEnrichment> enrichments = enrichmentService.getApprovedEnrichmentsForCourse(id);
+
         model.addAttribute("course", course);
         model.addAttribute("enrichments", enrichments);
-        return "course-detail";
+        model.addAttribute("enrichmentCount", enrichments.size());
+        return "student/course-details";
     }
 }

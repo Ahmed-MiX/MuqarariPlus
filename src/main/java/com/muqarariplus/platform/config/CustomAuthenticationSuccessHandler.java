@@ -29,7 +29,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                 response.sendRedirect("/expert");
                 return;
             } else if (authority.getAuthority().equals("ROLE_STUDENT")) {
-                response.sendRedirect("/student-dashboard");
+                response.sendRedirect("/student/dashboard");
                 return;
             }
         }

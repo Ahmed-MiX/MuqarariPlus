@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${(#locale.language == 'ar' ? course.nameAr : course.nameEn) + ' | Muqarari+'}">Course Detail | Muqarari+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <div th:fragment="main-content">
+
+        <!-- ===== HERO SECTION — ACADEMIC IDENTITY ===== -->
+        <section class="course-hero text-white py-5"
+                 style="background: linear-gradient(135deg, #0A192F 0%, #132F4C 40%, #00B4D8 100%);">
+            <div class="container py-4">
+                <a th:href="@{/courses}"
+                   class="btn btn-sm btn-outline-light rounded-pill px-4 fw-bold mb-4 shadow-sm"
+                   style="border-color: rgba(255,255,255,0.3); backdrop-filter: blur(4px);">
+                    &larr; <span th:text="${content['nav.courses']}">Courses</span>
+                </a>
+
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <!-- Course Code Badge -->
+                        <div class="d-inline-flex align-items-center bg-white bg-opacity-10 rounded-pill px-4 py-2 mb-3 shadow-sm"
+                             style="backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15);">
+                            <span class="fw-bold text-white" th:text="${course.code}">CS 1301</span>
+                            <span class="mx-2 text-white-50">|</span>
+                            <span class="text-white-50 small" th:text="${course.university}">CCIS</span>
+                        </div>
+
+                        <!-- Course Name (Primary Language) -->
+                        <h1 class="display-5 fw-bold mb-2 text-white"
+                            th:text="${#locale.language == 'ar' ? course.nameAr : course.nameEn}">Course Name</h1>
+                        <!-- Course Name (Secondary Language) -->
+                        <p class="fs-5 text-white-50 mb-3"
+                           th:text="${#locale.language == 'ar' ? course.nameEn : course.nameAr}">اسم المقرر</p>
+
+                        <!-- Description -->
+                        <p class="lead mb-0" style="color: rgba(255,255,255,0.7); line-height: 1.8;"
+                           th:text="${#locale.language == 'ar' ? course.descriptionAr : course.descriptionEn}">Description</p>
+                    </div>
+
+                    <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                        <!-- Stats Card -->
+                        <div class="d-inline-block bg-white bg-opacity-10 rounded-4 p-4 shadow"
+                             style="backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.12);">
+                            <div class="text-center">
+                                <span class="d-block fs-1 mb-2">📊</span>
+                                <span class="d-block fw-bold text-white fs-3" th:text="${enrichmentCount}">0</span>
+                                <span class="text-white-50 small"
+                                      th:text="${#locale.language == 'ar' ? 'إثراء معتمد' : 'Approved Enrichments'}">Approved Enrichments</span>
+                            </div>
+                            <hr style="border-color: rgba(255,255,255,0.15); margin: 1rem 0;">
+                            <div class="text-center">
+                                <span class="badge-verified px-3 py-2 rounded-pill shadow-sm">
+                                    <span class="me-1">✅</span>
+                                    <span th:text="${content['course.expert.verified'] ?: 'Expert-Verified'}">Expert-Verified</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== MAIN CONTENT AREA ===== -->
+        <section class="container py-5 mt-2">
+            <div class="row g-5">
+
+                <!-- ===== LEFT: INDUSTRY INSIGHTS FEED ===== -->
+                <div class="col-lg-8">
+
+                    <!-- Section Title -->
+                    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+                        <h2 class="h3 fw-bold text-primary-blue mb-0">
+                            <span class="me-2">🏭</span>
+                            <span th:text="${#locale.language == 'ar' ? 'إثراءات سوق العمل' : 'Industry Insights'}">Industry Insights</span>
+                        </h2>
+                        <span class="badge bg-light text-primary-blue border rounded-pill px-3 py-2 shadow-sm fs-6">
+                            <span th:text="${enrichmentCount}">0</span>
+                            <span th:text="${#locale.language == 'ar' ? ' إثراء' : ' enrichments'}"> enrichments</span>
+                        </span>
+                    </div>
+
+                    <!-- ===== ENRICHMENT CARDS ===== -->
+                    <div th:unless="${#lists.isEmpty(enrichments)}">
+                        <div th:each="enrichment, iterStat : ${enrichments}" class="enrichment-card mb-4">
+                            <div class="card bg-white rounded-4 shadow-sm border-0 overflow-hidden">
+
+                                <!-- Card Header: Expert Info -->
+                                <div class="card-header bg-white border-bottom p-4">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <!-- Expert Avatar -->
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm flex-shrink-0"
+                                                 style="width: 50px; height: 50px; min-width: 50px; background: linear-gradient(135deg, #0A192F, #00B4D8);"
+                                                 th:text="${#strings.substring(enrichment.expert.user.firstName,0,1) + #strings.substring(enrichment.expert.user.lastName,0,1)}">AB</div>
+                                            <div>
+                                                <h5 class="fw-bold text-primary-blue mb-0 fs-6"
+                                                    th:text="${enrichment.expert.user.firstName + ' ' + enrichment.expert.user.lastName}">Expert Name</h5>
+                                                <span class="text-muted small"
+                                                      th:text="${enrichment.expert.user.email}">expert@email.com</span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2 fw-semibold shadow-sm"
+                                                  style="font-size: 0.78rem;">
+                                                <span class="me-1">✅</span>
+                                                <span th:text="${#locale.language == 'ar' ? 'خبير موثَّق' : 'Verified Expert'}">Verified Expert</span>
+                                            </span>
+                                            <!-- LinkedIn link if available -->
+                                            <a th:if="${enrichment.expert.linkedinUrl}"
+                                               th:href="${enrichment.expert.linkedinUrl}" target="_blank"
+                                               class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold shadow-sm"
+                                               style="font-size: 0.75rem;">
+                                                LinkedIn →
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card Body: Content -->
+                                <div class="card-body p-4">
+                                    <div class="enrichment-content bg-light rounded-3 p-4"
+                                         style="line-height: 2; font-size: 1rem; max-height: 400px; overflow-y: auto;">
+                                        <pre class="mb-0" style="white-space: pre-wrap; word-wrap: break-word; font-family: inherit; font-size: inherit; color: var(--text-dark);"
+                                             th:text="${enrichment.content}">Enrichment content will appear here...</pre>
+                                    </div>
+
+                                    <!-- Submission Date -->
+                                    <div class="text-muted small mt-3 d-flex align-items-center gap-2">
+                                        <span>🕐</span>
+                                        <span th:text="${enrichment.createdAt != null ? #temporals.format(enrichment.createdAt, 'yyyy-MM-dd') : '—'}">2026-04-01</span>
+                                    </div>
+                                </div>
+
+                                <!-- Card Footer: Skills & Tools Badges -->
+                                <div class="card-footer bg-white border-top p-4"
+                                     th:if="${!enrichment.skills.isEmpty() || !enrichment.tools.isEmpty()}">
+                                    <div class="d-flex flex-wrap gap-2 align-items-center">
+
+                                        <!-- Skills Badges -->
+                                        <span th:each="skill : ${enrichment.skills}"
+                                              class="badge rounded-pill px-3 py-2 fw-semibold shadow-sm skill-badge"
+                                              style="background-color: rgba(0, 180, 216, 0.1); color: #00B4D8; font-size: 0.8rem; border: 1px solid rgba(0, 180, 216, 0.2);">
+                                            <span class="me-1">🧠</span>
+                                            <span th:text="${#locale.language == 'ar' ? skill.nameAr : skill.nameEn}">Skill</span>
+                                        </span>
+
+                                        <!-- Tools Badges -->
+                                        <span th:each="tool : ${enrichment.tools}"
+                                              class="badge rounded-pill px-3 py-2 fw-semibold shadow-sm tool-badge"
+                                              style="background-color: rgba(255, 77, 77, 0.08); color: #FF4D4D; font-size: 0.8rem; border: 1px solid rgba(255, 77, 77, 0.15);">
+                                            <span class="me-1">🔧</span>
+                                            <span th:text="${#locale.language == 'ar' ? tool.nameAr : tool.nameEn}">Tool</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== EMPTY STATE ===== -->
+                    <div th:if="${#lists.isEmpty(enrichments)}" class="card bg-white rounded-4 shadow-sm border-0 p-5">
+                        <div class="text-center py-5">
+                            <div class="bg-light rounded-circle d-inline-flex justify-content-center align-items-center mb-4 shadow-sm"
+                                 style="width: 110px; height: 110px;">
+                                <span class="fs-1">🌱</span>
+                            </div>
+                            <h3 class="h4 fw-bold text-primary-blue mb-3"
+                                th:text="${#locale.language == 'ar' ? 'لم تُضَف إثراءات بعد' : 'No Enrichments Yet'}">No Enrichments Yet</h3>
+                            <p class="text-muted fs-5 mb-4 mx-auto" style="max-width: 500px;"
+                               th:text="${#locale.language == 'ar' ? 'كن أول خبير يثري هذا المقرر بخبراته العملية من سوق العمل!' : 'Be the first expert to enrich this course with real-world industry insights!'}">
+                                Be the first expert to enrich this course with real-world industry insights!
+                            </p>
+                            <a th:href="@{/expert/enrichment/new}"
+                               class="btn btn-accent btn-lg px-5 fw-bold rounded-pill shadow">
+                                <span th:text="${#locale.language == 'ar' ? '✍️ أضف إثراءً الآن' : '✍️ Add an Enrichment Now'}">✍️ Add an Enrichment Now</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== RIGHT SIDEBAR ===== -->
+                <div class="col-lg-4">
+
+                    <!-- Course Info Card -->
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 mb-4">
+                        <h3 class="h5 fw-bold text-primary-blue border-bottom border-2 pb-3 mb-3"
+                            style="border-bottom-color: var(--secondary-teal) !important;">
+                            <span class="me-2">📘</span>
+                            <span th:text="${#locale.language == 'ar' ? 'معلومات المقرر' : 'Course Information'}">Course Information</span>
+                        </h3>
+                        <ul class="list-unstyled mb-0">
+                            <li class="d-flex justify-content-between py-2 border-bottom border-light">
+                                <span class="text-muted fw-semibold"
+                                      th:text="${#locale.language == 'ar' ? 'رمز المقرر' : 'Course Code'}">Code</span>
+                                <span class="fw-bold text-primary-blue" th:text="${course.code}">CS 1301</span>
+                            </li>
+                            <li class="d-flex justify-content-between py-2 border-bottom border-light">
+                                <span class="text-muted fw-semibold"
+                                      th:text="${#locale.language == 'ar' ? 'الكلية' : 'College'}">College</span>
+                                <span class="fw-bold" th:text="${course.university ?: 'CCIS'}">CCIS</span>
+                            </li>
+                            <li class="d-flex justify-content-between py-2">
+                                <span class="text-muted fw-semibold"
+                                      th:text="${#locale.language == 'ar' ? 'الإثراءات المعتمدة' : 'Approved Enrichments'}">Enrichments</span>
+                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1 fw-bold"
+                                      th:text="${enrichmentCount}">0</span>
+                            </li>
+                        </ul>
+                        <a th:if="${course.syllabusUrl}"
+                           th:href="${course.syllabusUrl}" target="_blank"
+                           class="btn btn-primary w-100 mt-4 fw-bold rounded-pill shadow-sm">
+                            <span th:text="${content['course.syllabus'] ?: 'View Official Syllabus'}">View Official Syllabus</span>
+                        </a>
+                    </div>
+
+                    <!-- Contributing Experts Card -->
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 mb-4">
+                        <h3 class="h5 fw-bold text-primary-blue border-bottom border-2 pb-3 mb-3"
+                            style="border-bottom-color: var(--accent-orange) !important;">
+                            <span class="me-2">👥</span>
+                            <span th:text="${content['course.experts.title'] ?: (#locale.language == 'ar' ? 'الخبراء المساهمون' : 'Contributing Experts')}">Contributing Experts</span>
+                        </h3>
+
+                        <ul th:unless="${#lists.isEmpty(enrichments)}" class="list-unstyled mb-0">
+                            <li th:each="enrichment : ${enrichments}"
+                                class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom border-light expert-row">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm flex-shrink-0"
+                                     style="width: 45px; height: 45px; min-width: 45px; background-color: var(--primary-blue);"
+                                     th:text="${#strings.substring(enrichment.expert.user.firstName,0,1) + #strings.substring(enrichment.expert.user.lastName,0,1)}">AB</div>
+                                <div>
+                                    <strong class="d-block text-dark small"
+                                            th:text="${enrichment.expert.user.firstName + ' ' + enrichment.expert.user.lastName}">Name</strong>
+                                    <a th:if="${enrichment.expert.linkedinUrl}"
+                                       th:href="${enrichment.expert.linkedinUrl}" target="_blank"
+                                       class="text-secondary-teal text-decoration-none small fw-semibold">
+                                       LinkedIn →
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+
+                        <div th:if="${#lists.isEmpty(enrichments)}" class="text-center py-3">
+                            <span class="text-muted small"
+                                  th:text="${content['course.experts.empty'] ?: (#locale.language == 'ar' ? 'لم يُضف خبراء مساهمون بعد.' : 'No contributing experts yet.')}">No contributing experts yet.</span>
+                        </div>
+                    </div>
+
+                    <!-- CTA Card -->
+                    <div class="card rounded-4 shadow-sm border-0 p-4 text-white"
+                         style="background: linear-gradient(135deg, #0A192F 0%, #00B4D8 100%);">
+                        <div class="text-center py-2">
+                            <span class="d-block fs-1 mb-3">🚀</span>
+                            <h4 class="fw-bold mb-2 text-white"
+                                th:text="${#locale.language == 'ar' ? 'هل أنت خبير؟' : 'Are You an Expert?'}">Are You an Expert?</h4>
+                            <p class="text-white-50 small mb-3"
+                               th:text="${#locale.language == 'ar' ? 'شارك خبرتك المهنية وأثرِ هذا المقرر.' : 'Share your professional experience and enrich this course.'}">
+                                Share your professional experience and enrich this course.
+                            </p>
+                            <a th:href="@{/expert/enrichment/new}"
+                               class="btn btn-accent btn-sm px-4 fw-bold rounded-pill shadow">
+                                <span th:text="${#locale.language == 'ar' ? 'أضف إثراءً' : 'Add Enrichment'}">Add Enrichment</span>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===== MICRO-INTERACTIONS ===== -->
+    <th:block th:fragment="script-extra">
+        <style>
+            .enrichment-card {
+                transition: all 0.3s ease;
+            }
+            .enrichment-card:hover {
+                transform: translateY(-4px);
+            }
+            .enrichment-card:hover .card {
+                box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12) !important;
+            }
+            .enrichment-card .card {
+                border-left: 4px solid var(--secondary-teal) !important;
+            }
+            .skill-badge {
+                transition: all 0.2s ease;
+            }
+            .skill-badge:hover {
+                background-color: rgba(0, 180, 216, 0.2) !important;
+                transform: scale(1.05);
+            }
+            .tool-badge {
+                transition: all 0.2s ease;
+            }
+            .tool-badge:hover {
+                background-color: rgba(255, 77, 77, 0.15) !important;
+                transform: scale(1.05);
+            }
+            .expert-row {
+                transition: all 0.2s ease;
+            }
+            .expert-row:hover {
+                background-color: rgba(0, 180, 216, 0.04);
+                border-radius: 12px;
+                padding-left: 8px !important;
+            }
+            .enrichment-content::-webkit-scrollbar {
+                width: 6px;
+            }
+            .enrichment-content::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            .enrichment-content::-webkit-scrollbar-thumb {
+                background: rgba(0, 180, 216, 0.3);
+                border-radius: 10px;
+            }
+            .enrichment-content::-webkit-scrollbar-thumb:hover {
+                background: rgba(0, 180, 216, 0.5);
+            }
+        </style>
+    </th:block>
+
+</body>
+</html>

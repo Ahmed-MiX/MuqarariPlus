@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Submit Enrichment | Muqarari+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <div th:fragment="main-content">
+
+        <!-- ===== HEADER ===== -->
+        <section class="text-white py-5" style="background: linear-gradient(135deg, var(--primary-blue) 0%, #132F4C 100%);">
+            <div class="container py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <nav aria-label="breadcrumb" class="mb-2">
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item"><a th:href="@{/expert}" class="text-white-50 text-decoration-none">بوابة الخبراء / Expert Portal</a></li>
+                                <li class="breadcrumb-item active text-white" aria-current="page">تقديم إثراء / Submit Enrichment</li>
+                            </ol>
+                        </nav>
+                        <h1 class="display-6 fw-bold mb-0 text-white">
+                            <span th:text="${#locale.language == 'ar' ? 'تقديم إثراء جديد لمقرر' : 'Submit a New Course Enrichment'}">Submit a New Course Enrichment</span>
+                        </h1>
+                        <p class="text-white-50 mt-2 fs-5"
+                           th:text="${#locale.language == 'ar' ? 'اختر مقرراً وشارك رؤيتك المهنية بالمهارات والأدوات ذات الصلة.' : 'Select a course and share your professional insights along with relevant skills and tools.'}">
+                            Select a course and share your professional insights along with relevant skills and tools.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-4 mt-md-0">
+                        <div class="d-inline-flex align-items-center bg-white text-dark rounded-pill shadow-sm px-4 py-3">
+                            <span class="fs-4 me-3">✍️</span>
+                            <div class="text-start">
+                                <span class="d-block fw-bold fs-6"
+                                      th:text="${#locale.language == 'ar' ? 'نموذج الإثراء' : 'Enrichment Form'}">Enrichment Form</span>
+                                <span class="text-muted small"
+                                      th:text="${#locale.language == 'ar' ? 'الحالة: مسودة جديدة' : 'Status: New Draft'}">Status: New Draft</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container py-5 mt-3">
+
+            <!-- Error flash message -->
+            <div th:if="${errorMsg}" class="alert alert-danger border-0 rounded-4 shadow-sm p-4 mb-4" role="alert">
+                <span class="fw-bold">⛔</span> <span th:text="${errorMsg}">Error message</span>
+            </div>
+
+            <div class="row g-5">
+
+                <!-- ===== MAIN FORM (LEFT) ===== -->
+                <div class="col-lg-8">
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5">
+
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                            <h2 class="h4 fw-bold text-primary-blue mb-0">
+                                <span th:text="${#locale.language == 'ar' ? '📝 تفاصيل الإثراء' : '📝 Enrichment Details'}">📝 Enrichment Details</span>
+                            </h2>
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 shadow-sm">
+                                <span th:text="${#locale.language == 'ar' ? 'قيد المراجعة عند الإرسال' : 'Pending on Submit'}">Pending on Submit</span>
+                            </span>
+                        </div>
+
+                        <form th:action="@{/expert/enrichment/new}" method="post" id="enrichmentForm">
+
+                            <!-- 1. Course Selection -->
+                            <div class="mb-4">
+                                <label for="courseId" class="form-label fw-bold fs-6">
+                                    <span class="me-2">📚</span>
+                                    <span th:text="${#locale.language == 'ar' ? 'اختر المقرر الجامعي' : 'Select University Course'}">Select University Course</span>
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select name="courseId" id="courseId"
+                                        class="form-select form-select-lg bg-light border-0 shadow-sm" required>
+                                    <option value="" disabled selected
+                                            th:text="${#locale.language == 'ar' ? '— اختر مقرراً —' : '— Choose a course —'}">— Choose a course —</option>
+                                    <option th:each="course : ${courses}"
+                                            th:value="${course.id}"
+                                            th:text="${course.code + ' — ' + (#locale.language == 'ar' ? course.nameAr : course.nameEn)}">
+                                        CS 1301 — Computer Programming 1
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- 2. Content (Markdown/Rich Text) -->
+                            <div class="mb-4">
+                                <label for="content" class="form-label fw-bold fs-6">
+                                    <span class="me-2">✏️</span>
+                                    <span th:text="${#locale.language == 'ar' ? 'المحتوى الإثرائي' : 'Enrichment Content'}">Enrichment Content</span>
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <textarea name="content" id="content" rows="12"
+                                          class="form-control bg-light border-0 shadow-sm"
+                                          style="font-size: 1rem; line-height: 1.8;"
+                                          th:placeholder="${#locale.language == 'ar' ?
+                                            'اكتب إثراءك هنا... يمكنك استخدام Markdown للتنسيق.\n\nمثال:\n## التطبيقات العملية\nيُستخدم هذا المفهوم في...\n\n## المسار المهني\nيقود هذا المقرر إلى وظائف مثل...\n\n## مصادر إثرائية\n- كتاب: ...\n- دورة: ...' :
+                                            'Write your enrichment here... You can use Markdown for formatting.\n\nExample:\n## Practical Applications\nThis concept is applied in...\n\n## Career Roadmap\nThis course leads to roles like...\n\n## Enrichment Resources\n- Book: ...\n- Course: ...'}"
+                                          required></textarea>
+                                <div class="form-text text-muted small mt-2 d-flex align-items-center gap-2">
+                                    <span class="badge bg-light text-dark border px-2 py-1">Markdown</span>
+                                    <span th:text="${#locale.language == 'ar' ? 'يدعم تنسيق Markdown — العناوين والقوائم والروابط' : 'Supports Markdown formatting — headings, lists, and links'}">
+                                        Supports Markdown formatting — headings, lists, and links
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- 3. Skills Selection -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold fs-6">
+                                    <span class="me-2">🧠</span>
+                                    <span th:text="${#locale.language == 'ar' ? 'المهارات ذات الصلة' : 'Related Skills'}">Related Skills</span>
+                                </label>
+                                <p class="text-muted small mb-3"
+                                   th:text="${#locale.language == 'ar' ? 'اختر المهارات التي يغطيها هذا الإثراء (اختياري)' : 'Select the skills covered by this enrichment (optional)'}">
+                                    Select the skills covered by this enrichment (optional)
+                                </p>
+                                <div class="row g-2">
+                                    <div class="col-md-6" th:each="skill : ${skills}">
+                                        <div class="form-check bg-light rounded-3 p-3 ps-5 border-0 shadow-sm skill-check-item">
+                                            <input class="form-check-input" type="checkbox"
+                                                   name="skillIds" th:value="${skill.id}"
+                                                   th:id="${'skill-' + skill.id}">
+                                            <label class="form-check-label fw-semibold w-100 cursor-pointer"
+                                                   th:for="${'skill-' + skill.id}">
+                                                <span th:text="${#locale.language == 'ar' ? skill.nameAr : skill.nameEn}">OOP</span>
+                                                <span class="d-block text-muted small"
+                                                      th:text="${#locale.language == 'ar' ? skill.nameEn : skill.nameAr}">البرمجة كائنية التوجه</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 4. Tools Selection -->
+                            <div class="mb-5">
+                                <label class="form-label fw-bold fs-6">
+                                    <span class="me-2">🔧</span>
+                                    <span th:text="${#locale.language == 'ar' ? 'الأدوات ذات الصلة' : 'Related Tools'}">Related Tools</span>
+                                </label>
+                                <p class="text-muted small mb-3"
+                                   th:text="${#locale.language == 'ar' ? 'اختر الأدوات التي يتطلبها هذا الإثراء (اختياري)' : 'Select the tools required by this enrichment (optional)'}">
+                                    Select the tools required by this enrichment (optional)
+                                </p>
+                                <div class="row g-2">
+                                    <div class="col-md-6" th:each="tool : ${tools}">
+                                        <div class="form-check bg-light rounded-3 p-3 ps-5 border-0 shadow-sm tool-check-item">
+                                            <input class="form-check-input" type="checkbox"
+                                                   name="toolIds" th:value="${tool.id}"
+                                                   th:id="${'tool-' + tool.id}">
+                                            <label class="form-check-label fw-semibold w-100 cursor-pointer"
+                                                   th:for="${'tool-' + tool.id}">
+                                                <span th:text="${#locale.language == 'ar' ? tool.nameAr : tool.nameEn}">Docker</span>
+                                                <span class="d-block text-muted small"
+                                                      th:text="${#locale.language == 'ar' ? tool.nameEn : tool.nameAr}">دوكر</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" id="submitEnrichmentBtn"
+                                    class="btn btn-accent btn-lg px-5 fw-bold shadow rounded-pill w-100"
+                                    style="font-size: 1.15rem; padding: 1rem;">
+                                <span th:text="${#locale.language == 'ar' ? '🚀 إرسال للمراجعة' : '🚀 Submit for Review'}">🚀 Submit for Review</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- ===== SIDEBAR (RIGHT) ===== -->
+                <div class="col-lg-4">
+
+                    <!-- Guidelines Card -->
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 mb-4 border-start border-5"
+                         style="border-color: var(--secondary-teal) !important;">
+                        <h3 class="h5 fw-bold text-secondary-teal border-bottom border-2 pb-3 mb-3">
+                            <span th:text="${#locale.language == 'ar' ? '📋 إرشادات الكتابة' : '📋 Writing Guidelines'}">📋 Writing Guidelines</span>
+                        </h3>
+                        <ul class="list-unstyled mb-0">
+                            <li class="d-flex align-items-start mb-3">
+                                <span class="me-2 text-secondary-teal fw-bold">①</span>
+                                <span th:text="${#locale.language == 'ar' ? 'اكتب من واقع خبرتك المهنية الفعلية' : 'Write from your actual professional experience'}">
+                                    Write from your actual professional experience
+                                </span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <span class="me-2 text-secondary-teal fw-bold">②</span>
+                                <span th:text="${#locale.language == 'ar' ? 'اذكر تطبيقات عملية حقيقية من بيئة العمل' : 'Mention real-world practical applications'}">
+                                    Mention real-world practical applications
+                                </span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <span class="me-2 text-secondary-teal fw-bold">③</span>
+                                <span th:text="${#locale.language == 'ar' ? 'وضّح المسار المهني المرتبط بهذا المقرر' : 'Clarify the career roadmap tied to this course'}">
+                                    Clarify the career roadmap tied to this course
+                                </span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <span class="me-2 text-secondary-teal fw-bold">④</span>
+                                <span th:text="${#locale.language == 'ar' ? 'أضف مصادر إثرائية (كتب، دورات، شهادات)' : 'Add enrichment resources (books, courses, certifications)'}">
+                                    Add enrichment resources (books, courses, certifications)
+                                </span>
+                            </li>
+                            <li class="d-flex align-items-start">
+                                <span class="me-2 text-secondary-teal fw-bold">⑤</span>
+                                <span th:text="${#locale.language == 'ar' ? 'حدد المهارات والأدوات المطلوبة بدقة' : 'Tag relevant skills and tools precisely'}">
+                                    Tag relevant skills and tools precisely
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Markdown Help Card -->
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 mb-4">
+                        <h3 class="h5 fw-bold text-primary-blue border-bottom border-2 pb-3 mb-3">
+                            <span th:text="${#locale.language == 'ar' ? '💡 تنسيق Markdown' : '💡 Markdown Formatting'}">💡 Markdown Formatting</span>
+                        </h3>
+                        <div class="bg-light rounded-3 p-3">
+                            <code class="d-block mb-1 text-dark" style="font-size: 0.85rem;">## Heading</code>
+                            <code class="d-block mb-1 text-dark" style="font-size: 0.85rem;">**Bold Text**</code>
+                            <code class="d-block mb-1 text-dark" style="font-size: 0.85rem;">- Bullet point</code>
+                            <code class="d-block mb-1 text-dark" style="font-size: 0.85rem;">1. Numbered list</code>
+                            <code class="d-block mb-1 text-dark" style="font-size: 0.85rem;">[Link](https://...)</code>
+                            <code class="d-block text-dark" style="font-size: 0.85rem;">`inline code`</code>
+                        </div>
+                    </div>
+
+                    <!-- Back Button -->
+                    <a th:href="@{/expert}"
+                       class="btn btn-outline-secondary btn-lg w-100 fw-bold rounded-pill shadow-sm">
+                        <span th:text="${#locale.language == 'ar' ? '→ العودة لبوابة الخبراء' : '← Back to Expert Portal'}">← Back to Expert Portal</span>
+                    </a>
+
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===== INLINE STYLES & MICRO-INTERACTIONS ===== -->
+    <th:block th:fragment="script-extra">
+        <style>
+            .skill-check-item,
+            .tool-check-item {
+                transition: all 0.2s ease;
+                cursor: pointer;
+                border: 2px solid transparent !important;
+            }
+            .skill-check-item:hover,
+            .tool-check-item:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 180, 216, 0.15) !important;
+                border-color: var(--secondary-teal) !important;
+            }
+            .form-check-input:checked ~ .form-check-label {
+                color: var(--primary-blue);
+            }
+            .skill-check-item:has(.form-check-input:checked),
+            .tool-check-item:has(.form-check-input:checked) {
+                background-color: rgba(0, 180, 216, 0.08) !important;
+                border-color: var(--secondary-teal) !important;
+            }
+            .cursor-pointer { cursor: pointer; }
+            #content:focus {
+                box-shadow: 0 0 0 0.25rem rgba(0, 180, 216, 0.15);
+                border-color: var(--secondary-teal);
+            }
+            #courseId:focus {
+                box-shadow: 0 0 0 0.25rem rgba(0, 180, 216, 0.15);
+                border-color: var(--secondary-teal);
+            }
+        </style>
+        <script>
+            // Character counter for the content textarea
+            (function() {
+                var textarea = document.getElementById('content');
+                if (!textarea) return;
+
+                var counter = document.createElement('div');
+                counter.className = 'text-end text-muted small mt-1';
+                counter.id = 'charCounter';
+                textarea.parentNode.appendChild(counter);
+
+                function updateCounter() {
+                    var len = textarea.value.length;
+                    counter.textContent = len + ' characters';
+                    if (len > 0 && len < 50) {
+                        counter.style.color = '#dc3545';
+                    } else if (len >= 50 && len < 200) {
+                        counter.style.color = '#ffc107';
+                    } else {
+                        counter.style.color = '#6c757d';
+                    }
+                }
+
+                textarea.addEventListener('input', updateCounter);
+                updateCounter();
+            })();
+        </script>
+    </th:block>
+
+</body>
+</html>

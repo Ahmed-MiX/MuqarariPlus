@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Academic Gap Index | Muqarari+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <!-- Chart.js CDN -->
+    <th:block th:fragment="head-extra">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </th:block>
+
+    <div th:fragment="main-content">
+
+        <!-- ===== HERO HEADER ===== -->
+        <section class="text-white py-5"
+                 style="background: linear-gradient(135deg, #0A192F 0%, #0d2240 40%, #132F4C 70%, #00B4D8 100%);">
+            <div class="container py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <nav aria-label="breadcrumb" class="mb-2">
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item"><a th:href="@{/admin}" class="text-white-50 text-decoration-none"
+                                    th:text="${#locale.language == 'ar' ? 'لوحة الإدارة' : 'Admin Panel'}">Admin Panel</a></li>
+                                <li class="breadcrumb-item active text-white" aria-current="page"
+                                    th:text="${#locale.language == 'ar' ? 'مؤشر الفجوة الأكاديمية' : 'Academic Gap Index'}">Academic Gap Index</li>
+                            </ol>
+                        </nav>
+                        <h1 class="display-5 fw-bold mb-2 text-white">
+                            <span th:text="${#locale.language == 'ar' ? '📊 مؤشر الفجوة الأكاديمية' : '📊 Academic Gap Index'}">📊 Academic Gap Index</span>
+                        </h1>
+                        <p class="text-white-50 fs-5 mb-0"
+                           th:text="${#locale.language == 'ar' ? 'تحليل ذكي للمهارات والأدوات الأكثر طلباً من خبراء سوق العمل — حلقة التغذية الراجعة بين الأكاديمية والصناعة.' : 'Smart analysis of the most demanded skills and tools by industry experts — the feedback loop between Academia and Industry.'}">
+                            Smart analysis of the most demanded skills and tools by industry experts.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-4 mt-md-0">
+                        <div class="d-inline-flex align-items-center bg-white text-dark rounded-pill shadow-sm px-4 py-3">
+                            <span class="fs-4 me-3">🏛️</span>
+                            <div class="text-start">
+                                <span class="d-block fw-bold fs-6"
+                                      th:text="${#locale.language == 'ar' ? 'لوحة B2B' : 'B2B Dashboard'}">B2B Dashboard</span>
+                                <span class="text-muted small"
+                                      th:text="${#locale.language == 'ar' ? 'تحليلات في الوقت الفعلي' : 'Real-time Analytics'}">Real-time Analytics</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container py-5 mt-2">
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- STAT CARDS ROW                             -->
+            <!-- ═══════════════════════════════════════════ -->
+            <div class="row g-4 mb-5">
+                <!-- Total Students -->
+                <div class="col-md-3">
+                    <div class="card stat-card rounded-4 border-0 shadow-sm overflow-hidden h-100">
+                        <div class="card-body p-4 d-flex align-items-center gap-3">
+                            <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                 style="width: 56px; height: 56px; background: linear-gradient(135deg, #00B4D8, #0099b8);">
+                                <span class="fs-3 text-white">🎓</span>
+                            </div>
+                            <div>
+                                <span class="d-block fs-2 fw-bold text-primary-blue" th:text="${totalStudents}">0</span>
+                                <span class="text-muted small fw-semibold"
+                                      th:text="${#locale.language == 'ar' ? 'طالب مسجل' : 'Students'}">Students</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 px-4 pb-3 pt-0">
+                            <span class="text-muted small" style="font-size: 0.7rem;"
+                                  th:text="${#locale.language == 'ar' ? 'إجمالي الطلاب المسجلين' : 'Total registered students'}">Total registered students</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Verified Experts -->
+                <div class="col-md-3">
+                    <div class="card stat-card rounded-4 border-0 shadow-sm overflow-hidden h-100">
+                        <div class="card-body p-4 d-flex align-items-center gap-3">
+                            <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                 style="width: 56px; height: 56px; background: linear-gradient(135deg, #198754, #157347);">
+                                <span class="fs-3 text-white">✅</span>
+                            </div>
+                            <div>
+                                <span class="d-block fs-2 fw-bold text-primary-blue" th:text="${verifiedExperts}">0</span>
+                                <span class="text-muted small fw-semibold"
+                                      th:text="${#locale.language == 'ar' ? 'خبير موثّق' : 'Verified Experts'}">Verified Experts</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 px-4 pb-3 pt-0">
+                            <span class="text-muted small" style="font-size: 0.7rem;"
+                                  th:text="${#locale.language == 'ar' ? 'خبراء معتمدون من الإدارة' : 'Admin-verified industry experts'}">Admin-verified industry experts</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Approved Enrichments -->
+                <div class="col-md-3">
+                    <div class="card stat-card rounded-4 border-0 shadow-sm overflow-hidden h-100">
+                        <div class="card-body p-4 d-flex align-items-center gap-3">
+                            <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                 style="width: 56px; height: 56px; background: linear-gradient(135deg, #0A192F, #132F4C);">
+                                <span class="fs-3 text-white">📝</span>
+                            </div>
+                            <div>
+                                <span class="d-block fs-2 fw-bold text-primary-blue" th:text="${approvedEnrichments}">0</span>
+                                <span class="text-muted small fw-semibold"
+                                      th:text="${#locale.language == 'ar' ? 'إثراء معتمد' : 'Approved Insights'}">Approved Insights</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 px-4 pb-3 pt-0">
+                            <span class="text-muted small" style="font-size: 0.7rem;"
+                                  th:text="${#locale.language == 'ar' ? 'إثراءات تمت مراجعتها واعتمادها' : 'Reviewed and approved enrichments'}">Reviewed and approved enrichments</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Pending Moderation -->
+                <div class="col-md-3">
+                    <div class="card stat-card rounded-4 border-0 shadow-sm overflow-hidden h-100">
+                        <div class="card-body p-4 d-flex align-items-center gap-3">
+                            <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                 style="width: 56px; height: 56px; background: linear-gradient(135deg, #ffc107, #e0a800);">
+                                <span class="fs-3 text-white">⏳</span>
+                            </div>
+                            <div>
+                                <span class="d-block fs-2 fw-bold text-primary-blue" th:text="${pendingEnrichments}">0</span>
+                                <span class="text-muted small fw-semibold"
+                                      th:text="${#locale.language == 'ar' ? 'بانتظار المراجعة' : 'Pending Review'}">Pending Review</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 px-4 pb-3 pt-0">
+                            <a th:href="@{/admin/enrichments/pending}" class="text-warning text-decoration-none small fw-bold"
+                               th:text="${#locale.language == 'ar' ? 'مراجعة الآن →' : 'Review Now →'}">Review Now →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- CHARTS ROW                                 -->
+            <!-- ═══════════════════════════════════════════ -->
+            <div class="row g-4 mb-5">
+
+                <!-- Bar Chart: Top Demanded Skills -->
+                <div class="col-lg-7">
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                            <h3 class="h5 fw-bold text-primary-blue mb-0">
+                                <span class="me-2">🧠</span>
+                                <span th:text="${#locale.language == 'ar' ? 'المهارات التقنية الأكثر طلباً' : 'Top Demanded Skills'}">Top Demanded Skills</span>
+                            </h3>
+                            <span class="badge bg-light text-secondary-teal border rounded-pill px-3 py-2 fw-bold shadow-sm" style="font-size: 0.75rem;">
+                                <span th:text="${#locale.language == 'ar' ? 'مؤشر الفجوة الأكاديمية' : 'Academic Gap Index'}">Academic Gap Index</span>
+                            </span>
+                        </div>
+                        <div style="position: relative; height: 350px;">
+                            <canvas id="skillsChart"></canvas>
+                        </div>
+                        <p class="text-muted small text-center mt-3 mb-0"
+                           th:text="${#locale.language == 'ar' ? 'تكرار ظهور المهارات في الإثراءات المعتمدة' : 'Frequency of skills across all approved enrichments'}">
+                            Frequency of skills across all approved enrichments
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Doughnut Chart: Top Tools -->
+                <div class="col-lg-5">
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                            <h3 class="h5 fw-bold text-primary-blue mb-0">
+                                <span class="me-2">🔧</span>
+                                <span th:text="${#locale.language == 'ar' ? 'أدوات سوق العمل' : 'Top Industry Tools'}">Top Industry Tools</span>
+                            </h3>
+                        </div>
+                        <div style="position: relative; height: 350px;">
+                            <canvas id="toolsChart"></canvas>
+                        </div>
+                        <p class="text-muted small text-center mt-3 mb-0"
+                           th:text="${#locale.language == 'ar' ? 'توزيع الأدوات المطلوبة من قِبل الخبراء' : 'Distribution of tools demanded by experts'}">
+                            Distribution of tools demanded by experts
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- ACTION CARDS ROW                           -->
+            <!-- ═══════════════════════════════════════════ -->
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <a th:href="@{/admin/enrichments/pending}" class="card action-link-card rounded-4 border-0 shadow-sm p-4 text-decoration-none h-100">
+                        <div class="text-center">
+                            <span class="d-block fs-1 mb-3">📋</span>
+                            <h4 class="h6 fw-bold text-primary-blue"
+                                th:text="${#locale.language == 'ar' ? 'مراجعة الإثراءات' : 'Moderate Enrichments'}">Moderate Enrichments</h4>
+                            <p class="text-muted small mb-0"
+                               th:text="${#locale.language == 'ar' ? 'اعتماد أو رفض الإثراءات المعلّقة' : 'Approve or reject pending submissions'}">
+                                Approve or reject pending submissions
+                            </p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a th:href="@{/admin}" class="card action-link-card rounded-4 border-0 shadow-sm p-4 text-decoration-none h-100">
+                        <div class="text-center">
+                            <span class="d-block fs-1 mb-3">👥</span>
+                            <h4 class="h6 fw-bold text-primary-blue"
+                                th:text="${#locale.language == 'ar' ? 'إدارة الخبراء' : 'Manage Experts'}">Manage Experts</h4>
+                            <p class="text-muted small mb-0"
+                               th:text="${#locale.language == 'ar' ? 'مراجعة طلبات التحقق من الخبراء' : 'Review expert verification requests'}">
+                                Review expert verification requests
+                            </p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a th:href="@{/courses}" class="card action-link-card rounded-4 border-0 shadow-sm p-4 text-decoration-none h-100">
+                        <div class="text-center">
+                            <span class="d-block fs-1 mb-3">📚</span>
+                            <h4 class="h6 fw-bold text-primary-blue"
+                                th:text="${#locale.language == 'ar' ? 'كتالوج المقررات' : 'Course Catalog'}">Course Catalog</h4>
+                            <p class="text-muted small mb-0"
+                               th:text="${#locale.language == 'ar' ? 'تصفح جميع المقررات والإثراءات' : 'Browse all courses and enrichments'}">
+                                Browse all courses and enrichments
+                            </p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+        </section>
+    </div>
+
+    <!-- ===== CHART.JS RENDERING & STYLES ===== -->
+    <th:block th:fragment="script-extra">
+        <style>
+            .stat-card {
+                transition: all 0.3s ease;
+                border-left: 4px solid transparent !important;
+            }
+            .stat-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+                border-left-color: var(--secondary-teal) !important;
+            }
+            .action-link-card {
+                transition: all 0.3s ease;
+                border-bottom: 3px solid transparent !important;
+            }
+            .action-link-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+                border-bottom-color: var(--secondary-teal) !important;
+            }
+        </style>
+
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+
+            // ── Parse DTOs from Spring Model ────────────────────────────────
+            var topSkills = /*[[${topSkills}]]*/ [];
+            var topTools  = /*[[${topTools}]]*/  [];
+
+            var skillLabels = topSkills.map(function(s) { return s.label; });
+            var skillCounts = topSkills.map(function(s) { return s.count; });
+            var toolLabels  = topTools.map(function(t) { return t.label; });
+            var toolCounts  = topTools.map(function(t) { return t.count; });
+
+            // ── Color Palettes ──────────────────────────────────────────────
+            var tealPalette = [
+                'rgba(0, 180, 216, 0.85)',
+                'rgba(0, 153, 184, 0.85)',
+                'rgba(0, 128, 155, 0.85)',
+                'rgba(10, 25, 47, 0.75)',
+                'rgba(19, 47, 76, 0.75)'
+            ];
+            var tealBorders = [
+                'rgba(0, 180, 216, 1)',
+                'rgba(0, 153, 184, 1)',
+                'rgba(0, 128, 155, 1)',
+                'rgba(10, 25, 47, 1)',
+                'rgba(19, 47, 76, 1)'
+            ];
+
+            var doughnutPalette = [
+                'rgba(255, 77, 77, 0.85)',
+                'rgba(0, 180, 216, 0.85)',
+                'rgba(10, 25, 47, 0.85)',
+                'rgba(255, 193, 7, 0.85)',
+                'rgba(25, 135, 84, 0.85)'
+            ];
+            var doughnutBorders = [
+                'rgba(255, 77, 77, 1)',
+                'rgba(0, 180, 216, 1)',
+                'rgba(10, 25, 47, 1)',
+                'rgba(255, 193, 7, 1)',
+                'rgba(25, 135, 84, 1)'
+            ];
+
+            // ── Skills Bar Chart ────────────────────────────────────────────
+            var skillsCtx = document.getElementById('skillsChart').getContext('2d');
+            new Chart(skillsCtx, {
+                type: 'bar',
+                data: {
+                    labels: skillLabels,
+                    datasets: [{
+                        label: 'Frequency / التكرار',
+                        data: skillCounts,
+                        backgroundColor: tealPalette,
+                        borderColor: tealBorders,
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0A192F',
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            padding: 12,
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: { size: 12, weight: '600' },
+                                color: '#666'
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: { size: 11, weight: '600' },
+                                color: '#333',
+                                maxRotation: 45,
+                                minRotation: 0
+                            },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // ── Tools Doughnut Chart ────────────────────────────────────────
+            var toolsCtx = document.getElementById('toolsChart').getContext('2d');
+            new Chart(toolsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: toolLabels,
+                    datasets: [{
+                        data: toolCounts,
+                        backgroundColor: doughnutPalette,
+                        borderColor: doughnutBorders,
+                        borderWidth: 2,
+                        hoverOffset: 12,
+                        spacing: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '55%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 16,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: { size: 12, weight: '600' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#0A192F',
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            padding: 12,
+                            cornerRadius: 8
+                        }
+                    }
+                }
+            });
+
+            /*]]>*/
+        </script>
+    </th:block>
+
+</body>
+</html>

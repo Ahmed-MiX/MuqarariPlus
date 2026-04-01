@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Enrichment Moderation | Muqarari+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <div th:fragment="main-content">
+
+        <!-- ===== HEADER ===== -->
+        <section class="text-white py-5" style="background: linear-gradient(135deg, #0A192F 0%, #1a3a5c 50%, #00B4D8 100%);">
+            <div class="container py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <nav aria-label="breadcrumb" class="mb-2">
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item"><a th:href="@{/admin}" class="text-white-50 text-decoration-none"
+                                    th:text="${#locale.language == 'ar' ? 'لوحة الإدارة' : 'Admin Dashboard'}">Admin Dashboard</a></li>
+                                <li class="breadcrumb-item active text-white" aria-current="page"
+                                    th:text="${#locale.language == 'ar' ? 'مراجعة الإثراءات' : 'Enrichment Moderation'}">Enrichment Moderation</li>
+                            </ol>
+                        </nav>
+                        <h1 class="display-6 fw-bold mb-0 text-white">
+                            <span th:text="${#locale.language == 'ar' ? '🛡️ قائمة مراجعة الإثراءات' : '🛡️ Enrichment Moderation Queue'}">🛡️ Enrichment Moderation Queue</span>
+                        </h1>
+                        <p class="text-white-50 mt-2 fs-5"
+                           th:text="${#locale.language == 'ar' ? 'راجع إثراءات الخبراء المعلَّقة واتخذ القرار بالاعتماد أو الرفض.' : 'Review pending expert enrichments and decide to approve or reject.'}">
+                            Review pending expert enrichments and decide to approve or reject.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-4 mt-md-0">
+                        <div class="d-inline-flex align-items-center bg-white text-dark rounded-pill shadow-sm px-4 py-3">
+                            <span class="fs-4 me-3">📋</span>
+                            <div class="text-start">
+                                <span class="d-block fw-bold fs-6"
+                                      th:text="${#locale.language == 'ar' ? 'إثراءات معلّقة' : 'Pending Items'}">Pending Items</span>
+                                <span class="fw-bold fs-5 text-warning"
+                                      th:text="${#lists.size(pendingEnrichments)}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container py-5 mt-3">
+
+            <!-- Success flash message -->
+            <div th:if="${successMsg}" class="alert alert-success border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">✅</span>
+                <span class="fw-semibold" th:text="${successMsg}">Action completed successfully.</span>
+            </div>
+
+            <!-- Error flash message -->
+            <div th:if="${errorMsg}" class="alert alert-danger border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">⛔</span>
+                <span class="fw-semibold" th:text="${errorMsg}">Error message</span>
+            </div>
+
+            <!-- ===== EMPTY STATE ===== -->
+            <div th:if="${#lists.isEmpty(pendingEnrichments)}" class="card bg-white rounded-4 shadow-sm border-0 p-5">
+                <div class="text-center py-5">
+                    <div class="bg-light rounded-circle d-inline-flex justify-content-center align-items-center mb-4"
+                         style="width: 100px; height: 100px;">
+                        <span class="fs-1">🎉</span>
+                    </div>
+                    <h3 class="h4 fw-bold text-primary-blue mb-3"
+                        th:text="${#locale.language == 'ar' ? 'لا توجد إثراءات قيد المراجعة' : 'No Pending Enrichments'}">No Pending Enrichments</h3>
+                    <p class="text-muted fs-5 mb-4"
+                       th:text="${#locale.language == 'ar' ? 'جميع الإثراءات تمت مراجعتها. عمل ممتاز!' : 'All enrichments have been reviewed. Great work!'}">
+                        All enrichments have been reviewed. Great work!
+                    </p>
+                    <a th:href="@{/admin}" class="btn btn-primary btn-lg px-5 fw-bold rounded-pill shadow-sm">
+                        <span th:text="${#locale.language == 'ar' ? '← العودة للوحة الإدارة' : '→ Back to Admin Dashboard'}">→ Back to Admin Dashboard</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- ===== ENRICHMENT CARDS ===== -->
+            <div th:unless="${#lists.isEmpty(pendingEnrichments)}" class="row g-4">
+                <div class="col-12" th:each="enrichment, iterStat : ${pendingEnrichments}">
+                    <div class="card bg-white rounded-4 shadow-sm border-0 overflow-hidden enrichment-review-card">
+
+                        <!-- Card Header: Expert + Course Info -->
+                        <div class="card-header bg-white border-bottom p-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-7">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="bg-light rounded-circle d-flex justify-content-center align-items-center flex-shrink-0"
+                                             style="width: 55px; height: 55px;">
+                                            <span class="fs-4">👤</span>
+                                        </div>
+                                        <div>
+                                            <h5 class="fw-bold text-primary-blue mb-1"
+                                                th:text="${enrichment.expert.user.firstName + ' ' + enrichment.expert.user.lastName}">Expert Name</h5>
+                                            <span class="text-muted small"
+                                                  th:text="${enrichment.expert.user.email}">expert@email.com</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                                    <div class="d-inline-flex align-items-center bg-light rounded-pill px-3 py-2">
+                                        <span class="me-2">📚</span>
+                                        <div>
+                                            <span class="d-block fw-bold small text-primary-blue"
+                                                  th:text="${enrichment.course.code}">CS 1301</span>
+                                            <span class="text-muted small"
+                                                  th:text="${#locale.language == 'ar' ? enrichment.course.nameAr : enrichment.course.nameEn}">Computer Programming 1</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="card-body p-4">
+
+                            <!-- Skills & Tools Badges -->
+                            <div class="mb-4" th:if="${!enrichment.skills.isEmpty() || !enrichment.tools.isEmpty()}">
+                                <div class="d-flex flex-wrap gap-2 align-items-center">
+                                    <!-- Skills -->
+                                    <span th:each="skill : ${enrichment.skills}"
+                                          class="badge rounded-pill px-3 py-2 fw-semibold"
+                                          style="background-color: rgba(0, 180, 216, 0.12); color: #00B4D8; font-size: 0.8rem;">
+                                        <span class="me-1">🧠</span>
+                                        <span th:text="${#locale.language == 'ar' ? skill.nameAr : skill.nameEn}">OOP</span>
+                                    </span>
+                                    <!-- Tools -->
+                                    <span th:each="tool : ${enrichment.tools}"
+                                          class="badge rounded-pill px-3 py-2 fw-semibold"
+                                          style="background-color: rgba(255, 77, 77, 0.1); color: #FF4D4D; font-size: 0.8rem;">
+                                        <span class="me-1">🔧</span>
+                                        <span th:text="${#locale.language == 'ar' ? tool.nameAr : tool.nameEn}">Docker</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Content Preview -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-muted small text-uppercase mb-2">
+                                    <span th:text="${#locale.language == 'ar' ? 'محتوى الإثراء' : 'Enrichment Content'}">Enrichment Content</span>
+                                </label>
+                                <div class="bg-light rounded-3 p-4 border"
+                                     style="max-height: 350px; overflow-y: auto; line-height: 1.9; font-size: 0.95rem;">
+                                    <pre class="mb-0" style="white-space: pre-wrap; word-wrap: break-word; font-family: inherit; font-size: inherit;"
+                                         th:text="${enrichment.content}">Content will appear here...</pre>
+                                </div>
+                            </div>
+
+                            <!-- Submission Timestamp -->
+                            <div class="d-flex align-items-center text-muted small mb-4">
+                                <span class="me-2">🕐</span>
+                                <span th:text="${#locale.language == 'ar' ? 'تاريخ الإرسال: ' : 'Submitted: '}">Submitted: </span>
+                                <span th:text="${enrichment.createdAt != null ? #temporals.format(enrichment.createdAt, 'yyyy-MM-dd HH:mm') : '—'}">2026-04-01 19:00</span>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-3 flex-wrap">
+                                <form th:action="@{'/admin/enrichments/' + ${enrichment.id} + '/approve'}" method="post" class="d-inline">
+                                    <button type="submit"
+                                            class="btn btn-success btn-lg px-5 fw-bold rounded-pill shadow-sm"
+                                            onclick="return confirm(this.dataset.confirmMsg)"
+                                            th:data-confirm-msg="${#locale.language == 'ar' ? 'هل أنت متأكد من اعتماد هذا الإثراء؟' : 'Are you sure you want to approve this enrichment?'}">
+                                        <span class="me-2">✅</span>
+                                        <span th:text="${#locale.language == 'ar' ? 'اعتماد' : 'Approve'}">Approve</span>
+                                    </button>
+                                </form>
+                                <form th:action="@{'/admin/enrichments/' + ${enrichment.id} + '/reject'}" method="post" class="d-inline">
+                                    <button type="submit"
+                                            class="btn btn-outline-danger btn-lg px-5 fw-bold rounded-pill shadow-sm"
+                                            onclick="return confirm(this.dataset.confirmMsg)"
+                                            th:data-confirm-msg="${#locale.language == 'ar' ? 'هل أنت متأكد من رفض هذا الإثراء؟' : 'Are you sure you want to reject this enrichment?'}">
+                                        <span class="me-2">❌</span>
+                                        <span th:text="${#locale.language == 'ar' ? 'رفض' : 'Reject'}">Reject</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Card Footer: Enrichment # -->
+                        <div class="card-footer bg-white border-top text-muted small px-4 py-3 d-flex justify-content-between align-items-center">
+                            <span>
+                                <span th:text="${#locale.language == 'ar' ? 'إثراء رقم #' : 'Enrichment #'}">Enrichment #</span>
+                                <span th:text="${enrichment.id}">1</span>
+                            </span>
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-1">
+                                <span th:text="${#locale.language == 'ar' ? 'قيد المراجعة' : 'PENDING'}">PENDING</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back to Admin Button -->
+            <div th:unless="${#lists.isEmpty(pendingEnrichments)}" class="text-center mt-5">
+                <a th:href="@{/admin}" class="btn btn-outline-secondary btn-lg px-5 fw-bold rounded-pill shadow-sm">
+                    <span th:text="${#locale.language == 'ar' ? '← العودة للوحة الإدارة' : '→ Back to Admin Dashboard'}">→ Back to Admin Dashboard</span>
+                </a>
+            </div>
+
+        </section>
+    </div>
+
+    <!-- ===== MICRO-INTERACTIONS ===== -->
+    <th:block th:fragment="script-extra">
+        <style>
+            .enrichment-review-card {
+                transition: all 0.3s ease;
+                border-left: 5px solid #ffc107 !important;
+            }
+            .enrichment-review-card:hover {
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1) !important;
+                transform: translateY(-3px);
+            }
+            .btn-success {
+                background-color: #198754 !important;
+                border-color: #198754 !important;
+                transition: all 0.2s ease;
+            }
+            .btn-success:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(25, 135, 84, 0.35);
+            }
+            .btn-outline-danger {
+                transition: all 0.2s ease;
+            }
+            .btn-outline-danger:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
+            }
+        </style>
+    </th:block>
+
+</body>
+</html>

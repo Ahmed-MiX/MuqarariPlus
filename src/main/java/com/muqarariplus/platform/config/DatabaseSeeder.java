@@ -3,11 +3,15 @@ package com.muqarariplus.platform.config;
 import com.muqarariplus.platform.entity.Course;
 import com.muqarariplus.platform.entity.Expert;
 import com.muqarariplus.platform.entity.ExpertStatus;
+import com.muqarariplus.platform.entity.Skill;
 import com.muqarariplus.platform.entity.SiteContent;
+import com.muqarariplus.platform.entity.Tool;
 import com.muqarariplus.platform.entity.User;
 import com.muqarariplus.platform.repository.CourseRepository;
 import com.muqarariplus.platform.repository.ExpertRepository;
 import com.muqarariplus.platform.repository.SiteContentRepository;
+import com.muqarariplus.platform.repository.SkillRepository;
+import com.muqarariplus.platform.repository.ToolRepository;
 import com.muqarariplus.platform.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,17 +28,23 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final CourseRepository courseRepository;
     private final SiteContentRepository siteContentRepository;
     private final ExpertRepository expertRepository;
+    private final SkillRepository skillRepository;
+    private final ToolRepository toolRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DatabaseSeeder(UserRepository userRepository,
                           CourseRepository courseRepository,
                           SiteContentRepository siteContentRepository,
                           ExpertRepository expertRepository,
+                          SkillRepository skillRepository,
+                          ToolRepository toolRepository,
                           PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.courseRepository = courseRepository;
         this.siteContentRepository = siteContentRepository;
         this.expertRepository = expertRepository;
+        this.skillRepository = skillRepository;
+        this.toolRepository = toolRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -45,6 +55,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         seedExperts();
         seedCourses();
         seedSiteContent();
+        seedIndustryHierarchy();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -429,5 +440,58 @@ public class DatabaseSeeder implements CommandLineRunner {
             siteContentRepository.save(sc);
         }
         System.out.println("SEEDER: " + content.length + " SiteContent keys seeded into MySQL.");
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // INDUSTRY HIERARCHY (Knowledge Graph Foundation — Skills & Tools)
+    // ─────────────────────────────────────────────────────────────────────────
+    private void seedIndustryHierarchy() {
+        // ── SKILLS ──────────────────────────────────────────────────────────
+        if (skillRepository.count() == 0) {
+            String[][] skills = {
+                {"Object-Oriented Programming",    "البرمجة كائنية التوجه"},
+                {"Agile Methodology",               "منهجية أجايل"},
+                {"Data Structures",                 "هياكل البيانات"},
+                {"Database Management",             "إدارة قواعد البيانات"},
+                {"RESTful API Design",              "تصميم واجهات برمجة التطبيقات"},
+                {"Cloud Architecture",              "هندسة الحوسبة السحابية"},
+                {"Machine Learning",                "تعلم الآلة"},
+                {"Cybersecurity Fundamentals",      "أساسيات الأمن السيبراني"},
+                {"DevOps Practices",                "ممارسات DevOps"},
+                {"Software Testing & QA",           "اختبار البرمجيات وضمان الجودة"}
+            };
+
+            for (String[] s : skills) {
+                Skill skill = new Skill();
+                skill.setNameEn(s[0]);
+                skill.setNameAr(s[1]);
+                skillRepository.save(skill);
+            }
+            System.out.println("SEEDER: 10 industry Skills seeded successfully.");
+        }
+
+        // ── TOOLS ───────────────────────────────────────────────────────────
+        if (toolRepository.count() == 0) {
+            String[][] tools = {
+                {"Docker",          "دوكر"},
+                {"Git",             "جِت"},
+                {"Spring Boot",     "سبرنج بوت"},
+                {"React",           "رياكت"},
+                {"Kubernetes",      "كوبرنيتيز"},
+                {"PostgreSQL",      "بوستقريسكيول"},
+                {"Jenkins",         "جنكنز"},
+                {"IntelliJ IDEA",   "إنتلي جي آيديا"},
+                {"Postman",         "بوستمان"},
+                {"AWS",             "أمازون ويب سيرفسز"}
+            };
+
+            for (String[] t : tools) {
+                Tool tool = new Tool();
+                tool.setNameEn(t[0]);
+                tool.setNameAr(t[1]);
+                toolRepository.save(tool);
+            }
+            System.out.println("SEEDER: 10 industry Tools seeded successfully.");
+        }
     }
 }

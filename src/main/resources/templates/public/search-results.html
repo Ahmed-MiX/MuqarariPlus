@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title th:text="${'Search: ' + keyword + ' | Muqarari+'}">Search Results | Muqarari+</title>
+</head>
+
+<body th:replace="~{fragments/layout :: html}">
+
+    <div th:fragment="main-content">
+
+        <!-- ===== HERO HEADER ===== -->
+        <section class="py-5" style="background: linear-gradient(135deg, #0A192F 0%, #132F4C 50%, #00B4D8 100%);">
+            <div class="container py-3">
+                <div class="row align-items-center">
+                    <div class="col-lg-7">
+                        <h1 class="display-6 fw-bold text-white mb-2">
+                            <span class="me-2">🔍</span>
+                            <span th:text="${#locale.language == 'ar' ? 'نتائج البحث' : 'Search Results'}">Search
+                                Results</span>
+                        </h1>
+                        <p class="text-white-50 fs-5 mb-0" th:if="${keyword != null and keyword != ''}">
+                            <span th:text="${#locale.language == 'ar' ? 'نتائج البحث عن: ' : 'Results for: '}">Results
+                                for: </span>
+                            <strong class="text-white" th:text="'&quot;' + ${keyword} + '&quot;'">"keyword"</strong>
+                        </p>
+                    </div>
+                    <div class="col-lg-5 mt-4 mt-lg-0">
+                        <!-- Inline search form -->
+                        <form action="/search" method="GET" class="d-flex gap-2">
+                            <input type="text" name="q"
+                                class="form-control form-control-lg bg-white bg-opacity-10 border-0 text-white shadow-sm"
+                                th:value="${keyword}"
+                                th:placeholder="${#locale.language == 'ar' ? 'ابحث مجدداً...' : 'Search again...'}"
+                                style="backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15) !important; --bs-body-color: #fff;">
+                            <button type="submit"
+                                class="btn btn-accent btn-lg px-4 fw-bold rounded-pill shadow flex-shrink-0">
+                                🔍
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Stats Row -->
+                <div class="row g-3 mt-4">
+                    <div class="col-auto">
+                        <span class="badge bg-white bg-opacity-10 text-white rounded-pill px-4 py-2 shadow-sm"
+                            style="border: 1px solid rgba(255,255,255,0.15); font-size: 0.9rem;">
+                            <span th:text="${totalResults}">0</span>
+                            <span th:text="${#locale.language == 'ar' ? ' نتيجة إجمالية' : ' total results'}"> total
+                                results</span>
+                        </span>
+                    </div>
+                    <div class="col-auto">
+                        <span class="badge bg-white bg-opacity-10 text-white rounded-pill px-4 py-2 shadow-sm"
+                            style="border: 1px solid rgba(255,255,255,0.15); font-size: 0.9rem;">
+                            📚 <span th:text="${courseCount}">0</span>
+                            <span th:text="${#locale.language == 'ar' ? ' مقرر' : ' courses'}"> courses</span>
+                        </span>
+                    </div>
+                    <div class="col-auto">
+                        <span class="badge bg-white bg-opacity-10 text-white rounded-pill px-4 py-2 shadow-sm"
+                            style="border: 1px solid rgba(255,255,255,0.15); font-size: 0.9rem;">
+                            🏭 <span th:text="${enrichmentCount}">0</span>
+                            <span th:text="${#locale.language == 'ar' ? ' إثراء' : ' insights'}"> insights</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container py-5 mt-2">
+
+            <!-- ===== GLOBAL EMPTY STATE ===== -->
+            <div th:if="${totalResults == 0 and keyword != null and keyword != ''}"
+                class="card bg-white rounded-4 shadow-sm border-0 p-5">
+                <div class="text-center py-5">
+                    <div class="bg-light rounded-circle d-inline-flex justify-content-center align-items-center mb-4"
+                        style="width: 100px; height: 100px;">
+                        <span class="fs-1">🔎</span>
+                    </div>
+                    <h3 class="h4 fw-bold text-primary-blue mb-3"
+                        th:text="${#locale.language == 'ar' ? 'لا توجد نتائج' : 'No Results Found'}">No Results Found
+                    </h3>
+                    <p class="text-muted fs-5 mb-4 mx-auto" style="max-width: 500px;">
+                        <span
+                            th:text="${#locale.language == 'ar' ? 'لم نجد نتائج تطابق بحثك عن ' : 'We couldn\'t find any results matching '}">No
+                            results for </span>
+                        <strong th:text="'&quot;' + ${keyword} + '&quot;'">"keyword"</strong>.
+                        <br>
+                        <span
+                            th:text="${#locale.language == 'ar' ? 'جرّب كلمات مفتاحية أخرى مثل: Docker, Java, Agile...' : 'Try other keywords like: Docker, Java, Agile...'}">
+                            Try other keywords like: Docker, Java, Agile...
+                        </span>
+                    </p>
+                    <a th:href="@{/courses}" class="btn btn-primary btn-lg px-5 fw-bold rounded-pill shadow-sm">
+                        <span
+                            th:text="${#locale.language == 'ar' ? '📚 تصفح كتالوج المقررات' : '📚 Browse Course Catalog'}">📚
+                            Browse Course Catalog</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- ===== TABBED RESULTS ===== -->
+            <div th:if="${totalResults > 0}">
+
+                <!-- Bootstrap Nav Tabs -->
+                <ul class="nav nav-tabs nav-fill mb-4 border-0" id="searchTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold fs-6 py-3 search-tab" id="courses-tab"
+                            data-bs-toggle="tab" data-bs-target="#courses-pane" type="button" role="tab"
+                            aria-controls="courses-pane" aria-selected="true">
+                            <span class="me-2">📚</span>
+                            <span th:text="${#locale.language == 'ar' ? 'المقررات' : 'Courses'}">Courses</span>
+                            <span class="badge bg-secondary-teal text-white rounded-pill ms-2 px-2"
+                                style="background-color: var(--secondary-teal);" th:text="${courseCount}">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold fs-6 py-3 search-tab" id="insights-tab" data-bs-toggle="tab"
+                            data-bs-target="#insights-pane" type="button" role="tab" aria-controls="insights-pane"
+                            aria-selected="false">
+                            <span class="me-2">🏭</span>
+                            <span th:text="${#locale.language == 'ar' ? 'إثراءات الخبراء' : 'Expert Insights'}">Expert
+                                Insights</span>
+                            <span class="badge text-white rounded-pill ms-2 px-2"
+                                style="background-color: var(--accent-orange);" th:text="${enrichmentCount}">0</span>
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="searchTabsContent">
+
+                    <!-- ═══ TAB 1: COURSES ═══ -->
+                    <div class="tab-pane fade show active" id="courses-pane" role="tabpanel"
+                        aria-labelledby="courses-tab">
+
+                        <!-- Empty state for courses tab -->
+                        <div th:if="${courseCount == 0}" class="text-center py-5 text-muted">
+                            <span class="d-block fs-1 mb-3">📚</span>
+                            <p class="fs-5"
+                                th:text="${#locale.language == 'ar' ? 'لا توجد مقررات تطابق بحثك.' : 'No courses match your search.'}">
+                                No courses match your search.
+                            </p>
+                        </div>
+
+                        <!-- Course cards grid -->
+                        <div th:unless="${courseCount == 0}" class="row g-4">
+                            <div class="col-md-6 col-lg-4" th:each="course : ${courses}">
+                                <a th:href="@{'/course/' + ${course.id}}" class="text-decoration-none">
+                                    <div
+                                        class="card bg-white rounded-4 shadow-sm border-0 h-100 search-course-card overflow-hidden">
+                                        <div class="card-body p-4">
+                                            <div class="d-flex align-items-center gap-3 mb-3">
+                                                <div class="rounded-3 d-flex align-items-center justify-content-center fw-bold text-white shadow-sm flex-shrink-0"
+                                                    style="width: 50px; height: 50px; background: linear-gradient(135deg, #0A192F, #00B4D8); font-size: 0.65rem;">
+                                                    <span th:text="${course.code}">CS</span>
+                                                </div>
+                                                <div>
+                                                    <h5 class="fw-bold text-primary-blue mb-0 fs-6"
+                                                        th:text="${#locale.language == 'ar' ? course.nameAr : course.nameEn}">
+                                                        Course Name</h5>
+                                                    <span class="text-muted small" th:text="${course.code}">CS
+                                                        1301</span>
+                                                </div>
+                                            </div>
+                                            <p class="text-muted small mb-0" style="line-height: 1.6;"
+                                                th:text="${#strings.abbreviate(#locale.language == 'ar' ? (course.descriptionAr ?: '') : (course.descriptionEn ?: ''), 120)}">
+                                                Course description...
+                                            </p>
+                                        </div>
+                                        <div
+                                            class="card-footer bg-light border-0 px-4 py-3 d-flex justify-content-between align-items-center">
+                                            <span class="badge-verified small">
+                                                ✅ <span
+                                                    th:text="${#locale.language == 'ar' ? 'عرض التفاصيل' : 'View Details'}">View
+                                                    Details</span>
+                                            </span>
+                                            <span class="text-primary-blue fw-bold small">→</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═══ TAB 2: EXPERT INSIGHTS ═══ -->
+                    <div class="tab-pane fade" id="insights-pane" role="tabpanel" aria-labelledby="insights-tab">
+
+                        <!-- Empty state for insights tab -->
+                        <div th:if="${enrichmentCount == 0}" class="text-center py-5 text-muted">
+                            <span class="d-block fs-1 mb-3">🏭</span>
+                            <p class="fs-5"
+                                th:text="${#locale.language == 'ar' ? 'لا توجد إثراءات تطابق بحثك.' : 'No expert insights match your search.'}">
+                                No expert insights match your search.
+                            </p>
+                        </div>
+
+                        <!-- Enrichment cards -->
+                        <div th:unless="${enrichmentCount == 0}">
+                            <div th:each="enrichment : ${enrichments}" class="search-enrichment-card mb-4">
+                                <div class="card bg-white rounded-4 shadow-sm border-0 overflow-hidden">
+
+                                    <!-- Header: Expert + Course -->
+                                    <div class="card-header bg-white border-bottom p-4">
+                                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm flex-shrink-0"
+                                                    style="width: 48px; height: 48px; background: linear-gradient(135deg, #0A192F, #00B4D8);"
+                                                    th:text="${#strings.substring(enrichment.expert.user.firstName,0,1) + #strings.substring(enrichment.expert.user.lastName,0,1)}">
+                                                    AB</div>
+                                                <div>
+                                                    <h5 class="fw-bold text-primary-blue mb-0 fs-6"
+                                                        th:text="${enrichment.expert.user.firstName + ' ' + enrichment.expert.user.lastName}">
+                                                        Expert Name</h5>
+                                                    <span class="text-muted small"
+                                                        th:text="${enrichment.expert.user.email}">email</span>
+                                                </div>
+                                            </div>
+                                            <a th:href="@{'/course/' + ${enrichment.course.id}}"
+                                                class="d-inline-flex align-items-center bg-light rounded-pill px-3 py-2 text-decoration-none">
+                                                <span class="me-2">📚</span>
+                                                <div>
+                                                    <span class="d-block fw-bold small text-primary-blue"
+                                                        th:text="${enrichment.course.code}">CS 1301</span>
+                                                    <span class="text-muted small"
+                                                        th:text="${#locale.language == 'ar' ? enrichment.course.nameAr : enrichment.course.nameEn}">Course</span>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <!-- Body: Content preview -->
+                                    <div class="card-body p-4">
+                                        <div class="bg-light rounded-3 p-4"
+                                            style="max-height: 200px; overflow-y: auto; line-height: 1.8; font-size: 0.95rem;">
+                                            <pre class="mb-0"
+                                                style="white-space: pre-wrap; word-wrap: break-word; font-family: inherit; font-size: inherit; color: var(--text-dark);"
+                                                th:text="${#strings.abbreviate(enrichment.content, 500)}">Content preview...</pre>
+                                        </div>
+                                    </div>
+
+                                    <!-- Footer: Skills & Tools badges -->
+                                    <div class="card-footer bg-white border-top p-4"
+                                        th:if="${!enrichment.skills.isEmpty() || !enrichment.tools.isEmpty()}">
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <span th:each="skill : ${enrichment.skills}"
+                                                class="badge rounded-pill px-3 py-2 fw-semibold shadow-sm"
+                                                style="background-color: rgba(0, 180, 216, 0.1); color: #00B4D8; font-size: 0.8rem; border: 1px solid rgba(0, 180, 216, 0.2);">
+                                                🧠 <span
+                                                    th:text="${#locale.language == 'ar' ? skill.nameAr : skill.nameEn}">Skill</span>
+                                            </span>
+                                            <span th:each="tool : ${enrichment.tools}"
+                                                class="badge rounded-pill px-3 py-2 fw-semibold shadow-sm"
+                                                style="background-color: rgba(255, 77, 77, 0.08); color: #FF4D4D; font-size: 0.8rem; border: 1px solid rgba(255, 77, 77, 0.15);">
+                                                🔧 <span
+                                                    th:text="${#locale.language == 'ar' ? tool.nameAr : tool.nameEn}">Tool</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </div>
+
+    <!-- ===== MICRO-INTERACTIONS ===== -->
+    <th:block th:fragment="script-extra">
+        <style>
+            .search-tab {
+                border: none !important;
+                border-radius: 12px 12px 0 0 !important;
+                color: var(--text-muted);
+                transition: all 0.2s ease;
+            }
+
+            .search-tab.active {
+                color: var(--primary-blue) !important;
+                background-color: white !important;
+                box-shadow: 0 -3px 0 var(--secondary-teal) inset;
+            }
+
+            .search-tab:hover:not(.active) {
+                background-color: rgba(0, 180, 216, 0.05);
+            }
+
+            .search-course-card {
+                transition: all 0.3s ease;
+                border-left: 4px solid transparent !important;
+            }
+
+            .search-course-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+                border-left-color: var(--secondary-teal) !important;
+            }
+
+            .search-enrichment-card {
+                transition: all 0.3s ease;
+            }
+
+            .search-enrichment-card:hover {
+                transform: translateY(-3px);
+            }
+
+            .search-enrichment-card:hover .card {
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            .search-enrichment-card .card {
+                border-left: 4px solid var(--accent-orange) !important;
+            }
+        </style>
+    </th:block>
+
+</body>
+
+</html>
