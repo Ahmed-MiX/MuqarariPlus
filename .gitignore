@@ -11,9 +11,17 @@ target/
 *.iml
 *.ipr
 
+# Eclipse
+.settings/
+.classpath
+.project
+
 # OS generated files
 .DS_Store
 Thumbs.db
 
 # Log file
 *.log
+
+# Uploaded files
+uploads/
