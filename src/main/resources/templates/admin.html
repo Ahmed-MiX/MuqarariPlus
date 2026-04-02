@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="${content['admin.title']}">Admin Dashboard | Muqarari+</title>
+    <title th:text="${#locale.language == 'ar' ? 'لوحة الإدارة | Muqarari+' : 'Admin Dashboard | Muqarari+'}">Admin Dashboard | Muqarari+</title>
 </head>
 <body th:replace="~{fragments/layout :: html}">
 
@@ -53,6 +53,45 @@
                                  th:text="${coursesEnriched}">0</div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== QUICK ACTIONS ===== -->
+        <section class="container py-4">
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <a th:href="@{/admin/academic}" class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4 text-decoration-none">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="fs-2">🏛️</span>
+                            <div>
+                                <h3 class="h6 fw-bold text-primary-blue mb-1" th:text="${#locale.language == 'ar' ? 'الهيكل الأكاديمي' : 'Academic Structure'}">Academic Structure</h3>
+                                <small class="text-muted" th:text="${#locale.language == 'ar' ? 'إدارة الجامعات والكليات والتخصصات والمقررات' : 'Manage universities, colleges, majors & courses'}">Manage universities, colleges, majors & courses</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a th:href="@{/admin/dashboard}" class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4 text-decoration-none">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="fs-2">📊</span>
+                            <div>
+                                <h3 class="h6 fw-bold text-primary-blue mb-1" th:text="${#locale.language == 'ar' ? 'تحليلات الفجوات' : 'Gap Analytics'}">Gap Analytics</h3>
+                                <small class="text-muted" th:text="${#locale.language == 'ar' ? 'عرض رسوم الفجوات الأكاديمية' : 'View academic gap index charts'}">View academic gap index charts</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a th:href="@{/admin/enrichments/pending}" class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4 text-decoration-none">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="fs-2">📋</span>
+                            <div>
+                                <h3 class="h6 fw-bold text-primary-blue mb-1" th:text="${#locale.language == 'ar' ? 'قائمة الإثراءات' : 'Enrichment Queue'}">Enrichment Queue</h3>
+                                <small class="text-muted" th:text="${#locale.language == 'ar' ? 'مراجعة إثراءات الخبراء المعلّقة' : 'Review pending expert enrichments'}">Review pending expert enrichments</small>
+                            </div>
+                        </div>
+                    </a>
                 </div>
             </div>
         </section>
