@@ -10,4 +10,6 @@ public interface ExpertRepository extends JpaRepository<Expert, Long> {
     List<Expert> findByStatus(ExpertStatus status);
     Optional<Expert> findByUserEmail(String email);
     Optional<Expert> findByUserId(Long userId);
+
+    Optional<Expert> findByUserUsername(String username);
 }

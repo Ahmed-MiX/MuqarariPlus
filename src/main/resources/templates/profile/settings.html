@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Profile Settings | Muqarari+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <th:block th:fragment="head-extra">
+        <style>
+            .vault-header {
+                background: linear-gradient(135deg, #0A192F 0%, #132F4C 50%, #00B4D8 100%);
+            }
+            .settings-card {
+                background: #fff;
+                border-radius: 16px;
+                border: 1px solid rgba(0,0,0,0.06);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+                padding: 2rem;
+                transition: all 0.3s ease;
+            }
+            .settings-card:hover {
+                box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            }
+            .section-title {
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: var(--primary-blue);
+                border-bottom: 2px solid rgba(0,180,216,0.2);
+                padding-bottom: 0.75rem;
+                margin-bottom: 1.5rem;
+            }
+            .form-label-custom {
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: #475569;
+                margin-bottom: 0.35rem;
+            }
+            .form-control-vault {
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
+                padding: 0.65rem 1rem;
+                font-size: 0.9rem;
+                transition: all 0.3s ease;
+            }
+            .form-control-vault:focus {
+                border-color: var(--secondary-teal);
+                box-shadow: 0 0 0 3px rgba(0,180,216,0.1);
+            }
+            .btn-vault {
+                background: linear-gradient(135deg, #00B4D8, #0099b8);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 0.65rem 2rem;
+                font-weight: 600;
+                font-size: 0.9rem;
+                transition: all 0.3s ease;
+            }
+            .btn-vault:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(0,180,216,0.3);
+                color: white;
+            }
+            .btn-security {
+                background: linear-gradient(135deg, #0A192F, #132F4C);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 0.65rem 2rem;
+                font-weight: 600;
+                font-size: 0.9rem;
+                transition: all 0.3s ease;
+            }
+            .btn-security:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(10,25,47,0.3);
+                color: white;
+            }
+            .profile-avatar {
+                width: 80px; height: 80px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #00B4D8, #0A192F);
+                display: flex; align-items: center; justify-content: center;
+                color: white; font-size: 2rem; font-weight: 700;
+            }
+            .public-url-badge {
+                background: rgba(0,180,216,0.08);
+                border: 1px solid rgba(0,180,216,0.2);
+                border-radius: 10px;
+                padding: 0.5rem 1rem;
+                font-size: 0.82rem;
+                color: #0099b8;
+                font-weight: 500;
+            }
+        </style>
+    </th:block>
+
+    <div th:fragment="main-content">
+
+        <!-- ═══ HEADER ═══ -->
+        <section class="vault-header text-white py-5">
+            <div class="container py-3">
+                <div class="d-flex align-items-center gap-4 flex-wrap">
+                    <div class="profile-avatar"
+                         th:text="${user.firstName != null ? user.firstName.substring(0, 1).toUpperCase() : '?'}">?</div>
+                    <div>
+                        <h1 class="display-6 fw-bold mb-1" style="color: #f1f5f9;">
+                            ⚙️ إعدادات الملف الشخصي
+                        </h1>
+                        <p style="color: rgba(255,255,255,0.6);" class="mb-0">
+                            Profile Settings — Private Vault
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container py-5">
+
+            <!-- Alerts -->
+            <div th:if="${successMsg}" class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                <span th:text="${successMsg}">Success</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${errorMsg}" class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                <span th:text="${errorMsg}">Error</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Public Profile URL -->
+            <div class="public-url-badge mb-4 d-inline-flex align-items-center gap-2"
+                 th:if="${user.username != null}">
+                <span>🔗 Public Profile:</span>
+                <a th:href="@{'/u/' + ${user.username}}"
+                   th:text="'/u/' + ${user.username}"
+                   class="fw-bold text-decoration-none" style="color: var(--secondary-teal);"></a>
+            </div>
+
+            <div class="row g-4">
+                <!-- ═══ BASIC INFO CARD ═══ -->
+                <div class="col-lg-7">
+                    <div class="settings-card">
+                        <h3 class="section-title">👤 المعلومات الأساسية — Basic Information</h3>
+                        <form th:action="@{/profile/settings/update}" method="post">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">الاسم الأول / First Name</label>
+                                    <input type="text" name="firstName" class="form-control form-control-vault"
+                                           th:value="${user.firstName}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">الاسم الأخير / Last Name</label>
+                                    <input type="text" name="lastName" class="form-control form-control-vault"
+                                           th:value="${user.lastName}" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label-custom">نبذة شخصية / Bio</label>
+                                    <textarea name="bio" class="form-control form-control-vault" rows="3"
+                                              th:text="${user.bio}" placeholder="Tell the world about yourself..."></textarea>
+                                </div>
+
+                                <!-- Expert-specific bio fields -->
+                                <th:block th:if="${expert != null}">
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">السيرة (عربي) / Bio (Arabic)</label>
+                                        <textarea name="bioAr" class="form-control form-control-vault" rows="2"
+                                                  th:text="${expert.bioAr}"></textarea>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Bio (English)</label>
+                                        <textarea name="bioEn" class="form-control form-control-vault" rows="2"
+                                                  th:text="${expert.bioEn}"></textarea>
+                                    </div>
+                                </th:block>
+
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">🔗 LinkedIn URL</label>
+                                    <input type="url" name="linkedInUrl" class="form-control form-control-vault"
+                                           th:value="${user.linkedInUrl}" placeholder="https://linkedin.com/in/...">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">🐙 GitHub URL</label>
+                                    <input type="url" name="githubUrl" class="form-control form-control-vault"
+                                           th:value="${user.githubUrl}" placeholder="https://github.com/...">
+                                </div>
+                            </div>
+                            <div class="mt-4 text-end">
+                                <button type="submit" class="btn btn-vault">💾 Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- ═══ SECURITY CARD ═══ -->
+                <div class="col-lg-5">
+                    <div class="settings-card">
+                        <h3 class="section-title">🔐 الأمان — Security</h3>
+                        <form th:action="@{/profile/settings/security}" method="post">
+                            <div class="mb-3">
+                                <label class="form-label-custom">كلمة المرور الحالية / Current Password</label>
+                                <input type="password" name="currentPassword" class="form-control form-control-vault" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label-custom">كلمة المرور الجديدة / New Password</label>
+                                <input type="password" name="newPassword" class="form-control form-control-vault"
+                                       minlength="6" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label-custom">تأكيد كلمة المرور / Confirm Password</label>
+                                <input type="password" name="confirmPassword" class="form-control form-control-vault"
+                                       minlength="6" required>
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-security">🔑 Change Password</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Account Info Card -->
+                    <div class="settings-card mt-4">
+                        <h3 class="section-title">📋 معلومات الحساب — Account Info</h3>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span class="text-muted small">Email</span>
+                            <span class="fw-semibold small" th:text="${user.email}">email@example.com</span>
+                        </div>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span class="text-muted small">Username</span>
+                            <span class="fw-semibold small" th:text="${user.username ?: 'Not set'}">username</span>
+                        </div>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span class="text-muted small">Role</span>
+                            <span class="badge rounded-pill px-3 py-1"
+                                  style="background: rgba(0,180,216,0.1); color: #0099b8; font-weight: 600;"
+                                  th:text="${user.role.replace('ROLE_', '')}">STUDENT</span>
+                        </div>
+                        <div class="mb-0 d-flex justify-content-between">
+                            <span class="text-muted small">Status</span>
+                            <span class="badge rounded-pill px-3 py-1"
+                                  style="background: rgba(16,185,129,0.1); color: #10b981; font-weight: 600;"
+                                  th:text="${user.status ?: 'ACTIVE'}">ACTIVE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </div>
+
+</body>
+</html>

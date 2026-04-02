@@ -104,6 +104,11 @@
                                th:text="${content['nav.student']}">My Dashboard</a>
                         </li>
 
+                        <!-- Profile Settings -->
+                        <li class="nav-item">
+                            <a class="nav-link fw-semibold" th:href="@{/profile/settings}">⚙️</a>
+                        </li>
+
                         <!-- Secure POST Logout -->
                         <li class="nav-item ms-lg-3">
                             <form th:action="@{/logout}" method="post" class="m-0">

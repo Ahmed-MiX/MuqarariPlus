@@ -3,6 +3,7 @@ package com.muqarariplus.platform.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -13,6 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
@@ -29,10 +31,13 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable) // Simplified for the prototype
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/courses", "/course/**", "/search", "/css/**", "/js/**", "/img/**", "/fonts/**", "/uploads/**", "/login", "/register", "/error", "/favicon.ico", "/student/api/**").permitAll()
+                .requestMatchers("/u/**", "/expert-profile/**").permitAll()
+                .requestMatchers("/api/admin/audit", "/api/admin/audit/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/super-admin", "/super-admin/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/expert", "/expert/**").hasAnyRole("EXPERT", "ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/admin", "/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/student-dashboard", "/student-dashboard/**", "/student", "/student/**", "/api/engagement/**").hasAnyRole("STUDENT", "EXPERT", "ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/profile/**").authenticated()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

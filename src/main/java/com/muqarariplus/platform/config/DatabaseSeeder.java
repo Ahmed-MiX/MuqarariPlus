@@ -2,6 +2,7 @@ package com.muqarariplus.platform.config;
 
 import com.muqarariplus.platform.entity.*;
 import com.muqarariplus.platform.repository.*;
+import jakarta.persistence.EntityManager;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final CollegeRepository collegeRepository;
     private final MajorRepository majorRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EntityManager entityManager;
 
     public DatabaseSeeder(UserRepository userRepository, CourseRepository courseRepository,
                           SiteContentRepository siteContentRepository, ExpertRepository expertRepository,
@@ -33,7 +35,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                           UniversityRepository universityRepository,
                           CollegeRepository collegeRepository,
                           MajorRepository majorRepository,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder, EntityManager entityManager) {
         this.userRepository = userRepository;
         this.courseRepository = courseRepository;
         this.siteContentRepository = siteContentRepository;
@@ -46,6 +48,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         this.collegeRepository = collegeRepository;
         this.majorRepository = majorRepository;
         this.passwordEncoder = passwordEncoder;
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -58,7 +61,9 @@ public class DatabaseSeeder implements CommandLineRunner {
         seedSiteContent();
         seedIndustryHierarchy();
         seedCertifications();
-        seedMassiveEnrichments();
+        purgeNonTechnicalEnrichments();
+        List<User> massiveExperts = seedMassiveExperts();
+        seedMassiveEnrichments(massiveExperts);
     }
 
     private void seedUsers() {
@@ -126,8 +131,6 @@ public class DatabaseSeeder implements CommandLineRunner {
     }
 
     private void seedCourses() {
-        if (courseRepository.count() > 0) return;
-
         String[][] universityReqs = {
             {"IC 101","Introduction to Islamic Culture","المدخل إلى الثقافة الإسلامية"},
             {"IC 102","Islam and Building of Society","الإسلام وبناء المجتمع"},
@@ -214,34 +217,40 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         Major[] allMajors = {csMajor, ceMajor, seMajor, isMajor};
 
+        int newCourses = 0;
         for (Major major : allMajors) {
             for (String[] c : universityReqs) {
+                if (courseRepository.findByCode(c[0]).isEmpty()) {
+                    Course co = new Course();
+                    co.setCode(c[0]);
+                    co.setNameEn(c[1]);
+                    co.setNameAr(c[2]);
+                    co.setDescriptionEn("CCIS standard course.");
+                    co.setDescriptionAr("مقرر ضمن كلية علوم الحاسب والمعلومات.");
+                    co.setMajor(major);
+                    courseRepository.save(co);
+                    newCourses++;
+                }
+            }
+        }
+
+        for (String[] c : seOnlyCourses) {
+            if (courseRepository.findByCode(c[0]).isEmpty()) {
                 Course co = new Course();
                 co.setCode(c[0]);
                 co.setNameEn(c[1]);
                 co.setNameAr(c[2]);
                 co.setDescriptionEn("CCIS standard course.");
                 co.setDescriptionAr("مقرر ضمن كلية علوم الحاسب والمعلومات.");
-                co.setMajor(major);
+                co.setMajor(seMajor);
                 courseRepository.save(co);
+                newCourses++;
             }
         }
 
-        for (String[] c : seOnlyCourses) {
-            Course co = new Course();
-            co.setCode(c[0]);
-            co.setNameEn(c[1]);
-            co.setNameAr(c[2]);
-            co.setDescriptionEn("CCIS standard course.");
-            co.setDescriptionAr("مقرر ضمن كلية علوم الحاسب والمعلومات.");
-            co.setMajor(seMajor);
-            courseRepository.save(co);
-        }
-
-        System.out.println("SEEDER: " + courseRepository.count() + " courses seeded across all majors.");
+        System.out.println("SEEDER [INCREMENTAL]: " + newCourses + " new courses seeded across all majors.");
     }
 
-    // ── SITE CONTENT (kept via helper to save space) ─────────────────────
     private void seedSiteContent() {
         if (siteContentRepository.count() > 0) return;
         sc("app.title","Muqarari+ | Bridge Theory & Practice","مقرري+ | اربط بين النظرية والتطبيق");
@@ -408,6 +417,51 @@ public class DatabaseSeeder implements CommandLineRunner {
         sc("course.experts.title","Contributing Experts","الخبراء المساهمون");
         sc("course.experts.linkedin","LinkedIn Profile →","الملف الشخصي ←");
         sc("course.experts.empty","No contributing experts yet.","لم يُضَف خبراء مساهمون لهذا المقرر بعد.");
+        // ── Super Admin Unified Command Center i18n ──
+        sc("sa.title","Supreme Command Center","مركز القيادة العليا");
+        sc("sa.subtitle","Full platform oversight, analytics, and control.","إشراف كامل على المنصة والتحليلات والتحكم.");
+        sc("sa.badge","SUPER ADMIN","مدير أعلى");
+        sc("sa.tab.dashboard","Dashboard","لوحة التحكم");
+        sc("sa.tab.users","User Matrix","مصفوفة المستخدمين");
+        sc("sa.tab.admin","Admin Tools","أدوات الإدارة");
+        sc("sa.tab.generate","Generate Admins","توليد المدراء");
+        sc("sa.kpi.total_users","Total Users","إجمالي المستخدمين");
+        sc("sa.kpi.experts","Registered Experts","الخبراء المسجلين");
+        sc("sa.kpi.courses","Total Courses","المقررات الدراسية");
+        sc("sa.kpi.enrichments","Total Enrichments","إجمالي الإثراءات");
+        sc("sa.chart.users_by_role","Users by Role","المستخدمون حسب الدور");
+        sc("sa.chart.enrichments_by_status","Enrichments by Status","الإثراءات حسب الحالة");
+        sc("sa.audit.title","Recent Audit Trail","سجل المراجعة الأخير");
+        sc("sa.audit.action","Action","الإجراء");
+        sc("sa.audit.entity","Entity","الكيان");
+        sc("sa.audit.user","User","المستخدم");
+        sc("sa.audit.timestamp","Timestamp","الطابع الزمني");
+        sc("sa.fleet.title","Admin Fleet","قائمة المدراء");
+        sc("sa.fleet.name","Name","الاسم");
+        sc("sa.fleet.email","Email","البريد الإلكتروني");
+        sc("sa.fleet.username","Username","اسم المستخدم");
+        sc("sa.fleet.action","Actions","الإجراءات");
+        sc("sa.fleet.delete","Revoke","سحب");
+        sc("sa.fleet.delete_confirm","Are you sure you want to revoke this admin?","هل أنت متأكد من سحب صلاحيات هذا المدير؟");
+        sc("sa.fleet.empty","No admins.","لا يوجد مدراء.");
+        sc("sa.generate.title","Generate Admin Credentials","توليد بيانات مدير جديد");
+        sc("sa.generate.firstname","First Name","الاسم الأول");
+        sc("sa.generate.lastname","Last Name","اسم العائلة");
+        sc("sa.generate.email","Email","البريد الإلكتروني");
+        sc("sa.generate.btn","Generate","توليد");
+        sc("sa.generate.success","Admin Generated!","تم توليد المدير!");
+        sc("sa.generate.success_msg","Copy credentials now.","انسخ البيانات الآن.");
+        sc("sa.generate.success_user","Username:","اسم المستخدم:");
+        sc("sa.generate.success_pass","Password:","كلمة المرور:");
+        sc("sa.generate.error","Email already in use.","البريد الإلكتروني مستخدم بالفعل.");
+        sc("sa.users.title","User Matrix","مصفوفة المستخدمين");
+        sc("sa.users.email","Email","البريد الإلكتروني");
+        sc("sa.users.name","Name","الاسم");
+        sc("sa.users.role","Role","الدور");
+        sc("sa.users.status","Status","الحالة");
+        sc("sa.users.action","Actions","الإجراءات");
+        sc("sa.users.toggle","Toggle Status","تبديل الحالة");
+        sc("sa.users.change_role","Change Role","تغيير الدور");
         System.out.println("SEEDER: SiteContent seeded.");
     }
     private void sc(String key, String en, String ar) {
@@ -471,231 +525,457 @@ public class DatabaseSeeder implements CommandLineRunner {
         System.out.println("SEEDER: 15 Professional Certifications seeded.");
     }
 
-    // ═════════════════════════════════════════════════════════════════════
-    // THE MASSIVE ENRICHMENT SEEDER
-    // ═════════════════════════════════════════════════════════════════════
-    private void seedMassiveEnrichments() {
-        if (enrichmentRepository.count() > 0) return;
+    // ═══════════════════════════════════════════════════════════════════
+    // IRON VAULT: Domain Classification & Purge Engine
+    // ═══════════════════════════════════════════════════════════════════
 
-        // ── Expert 1: Software Engineering ──────────────────────────────
-        createExpertAndEnrichment(
-            "fahad.se@elm.sa", "فهد", "العتيبي", "SE 2111",
-            "## التطبيقات العملية في هندسة البرمجيات\n\n"
-            + "في شركة **Elm** نطبق مبادئ هندسة البرمجيات يومياً في بناء الأنظمة الحكومية الرقمية. "
-            + "نستخدم منهجية **Agile/Scrum** لتقسيم المشاريع الكبيرة إلى Sprints مدتها أسبوعان. "
-            + "نعتمد بنية **Microservices** لضمان أن كل خدمة تُطوَّر وتُنشر بشكل مستقل عبر Docker و Kubernetes.\n\n"
-            + "## المسار المهني\n\n"
-            + "يبدأ المسار من **Junior Developer** ثم **Software Engineer** ثم **Senior Architect**. "
-            + "الطلب في السوق السعودي مرتفع جداً مع رؤية 2030. شركات مثل Elm وNeom وSTC تبحث عن مهندسين يفهمون Design Patterns.\n\n"
-            + "## مصادر إثرائية\n\n"
-            + "- كتاب: Clean Architecture by Robert C. Martin\n"
-            + "- دورة: Software Design and Architecture Specialization (Coursera)\n"
-            + "- شهادة: AWS Certified Solutions Architect",
-            new String[]{"Agile Methodology","Microservices Architecture","Software Testing & QA","RESTful API Design"},
-            new String[]{"Docker","Git","Jenkins","Jira"},
-            new String[]{"Certified ScrumMaster (CSM)","AWS Certified Solutions Architect"}
-        );
+    private static final String[] NON_TECH_KEYWORDS = {
+        "ثقافة", "سلم", "إسلام", "عرب", "لغة", "مهارات", "قرآن", "تحرير",
+        "islamic", "arabic", "english", "communication", "writing", "reading"
+    };
 
-        // ── Expert 2: Artificial Intelligence ───────────────────────────
-        createExpertAndEnrichment(
-            "noura.ai@sdaia.gov.sa", "نورة", "القحطاني", "CS 3501",
-            "## التطبيقات العملية في الذكاء الاصطناعي\n\n"
-            + "في **SDAIA** (هيئة البيانات والذكاء الاصطناعي) نعمل على مشاريع تحليل البيانات الضخمة لدعم صنع القرار الحكومي. "
-            + "نستخدم **TensorFlow** و **PyTorch** لبناء نماذج Deep Learning لمعالجة اللغة العربية الطبيعية (NLP) وتحليل الصور الطبية.\n\n"
-            + "## المسار المهني\n\n"
-            + "المسار يبدأ من **Data Analyst** ثم **ML Engineer** ثم **AI Research Scientist**. "
-            + "السعودية تستثمر مليارات في الذكاء الاصطناعي. مشاريع مثل منصة توكلنا وتحليل بيانات الحج تعتمد على هذه التقنيات.\n\n"
-            + "## مصادر إثرائية\n\n"
-            + "- كتاب: Deep Learning by Ian Goodfellow\n"
-            + "- دورة: Deep Learning Specialization (Andrew Ng - Coursera)\n"
-            + "- شهادة: Microsoft Certified Azure AI Engineer",
-            new String[]{"Machine Learning","Deep Learning","Data Structures","Cloud Architecture"},
-            new String[]{"TensorFlow","Python","AWS","Azure"},
-            new String[]{"Microsoft Certified: Azure AI Engineer"}
-        );
-
-        // ── Expert 3: Database Management Systems ───────────────────────
-        createExpertAndEnrichment(
-            "ahmed.db@aramco.sa", "أحمد", "الدوسري", "IS 2511",
-            "## التطبيقات العملية في قواعد البيانات\n\n"
-            + "في **أرامكو** ندير أكبر قواعد بيانات صناعية في العالم. نستخدم **Oracle Database** لإدارة بيانات الإنتاج والاستكشاف، "
-            + "و**PostgreSQL** للأنظمة التحليلية. تحسين استعلامات SQL (Query Optimization) يوفر ملايين الريالات سنوياً.\n\n"
-            + "## المسار المهني\n\n"
-            + "يبدأ من **Database Administrator** ثم **Data Engineer** ثم **Chief Data Officer**. "
-            + "الشركات النفطية والبنوك السعودية تحتاج خبراء قواعد بيانات بشكل مستمر.\n\n"
-            + "## مصادر إثرائية\n\n"
-            + "- كتاب: Database System Concepts by Silberschatz\n"
-            + "- دورة: Oracle Database SQL Certified Associate\n"
-            + "- أداة: تعلم استخدام pgAdmin و Oracle SQL Developer",
-            new String[]{"Database Management","Data Structures","Cloud Architecture","RESTful API Design"},
-            new String[]{"PostgreSQL","MySQL","AWS","Docker"},
-            new String[]{"Oracle Database SQL Certified Associate","AWS Certified Solutions Architect"}
-        );
-
-        // ── Expert 4: Information Security ──────────────────────────────
-        createExpertAndEnrichment(
-            "sara.sec@nca.gov.sa", "سارة", "الشهري", "CE 4711",
-            "## التطبيقات العملية في أمن المعلومات\n\n"
-            + "في **الهيئة الوطنية للأمن السيبراني (NCA)** نحمي البنية التحتية الرقمية للمملكة. "
-            + "نجري اختبارات اختراق (Penetration Testing) دورية باستخدام أدوات مثل **Wireshark** و **Burp Suite**. "
-            + "نطبق معايير التشفير المتقدمة وبروتوكولات Zero Trust Architecture.\n\n"
-            + "## المسار المهني\n\n"
-            + "يبدأ من **SOC Analyst** ثم **Penetration Tester** ثم **CISO**. "
-            + "الأمن السيبراني من أعلى المجالات أجراً في السعودية مع تزايد التهديدات الإلكترونية.\n\n"
-            + "## مصادر إثرائية\n\n"
-            + "- كتاب: The Web Application Hacker's Handbook\n"
-            + "- دورة: CompTIA Security+ Certification\n"
-            + "- شهادة: CISSP من ISC2",
-            new String[]{"Cybersecurity Fundamentals","Penetration Testing","Cryptography","Linux Administration"},
-            new String[]{"Wireshark","Linux","Git","Python"},
-            new String[]{"CISSP - Certified Information Systems Security Professional","CompTIA Security+"}
-        );
-
-        // ── Expert 5: Mobile App Development ────────────────────────────
-        createExpertAndEnrichment(
-            "mohammed.mob@stc.com.sa", "محمد", "الحربي", "CS 2301",
-            "## التطبيقات العملية في تطوير التطبيقات\n\n"
-            + "في **STC** نطور تطبيقات الجوال التي يستخدمها ملايين العملاء يومياً. "
-            + "نستخدم **Flutter** لبناء تطبيقات cross-platform بكفاءة عالية. "
-            + "نطبق CI/CD باستخدام **Jenkins** لنشر التحديثات بشكل آلي وآمن كل أسبوع.\n\n"
-            + "## المسار المهني\n\n"
-            + "يبدأ من **Junior Mobile Developer** ثم **Senior Developer** ثم **Mobile Tech Lead**. "
-            + "تطبيقات مثل MySTC و stc pay تحتاج مطورين محترفين في Dart و Swift.\n\n"
-            + "## مصادر إثرائية\n\n"
-            + "- دورة: Flutter & Dart - The Complete Guide (Udemy)\n"
-            + "- أداة: تعلم Android Studio و Xcode\n"
-            + "- كتاب: Flutter in Action (Manning)",
-            new String[]{"Mobile Development","CI/CD Pipelines","Object-Oriented Programming","Software Testing & QA"},
-            new String[]{"Flutter","Git","Jenkins","Postman"},
-            new String[]{"AWS Certified Developer"}
-        );
-
-        // ── Expert 6: Cloud DevOps ──────────────────────────────────────
-        createExpertAndEnrichment(
-            "khalid.devops@lean.sa", "خالد", "المالكي", "CS 3701",
-            "## التطبيقات العملية في نظم التشغيل والسحابة\n\n"
-            + "في **Lean Technologies** نبني بنية تحتية سحابية تخدم منصات التقنية المالية (FinTech). "
-            + "نستخدم **Docker** لتحزيم التطبيقات و**Kubernetes** لتنسيق الحاويات على نطاق واسع. "
-            + "فهم نظم التشغيل وإدارة العمليات (Process Management) أساسي لتحسين أداء الخوادم.\n\n"
-            + "## المسار المهني\n\n"
-            + "يبدأ من **System Administrator** ثم **DevOps Engineer** ثم **Cloud Architect**. "
-            + "شهادة CKA و AWS Solutions Architect مطلوبة بشدة في السوق السعودي.\n\n"
-            + "## مصادر إثرائية\n\n"
-            + "- كتاب: The Phoenix Project (Gene Kim)\n"
-            + "- دورة: CKA - Certified Kubernetes Administrator\n"
-            + "- أداة: تعلم Terraform و Ansible",
-            new String[]{"DevOps Practices","Cloud Architecture","Linux Administration","CI/CD Pipelines"},
-            new String[]{"Docker","Kubernetes","Linux","AWS"},
-            new String[]{"Certified Kubernetes Administrator (CKA)","AWS Certified Solutions Architect"}
-        );
-
-        // ── Expert 7: Full Stack Web Technologies ───────────────────────
-        createExpertAndEnrichment(
-            "reem.web@outlook.sa", "ريم", "السبيعي", "CS 2321",
-            "## التطبيقات العملية في تقنيات الويب\n\n"
-            + "كـ **Full Stack Tech Lead** في تطوير منصات الويب الحكومية، نعتمد على **React** للواجهات الأمامية "
-            + "و**Spring Boot** للخدمات الخلفية مع **RESTful APIs**. فهم هياكل البيانات والخوارزميات ضروري لتحسين أداء قواعد البيانات والبحث.\n\n"
-            + "## المسار المهني\n\n"
-            + "يبدأ من **Frontend Developer** ثم **Full Stack Developer** ثم **Technical Lead**. "
-            + "الطلب على مطوري Full Stack في السعودية يتزايد مع التحول الرقمي.\n\n"
-            + "## مصادر إثرائية\n\n"
-            + "- كتاب: Grokking Algorithms (Aditya Bhargava)\n"
-            + "- دورة: Full Stack Open (University of Helsinki)\n"
-            + "- أداة: تعلم TypeScript و Next.js",
-            new String[]{"Frontend Development","RESTful API Design","Data Structures","Object-Oriented Programming"},
-            new String[]{"React","Spring Boot","PostgreSQL","Git"},
-            new String[]{"AWS Certified Developer"}
-        );
-
-        // ── Expert 8: IT Project Management ─────────────────────────────
-        createExpertAndEnrichment(
-            "turki.pm@outlook.sa", "تركي", "الغامدي", "SE 4231",
-            "## التطبيقات العملية في إدارة المشاريع\n\n"
-            + "كـ **IT Project Manager** أدرت مشاريع تحول رقمي بملايين الريالات. "
-            + "نستخدم **Jira** لتتبع المهام و**Scrum Framework** لتنظيم الفرق. "
-            + "إدارة المخاطر (Risk Management) وتحليل أصحاب المصلحة (Stakeholder Analysis) من أهم المهارات العملية.\n\n"
-            + "## المسار المهني\n\n"
-            + "يبدأ من **Scrum Master** ثم **Project Manager** ثم **PMO Director**. "
-            + "شهادة PMP من PMI تزيد الراتب بنسبة 20-30% في السوق السعودي.\n\n"
-            + "## مصادر إثرائية\n\n"
-            + "- كتاب: PMBOK Guide 7th Edition\n"
-            + "- دورة: PMP Certification Training (PMI)\n"
-            + "- أداة: تعلم MS Project و Confluence",
-            new String[]{"Project Management","Risk Management","Agile Methodology","Software Testing & QA"},
-            new String[]{"Jira","Git","Postman","Figma"},
-            new String[]{"PMP - Project Management Professional","Certified ScrumMaster (CSM)"}
-        );
-
-        System.out.println("SEEDER: 8 massive enrichments with experts, skills, tools, and certifications seeded.");
+    private boolean isNonTechnicalCourse(Course course) {
+        String combined = (course.getNameEn() + " " + course.getNameAr()).toLowerCase();
+        for (String kw : NON_TECH_KEYWORDS) {
+            if (combined.contains(kw.toLowerCase())) return true;
+        }
+        return false;
     }
 
-    /**
-     * Helper: Creates a User + Expert + CourseEnrichment in one shot.
-     */
-    private void createExpertAndEnrichment(String email, String firstName, String lastName,
-                                           String courseCode, String content,
-                                           String[] skillNames, String[] toolNames, String[] certNames) {
-        // 1. Create or find the User
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            user = new User();
-            user.setEmail(email);
-            user.setPassword(passwordEncoder.encode("Expert@2026"));
-            user.setFirstName(firstName);
-            user.setLastName(lastName);
-            user.setRole("ROLE_EXPERT");
-            user.setStatus("APPROVED");
-            user = userRepository.save(user);
+    private void purgeNonTechnicalEnrichments() {
+        List<Course> allCourses = courseRepository.findAll();
+        int purgedNonTech = 0;
+        int purgedStale = 0;
+        for (Course course : allCourses) {
+            if (isNonTechnicalCourse(course)) {
+                List<CourseEnrichment> allEnrichments = enrichmentRepository.findByCourseId(course.getId());
+                if (!allEnrichments.isEmpty()) {
+                    enrichmentRepository.deleteAll(allEnrichments);
+                    purgedNonTech += allEnrichments.size();
+                }
+                continue;
+            }
+
+            List<CourseEnrichment> approved = enrichmentRepository
+                .findByCourseIdAndStatus(course.getId(), EnrichmentStatus.APPROVED);
+            if (approved.isEmpty()) continue;
+
+            String domain = classifyCourse(course);
+            List<String> validCertNames = getCertsForDomain(domain);
+            List<String> validToolNames = getToolsForDomain(domain);
+            List<String> validExpertEmails = getExpertEmailsForDomain(domain);
+            List<CourseEnrichment> toDelete = new ArrayList<>();
+            for (CourseEnrichment e : approved) {
+                boolean contaminated = false;
+                if (e.getExpert() != null && e.getExpert().getUser() != null) {
+                    String expertEmail = e.getExpert().getUser().getEmail();
+                    if (!validExpertEmails.contains(expertEmail)) contaminated = true;
+                }
+                if (!contaminated && e.getCertificates() != null) {
+                    for (ProfessionalCertificate cert : e.getCertificates()) {
+                        if (!validCertNames.contains(cert.getNameEn())) { contaminated = true; break; }
+                    }
+                }
+                if (!contaminated && e.getTools() != null) {
+                    for (Tool tool : e.getTools()) {
+                        if (!validToolNames.contains(tool.getNameEn())) { contaminated = true; break; }
+                    }
+                }
+                if (contaminated) {
+                    toDelete.add(e);
+                }
+            }
+            if (!toDelete.isEmpty()) {
+                enrichmentRepository.deleteAll(toDelete);
+                purgedStale += toDelete.size();
+            }
         }
+        entityManager.flush();
+        entityManager.clear();
+        System.out.println("SEEDER [PURGE]: Removed " + purgedNonTech + " non-technical + " + purgedStale + " stale cross-domain enrichments.");
+    }
 
-        // 2. Create Expert entity (APPROVED)
-        Expert expert;
-        Optional<Expert> existingExpert = expertRepository.findByUserId(user.getId());
-        if (existingExpert.isPresent()) {
-            expert = existingExpert.get();
-        } else {
-            expert = new Expert();
-            expert.setUser(user);
-            expert.setStatus(ExpertStatus.APPROVED);
-            expert.setRating(4.5);
-            expert.setLinkedinUrl("https://linkedin.com/in/" + email.split("@")[0]);
-            expert = expertRepository.save(expert);
+    private String classifyCourse(Course course) {
+        String n = (course.getNameEn() + " " + course.getNameAr()).toLowerCase();
+        if (n.contains("database") || n.contains("قواعد بيانات")) return "DATABASE";
+        if (n.contains("secur") || n.contains("crypt") || n.contains("أمن") || n.contains("تشفير")) return "SECURITY";
+        if (n.contains("artificial intelligence") || n.contains("ذكاء") || n.contains("image") || n.contains("صور")
+            || n.contains("signal") || n.contains("إشارات") || n.contains("soft computing") || n.contains("simulation")
+            || n.contains("modeling") || n.contains("نمذجة") || n.contains("محاكاة")) return "AI_DATA";
+        if (n.contains("network") || n.contains("شبكات") || n.contains("cloud") || n.contains("سحاب")
+            || n.contains("wireless") || n.contains("لاسلك") || n.contains("تراسل") || n.contains("internet")
+            || n.contains("إنترنت") || n.contains("sensor") || n.contains("حسية") || n.contains("multimedia")
+            || n.contains("وسائط") || n.contains("mobile") || n.contains("متنقل")) return "NETWORKS";
+        if (n.contains("circuit") || n.contains("دوائر") || n.contains("logic design") || n.contains("منطقي")
+            || n.contains("processor") || n.contains("معالج") || n.contains("architecture") || n.contains("عمارة")
+            || n.contains("embedded") || n.contains("مضمن") || n.contains("vlsi") || n.contains("متكاملة")
+            || n.contains("control") || n.contains("تحكم") || n.contains("robot") || n.contains("روبوت")
+            || n.contains("automat") || n.contains("أتمتة") || n.contains("digital system") || n.contains("رقمية")
+            || n.contains("reconfigur") || n.contains("متشكلة") || n.contains("storage") || n.contains("تخزين")
+            || n.contains("high per") || n.contains("عالية")) return "HARDWARE";
+        if (n.contains("software") || n.contains("برمجيات") || n.contains("program") || n.contains("برمجة")
+            || n.contains("compiler") || n.contains("مترجم") || n.contains("operating") || n.contains("تشغيل")
+            || n.contains("ethics") || n.contains("أخلاقيات") || n.contains("real time") || n.contains("حقيقي")
+            || n.contains("data structures") || n.contains("خوارزميات") || n.contains("training") || n.contains("تدريب")
+            || n.contains("graduation") || n.contains("تخرج") || n.contains("selected") || n.contains("مختارة")
+            || n.contains("research") || n.contains("بحث") || n.contains("systems prog") || n.contains("إدارة النظم")
+            || n.contains("project manage") || n.contains("إدارة مشروع")) return "SOFTWARE";
+        if (n.contains("math") || n.contains("رياضيات") || n.contains("calculus") || n.contains("تفاضل")
+            || n.contains("تكامل") || n.contains("algebra") || n.contains("جبر") || n.contains("statist")
+            || n.contains("إحصاء") || n.contains("احتمال") || n.contains("physics") || n.contains("فيزياء")
+            || n.contains("discrete") || n.contains("متقطعة") || n.contains("number theory") || n.contains("أعداد")
+            || n.contains("differential eq") || n.contains("معادلات")) return "MATH";
+        if (n.contains("computer") || n.contains("حاسب")) return "SOFTWARE";
+        return "SOFTWARE";
+    }
+
+    private List<String> getSkillsForDomain(String domain) {
+        switch (domain) {
+            case "AI_DATA": return List.of("Machine Learning","Deep Learning","Natural Language Processing","Computer Vision","Data Mining","MLOps","LLM Fine-tuning","Retrieval-Augmented Generation","Prompt Engineering","Feature Engineering","Time Series Analysis","Reinforcement Learning","Generative AI","Transfer Learning","Data Lakehouse Architecture","ETL Pipeline Design","Statistical Modeling","Big Data Analytics","Edge AI","Federated Learning","Model Optimization","Data Governance","Anomaly Detection","Recommendation Systems","Speech Recognition","Sentiment Analysis","Knowledge Graphs","AutoML","Neural Architecture Search","Signal Processing","Data Structures");
+            case "SECURITY": return List.of("Penetration Testing","Cryptography","Cybersecurity Fundamentals","Risk Management","Zero Trust Architecture","SOC Analysis","Malware Reverse Engineering","Incident Response","Threat Intelligence","Digital Forensics","Vulnerability Assessment","Security Architecture","Network Security","Application Security","Cloud Security","Identity & Access Management","SIEM Management","Red Team Operations","Blue Team Defense","Threat Hunting","Security Automation","Container Security","API Security","Security Governance","Linux Administration");
+            case "SOFTWARE": return List.of("Object-Oriented Programming","Agile Methodology","RESTful API Design","Microservices Architecture","CI/CD Pipelines","Software Testing & QA","DevOps Practices","Frontend Development","Mobile Development","Project Management","Domain-Driven Design","GraphQL API Development","WebSocket Programming","Test-Driven Development","Clean Architecture","SOLID Principles","Design Patterns","Event-Driven Architecture","Serverless Architecture","API Gateway Design","Performance Optimization","System Design","Distributed Systems","Concurrency Programming","Infrastructure as Code","Site Reliability Engineering","Data Structures");
+            case "NETWORKS": return List.of("Cloud Architecture","Linux Administration","Network Routing & Switching","SDN Architecture","Network Automation","Load Balancing","Network Monitoring","Cloud Migration","Multi-Cloud Strategy","Edge Computing","CDN Architecture","Network Virtualization","BGP Routing","Cybersecurity Fundamentals","Network Security");
+            case "DATABASE": return List.of("Database Management","SQL Optimization","Data Structures","Database Design","Data Modeling","Query Performance Tuning","Data Warehousing","NoSQL Design Patterns","Database Migration","Replication & Sharding","Transaction Management","Schema Design","Database Monitoring","ETL Pipeline Design","Data Governance","Big Data Analytics");
+            case "HARDWARE": return List.of("Embedded Systems Programming","Digital Circuit Design","Control Theory","Signal Processing","FPGA Design","PCB Design","Microcontroller Programming","RTOS Development","Hardware Description Languages","SoC Design","Sensor Integration","IoT Protocols","PLC Programming","Robotics Programming","ASIC Design");
+            case "MATH": return List.of("Data Structures","Machine Learning","Deep Learning","Statistical Modeling","Numerical Methods","Optimization Theory","Mathematical Modeling","Graph Theory","Probability Theory","Operations Research","Stochastic Processes","Cryptographic Mathematics","Feature Engineering","Time Series Analysis");
+            default: return List.of("Object-Oriented Programming","Data Structures");
         }
+    }
 
-        // 3. Find the Course (SE major version)
-        List<Course> matchingCourses = courseRepository.findAll().stream()
-                .filter(c -> c.getCode().equals(courseCode) && c.getMajor() != null && "SE".equals(c.getMajor().getCode()))
-                .toList();
-        if (matchingCourses.isEmpty()) return;
-        Course course = matchingCourses.get(0);
-
-        // 4. Resolve Skills
-        Set<Skill> skills = new HashSet<>();
-        for (String sn : skillNames) {
-            skillRepository.findAll().stream().filter(s -> s.getNameEn().equals(sn)).findFirst().ifPresent(skills::add);
+    private List<String> getToolsForDomain(String domain) {
+        switch (domain) {
+            case "AI_DATA": return List.of("TensorFlow","PyTorch","Python","Hadoop","Power BI","MATLAB","Snowflake","Databricks","HuggingFace Transformers","MLflow","Apache Spark","Jupyter Notebook","Pandas","NumPy","Scikit-learn","Keras","Apache Airflow","LangChain","OpenCV","Tableau","Amazon SageMaker","Azure ML Studio","Google Colab","Weights & Biases","DVC");
+            case "SECURITY": return List.of("Kali Linux","Wireshark","Metasploit","Burp Suite","Linux","CrowdStrike","Splunk","Fortinet FortiGate","Nmap","Snort","Nessus","OWASP ZAP","Qualys","Palo Alto Networks","HashiCorp Vault","Elastic SIEM","IBM QRadar","SentinelOne","Ghidra","OpenVAS","Suricata");
+            case "SOFTWARE": return List.of("Spring Boot","React","Docker","Git","Jenkins","IntelliJ IDEA","Postman","Jira","Selenium","Flutter","Apache Kafka","Redis","Next.js","GraphQL","VS Code","GitHub Actions","SonarQube","Gradle","Maven","Nginx","RabbitMQ","Prometheus","Grafana","Swagger","ArgoCD","Kubernetes");
+            case "NETWORKS": return List.of("Cisco Packet Tracer","Kubernetes","Terraform","AWS","Azure","Linux","GNS3","Nagios","Zabbix","Ansible","CloudFormation","Istio","Cloudflare","OpenStack","VMware vSphere","AWS CloudWatch","Envoy Proxy");
+            case "DATABASE": return List.of("PostgreSQL","MySQL","Oracle Database","MongoDB","Power BI","Apache Cassandra","Neo4j","Amazon RDS","Elasticsearch","MariaDB","DynamoDB","InfluxDB","pgAdmin","DataGrip","Liquibase","Oracle RAC");
+            case "HARDWARE": return List.of("Arduino","Xilinx Vivado","MATLAB","Simulink","Linux","Altium Designer","KiCad","STM32CubeIDE","Quartus Prime","LTSpice","LabVIEW","Proteus","PlatformIO","FreeRTOS");
+            case "MATH": return List.of("Python","MATLAB","TensorFlow","Jupyter Notebook","NumPy","Pandas","Scikit-learn");
+            default: return List.of("Git","Docker","VS Code");
         }
+    }
 
-        // 5. Resolve Tools
-        Set<Tool> tools = new HashSet<>();
-        for (String tn : toolNames) {
-            toolRepository.findAll().stream().filter(t -> t.getNameEn().equals(tn)).findFirst().ifPresent(tools::add);
+    private List<String> getCertsForDomain(String domain) {
+        switch (domain) {
+            case "AI_DATA": return List.of("Microsoft Certified: Azure AI Engineer","Google Cloud Professional Data Engineer","AWS Certified Data Analytics","IBM Data Science Professional","AWS Machine Learning Specialty","Databricks Certified Data Engineer","TensorFlow Developer Certificate","Google Professional ML Engineer","Snowflake SnowPro Core","Azure Data Scientist Associate","Azure Data Engineer Associate","Cloudera Data Platform Generalist","SAS Certified Data Scientist","Deep Learning Specialization");
+            case "SECURITY": return List.of("CISSP - Certified Information Systems Security Professional","CompTIA Security+","CEH - Certified Ethical Hacker","CISM - Certified Information Security Manager","OSCP - Offensive Security Certified Professional","GCIH - GIAC Incident Handler","CompTIA CASP+","GPEN - GIAC Penetration Tester","GSEC - GIAC Security Essentials","CCSP - Certified Cloud Security Professional","CySA+ - CompTIA Cybersecurity Analyst","CISA - Certified Information Systems Auditor","CHFI - Computer Hacking Forensic Investigator","CRISC - Certified in Risk and IS Control","ISO 27001 Lead Auditor");
+            case "SOFTWARE": return List.of("AWS Certified Developer","PMP - Project Management Professional","Certified ScrumMaster (CSM)","ISTQB Certified Tester","Spring Certified Professional","AWS DevOps Engineer Professional","CKAD - Certified Kubernetes App Developer","PMI-ACP - Agile Certified Practitioner","Oracle Java SE Developer","Red Hat Certified Engineer","Azure DevOps Engineer Expert","GitHub Actions Certification","Docker Certified Associate","SAFe Agilist","Certified Kubernetes Administrator (CKA)");
+            case "NETWORKS": return List.of("AWS Certified Solutions Architect","Cisco CCNA","Cisco CCNP","Certified Kubernetes Administrator (CKA)","Terraform Associate","Google Associate Cloud Engineer","AWS Advanced Networking Specialty","Azure Solutions Architect Expert","Azure Network Engineer Associate","CompTIA Network+","Juniper JNCIA","VMware VCP-DCV");
+            case "DATABASE": return List.of("Oracle Database SQL Certified Associate","Oracle Certified Professional","MongoDB Developer Certification","AWS Database Specialty","Azure Database Administrator","PostgreSQL Certified Associate","Cassandra Administrator Certification","Redis Certified Developer","MariaDB Certified DBA","Neo4j Certified Professional");
+            case "HARDWARE": return List.of("Cisco CCNA","CompTIA A+","ARM Accredited Engineer");
+            case "MATH": return List.of("Google Cloud Professional Data Engineer","IBM Data Science Professional","SAS Certified Data Scientist","Deep Learning Specialization","TensorFlow Developer Certificate");
+            default: return List.of("AWS Certified Developer");
         }
+    }
 
-        // 6. Resolve Certificates
-        Set<ProfessionalCertificate> certs = new HashSet<>();
-        for (String cn : certNames) {
-            certRepository.findByNameEn(cn).ifPresent(certs::add);
+    private List<String> getExpertEmailsForDomain(String domain) {
+        switch (domain) {
+            case "AI_DATA": return List.of("khalid.ai@sdaia.gov.sa","noura.data@aramco.com","yasser.bigdata@sabic.com","tariq.ai@tuwaiq.sa","layla.ml@google.com","mohammed.ds@microsoft.com","nada.nlp@sdaia.gov.sa","sultan.analytics@neom.com");
+            case "SECURITY": return List.of("sara.sec@nca.gov.sa","mona.sec@sit.sa","ali.sec@cert.gov.sa","khadija.soc@stc.com.sa","abdulaziz.ir@aramco.com","tamara.grc@elm.sa","hassan.pen@nca.gov.sa","manal.forensics@cert.gov.sa");
+            case "SOFTWARE": return List.of("ahmad.sw@stc.com.sa","reem.web@neom.com","turki.pm@lean.sa","hala.mobile@stcpay.com.sa","layan.qa@tahaluf.com","saleh.sw@thiqah.sa","fawaz.game@misk.org.sa","dalal.ui@sdaia.gov.sa","youssef.arch@amazon.com","ghada.devops@stc.com.sa","adel.backend@neom.com","rasha.fullstack@elm.sa","norah.mobile@sdaia.gov.sa","hamad.qa@thiqah.sa");
+            case "NETWORKS": return List.of("faisal.cloud@elm.sa","hind.net@mobily.com.sa","saad.infra@wipro.com","nawal.cloud@aws.com","waleed.cloud@google.com","asma.sdn@stc.com.sa","sultan.noc@mobily.com.sa","ibrahim.aws@aws.com","haya.azure@microsoft.com");
+            case "DATABASE": return List.of("bandar.db@alrajhibank.com","noura.data@aramco.com","fahad.dba@sabb.com","rakan.db@stc.com.sa","osama.bigdata@aramco.com","shaima.dba@snb.com","turki.dataeng@stc.com.sa","latifa.analytics@sabic.com");
+            case "HARDWARE": return List.of("omar.sys@saip.gov.sa","majed.it@thales.com","nasser.hw@kacst.edu.sa","khaled.embedded@neom.com","aisha.iot@aramco.com","mansour.fpga@kacst.edu.sa","salma.robotics@sdaia.gov.sa");
+            case "MATH": return List.of("khalid.ai@sdaia.gov.sa","tariq.ai@tuwaiq.sa","yasser.bigdata@sabic.com","layla.ml@google.com","mohammed.ds@microsoft.com");
+            default: return List.of("ahmad.sw@stc.com.sa");
         }
+    }
 
-        // 7. Build and save enrichment
-        CourseEnrichment enrichment = new CourseEnrichment();
-        enrichment.setExpert(expert);
-        enrichment.setCourse(course);
-        enrichment.setContent(content);
-        enrichment.setSkills(skills);
-        enrichment.setTools(tools);
-        enrichment.setCertificates(certs);
-        enrichment.setStatus(EnrichmentStatus.APPROVED);
-        enrichmentRepository.save(enrichment);
+    // ═══════════════════════════════════════════════════════════════════
+    // MASSIVE EXPERT SEEDER (50+ experts, incremental)
+    // ═══════════════════════════════════════════════════════════════════
+    private List<User> seedMassiveExperts() {
+        String[][] expertData = {
+            {"khalid.ai@sdaia.gov.sa", "خالد", "الغامدي", "AI Lead at SDAIA"},
+            {"noura.data@aramco.com", "نورة", "القحطاني", "Data Architect at Aramco"},
+            {"faisal.cloud@elm.sa", "فيصل", "العتيبي", "Cloud DevOps at Elm"},
+            {"sara.sec@nca.gov.sa", "سارة", "الشهري", "CyberSec Manager at NCA"},
+            {"ahmad.sw@stc.com.sa", "أحمد", "الدوسري", "SW Engineering Director at STC"},
+            {"majed.it@thales.com", "ماجد", "المطيري", "IT Consultant at Thales"},
+            {"yasser.bigdata@sabic.com", "ياسر", "العمري", "Big Data Engineer at SABIC"},
+            {"reem.web@neom.com", "ريم", "السبيعي", "Frontend Tech Lead at NEOM"},
+            {"turki.pm@lean.sa", "تركي", "الحربي", "Agile Project Manager at Lean Tech"},
+            {"hala.mobile@stcpay.com.sa", "هالة", "الرويلي", "Mobile Dev Lead at stc pay"},
+            {"omar.sys@saip.gov.sa", "عمر", "السالم", "Systems Analyst at SAIP"},
+            {"layan.qa@tahaluf.com", "ليان", "العنزي", "QA Engineer at Tahaluf"},
+            {"bandar.db@alrajhibank.com", "بندر", "الزهراني", "Database Admin at Al Rajhi Bank"},
+            {"hind.net@mobily.com.sa", "هند", "الشمري", "Network Architect at Mobily"},
+            {"saad.infra@wipro.com", "سعد", "التميمي", "Infrastructure Specialist at Wipro"},
+            {"mona.sec@sit.sa", "منى", "اليامي", "InfoSec Analyst at SITE"},
+            {"tariq.ai@tuwaiq.sa", "طارق", "الدعجاني", "ML Engineer at Tuwaiq Academy"},
+            {"dalal.ui@sdaia.gov.sa", "دلال", "المحسن", "UX/UI Designer at SDAIA"},
+            {"saleh.sw@thiqah.sa", "صالح", "الصالح", "Software Architect at Thiqah"},
+            {"nawal.cloud@aws.com", "نوال", "السعدون", "Cloud Support Engineer at AWS"},
+            {"fawaz.game@misk.org.sa", "فواز", "البلوي", "Game Developer at Misk Foundation"},
+            {"fahad.dba@sabb.com", "فهد", "القرني", "Senior DBA at SABB Bank"},
+            {"ali.sec@cert.gov.sa", "علي", "الحارثي", "SOC Team Lead at CERT SA"},
+            {"nasser.hw@kacst.edu.sa", "ناصر", "العسيري", "Embedded Systems Engineer at KACST"},
+            {"rakan.db@stc.com.sa", "راكان", "الشريف", "Data Engineer at STC"},
+            {"layla.ml@google.com", "ليلى", "الفهد", "Senior ML Engineer at Google"},
+            {"mohammed.ds@microsoft.com", "محمد", "الخليفة", "Data Science Lead at Microsoft"},
+            {"nada.nlp@sdaia.gov.sa", "ندى", "المنصور", "NLP Researcher at SDAIA"},
+            {"sultan.analytics@neom.com", "سلطان", "البقمي", "Analytics Director at NEOM"},
+            {"khadija.soc@stc.com.sa", "خديجة", "الهاجري", "SOC Manager at STC"},
+            {"abdulaziz.ir@aramco.com", "عبدالعزيز", "العبدالله", "Incident Response Lead at Aramco"},
+            {"tamara.grc@elm.sa", "تمارا", "الجهني", "GRC Specialist at Elm"},
+            {"hassan.pen@nca.gov.sa", "حسن", "الردادي", "Senior Pen Tester at NCA"},
+            {"manal.forensics@cert.gov.sa", "منال", "البشري", "Digital Forensics Lead at CERT SA"},
+            {"youssef.arch@amazon.com", "يوسف", "المالكي", "Solutions Architect at Amazon"},
+            {"ghada.devops@stc.com.sa", "غادة", "الأحمدي", "DevOps Lead at STC"},
+            {"adel.backend@neom.com", "عادل", "العجمي", "Backend Engineering Manager at NEOM"},
+            {"rasha.fullstack@elm.sa", "رشا", "العمري", "Full Stack Lead at Elm"},
+            {"norah.mobile@sdaia.gov.sa", "نورة", "الثقفي", "Mobile Engineering Lead at SDAIA"},
+            {"hamad.qa@thiqah.sa", "حمد", "المري", "QA Director at Thiqah"},
+            {"waleed.cloud@google.com", "وليد", "الرشيدي", "Cloud Infrastructure Lead at Google"},
+            {"asma.sdn@stc.com.sa", "أسماء", "المطرفي", "SDN Architect at STC"},
+            {"sultan.noc@mobily.com.sa", "سلطان", "اللحياني", "NOC Director at Mobily"},
+            {"ibrahim.aws@aws.com", "إبراهيم", "الحمدان", "AWS Networking Specialist at AWS"},
+            {"haya.azure@microsoft.com", "هيا", "السديري", "Azure Solutions Architect at Microsoft"},
+            {"osama.bigdata@aramco.com", "أسامة", "الشهري", "Big Data Platform Engineer at Aramco"},
+            {"shaima.dba@snb.com", "شيماء", "القرشي", "Senior DBA at SNB"},
+            {"turki.dataeng@stc.com.sa", "تركي", "النفيعي", "Data Engineering Manager at STC"},
+            {"latifa.analytics@sabic.com", "لطيفة", "الحربي", "Data Analytics Lead at SABIC"},
+            {"khaled.embedded@neom.com", "خالد", "الزمامي", "Embedded Systems Lead at NEOM"},
+            {"aisha.iot@aramco.com", "عائشة", "العتيبي", "IoT Solutions Architect at Aramco"},
+            {"mansour.fpga@kacst.edu.sa", "منصور", "الدوسري", "FPGA Design Engineer at KACST"},
+            {"salma.robotics@sdaia.gov.sa", "سلمى", "البلوي", "Robotics Engineer at SDAIA"}
+        };
+        List<User> returnedUsers = new ArrayList<>();
+        for (String[] data : expertData) {
+            String email = data[0];
+            User user = userRepository.findByEmail(email);
+            if (user == null) {
+                user = new User();
+                user.setEmail(email);
+                user.setUsername("expert_" + email.split("@")[0]);
+                user.setPassword(passwordEncoder.encode("Expert@2026"));
+                user.setFirstName(data[1]);
+                user.setLastName(data[2]);
+                user.setRole("ROLE_EXPERT");
+                user.setStatus("APPROVED");
+                user = userRepository.save(user);
+            }
+            returnedUsers.add(user);
+            if (expertRepository.findByUserId(user.getId()).isEmpty()) {
+                Expert expert = new Expert();
+                expert.setUser(user);
+                expert.setStatus(ExpertStatus.APPROVED);
+                expert.setRating(4.5 + (Math.random() * 0.5));
+                expert.setLinkedinUrl("https://linkedin.com/in/" + email.split("@")[0]);
+                expert.setBioAr("خبير في " + data[3]);
+                expert.setBioEn("Expert in " + data[3]);
+                expertRepository.save(expert);
+            }
+        }
+        System.out.println("SEEDER: " + expertData.length + " Experts seeded (incremental).");
+        return returnedUsers;
+    }
+
+    private List<User> generateVoterPool() {
+        List<User> voters = new ArrayList<>();
+        for (int i = 0; i < 50; i++) {
+            User u = userRepository.findByEmail("voter" + i + "@student.edu.sa");
+            if (u == null) {
+                u = new User(); u.setEmail("voter" + i + "@student.edu.sa");
+                u.setUsername("voter_stu" + i); u.setPassword(passwordEncoder.encode("123456"));
+                u.setFirstName("طالب"); u.setLastName(String.valueOf(i));
+                u.setRole("ROLE_STUDENT"); u.setStatus("APPROVED");
+                u = userRepository.save(u);
+            }
+            voters.add(u);
+        }
+        return voters;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // DETERMINISTIC MASSIVE ENRICHMENT SEEDER
+    // ═══════════════════════════════════════════════════════════════════
+    private void seedMassiveEnrichments(List<User> experts) {
+        List<Course> allCourses = courseRepository.findAll();
+        List<Skill> allSkills = skillRepository.findAll();
+        List<Tool> allTools = toolRepository.findAll();
+        List<ProfessionalCertificate> allCerts = certRepository.findAll();
+        List<User> voters = generateVoterPool();
+        Random rand = new Random(42);
+        int totalNew = 0, skipped = 0, skippedNonTech = 0;
+
+        for (Course course : allCourses) {
+            try {
+                if (isNonTechnicalCourse(course)) { skippedNonTech++; continue; }
+
+                String domain = classifyCourse(course);
+
+                int existing = enrichmentRepository
+                    .findByCourseIdAndStatus(course.getId(), EnrichmentStatus.APPROVED).size();
+                if (existing >= 5) { skipped++; continue; }
+
+                int target = rand.nextInt(4) + 5;
+                int needed = target - existing;
+
+                List<String> domainExpertEmails = getExpertEmailsForDomain(domain);
+                List<User> domainExperts = new ArrayList<>();
+                for (String email : domainExpertEmails) {
+                    User u = userRepository.findByEmail(email);
+                    if (u != null) domainExperts.add(u);
+                }
+                if (domainExperts.isEmpty()) continue;
+                Collections.shuffle(domainExperts, rand);
+
+                List<String> domainSkillNames = getSkillsForDomain(domain);
+                List<String> domainToolNames = getToolsForDomain(domain);
+                List<String> domainCertNames = getCertsForDomain(domain);
+
+                Set<Skill> domainSkills = new HashSet<>();
+                for (Skill s : allSkills) { if (domainSkillNames.contains(s.getNameEn())) domainSkills.add(s); }
+                Set<Tool> domainTools = new HashSet<>();
+                for (Tool t : allTools) { if (domainToolNames.contains(t.getNameEn())) domainTools.add(t); }
+                Set<ProfessionalCertificate> domainCerts = new HashSet<>();
+                for (ProfessionalCertificate c : allCerts) { if (domainCertNames.contains(c.getNameEn())) domainCerts.add(c); }
+
+                int injected = 0;
+                int idx = 0;
+                while (injected < needed) {
+                    User expertUser = domainExperts.get(idx % domainExperts.size());
+                    idx++;
+                    Expert expert = expertRepository.findByUserId(expertUser.getId()).orElse(null);
+                    if (expert == null) continue;
+
+                    String content = generateDynamicContent(course, expertUser, domain);
+
+                    CourseEnrichment enrichment = new CourseEnrichment();
+                    enrichment.setExpert(expert);
+                    enrichment.setCourse(course);
+                    enrichment.setContent(content);
+                    enrichment.setStatus(EnrichmentStatus.APPROVED);
+
+                    List<Skill> sList = new ArrayList<>(domainSkills);
+                    Collections.shuffle(sList, rand);
+                    Set<Skill> pickedSkills = new HashSet<>();
+                    int ns = Math.min(rand.nextInt(3) + 4, sList.size());
+                    for (int j = 0; j < ns; j++) pickedSkills.add(sList.get(j));
+                    enrichment.setSkills(pickedSkills);
+
+                    List<Tool> tList = new ArrayList<>(domainTools);
+                    Collections.shuffle(tList, rand);
+                    Set<Tool> pickedTools = new HashSet<>();
+                    int nt = Math.min(rand.nextInt(3) + 4, tList.size());
+                    for (int j = 0; j < nt; j++) pickedTools.add(tList.get(j));
+                    enrichment.setTools(pickedTools);
+
+                    List<ProfessionalCertificate> cList = new ArrayList<>(domainCerts);
+                    Collections.shuffle(cList, rand);
+                    Set<ProfessionalCertificate> pickedCerts = new HashSet<>();
+                    int nc = Math.min(rand.nextInt(3) + 1, cList.size());
+                    for (int j = 0; j < nc; j++) pickedCerts.add(cList.get(j));
+                    enrichment.setCertificates(pickedCerts);
+
+                    enrichment = enrichmentRepository.save(enrichment);
+
+                    int upvotes = rand.nextInt(41) + 10;
+                    List<User> sv = new ArrayList<>(voters);
+                    Collections.shuffle(sv, rand);
+                    for (int k = 0; k < upvotes && k < sv.size(); k++) enrichment.addUpvote(sv.get(k));
+                    enrichmentRepository.save(enrichment);
+                    injected++;
+                    totalNew++;
+                }
+            } catch (Exception e) {
+                System.err.println("SEEDER [WARN]: " + course.getCode() + ": " + e.getMessage());
+            }
+        }
+        System.out.println("SEEDER [DETERMINISTIC]: " + totalNew + " enrichments | " + skipped + " already >=5 | " + skippedNonTech + " non-technical skipped");
+    }
+
+    private String generateDynamicContent(Course course, User expert, String domain) {
+        String courseAr = course.getNameAr();
+        String courseEn = course.getNameEn();
+        Optional<Expert> expOpt = expertRepository.findByUserId(expert.getId());
+        String company = "مؤسسات تقنية رائدة";
+        if (expOpt.isPresent() && expOpt.get().getBioEn() != null && expOpt.get().getBioEn().contains("at ")) {
+            company = expOpt.get().getBioEn().substring(expOpt.get().getBioEn().indexOf("at ") + 3);
+        }
+        String expertName = expert.getFirstName() + " " + expert.getLastName();
+        StringBuilder sb = new StringBuilder();
+        sb.append("## 🎯 إثراء مهني: ").append(courseAr).append("\n\n");
+        sb.append("> **الخبير:** ").append(expertName).append(" — **").append(company).append("**\n\n");
+        sb.append("### 🏭 التطبيق العملي في بيئة العمل\n\n");
+        switch (domain) {
+            case "AI_DATA":
+                sb.append("البيانات هي نفط العصر الرقمي. في **").append(company).append("**، نعتمد يومياً على مفاهيم مقرر **").append(courseAr)
+                  .append("** لبناء نماذج التعلم العميق ومعالجة اللغات الطبيعية التي تدعم مشاريع الذكاء الاصطناعي ضمن رؤية 2030.")
+                  .append(" نستخدم PyTorch وTensorFlow عبر Databricks وApache Spark، وMLflow لتتبع التجارب، وHuggingFace لنماذج LLM، وSnowflake لمستودعات البيانات.")
+                  .append(" هذه التقنيات تُطبَّق في مشاريع **سدايا** للحكومة الذكية ومبادرات **نيوم** للمدن المعرفية.\n\n");
+                break;
+            case "SECURITY":
+                sb.append("حماية الفضاء السيبراني السعودي أولوية وطنية. في **").append(company).append("**، نطبق مفاهيم **").append(courseAr)
+                  .append("** لحماية البنية التحتية الحرجة من التهديدات المتقدمة المستمرة (APTs).")
+                  .append(" نستخدم CrowdStrike وSentinelOne للكشف والاستجابة، وSplunk وElastic SIEM للمراقبة، وGhidra للهندسة العكسية.")
+                  .append(" إطار عمل **NCA** يتطلب هذه الكفاءات في كل المؤسسات الحكومية والمالية.\n\n");
+                break;
+            case "SOFTWARE":
+                sb.append("في **").append(company).append("**، نعتمد على أساسيات مقرر **").append(courseAr)
+                  .append("** لبناء أنظمة مؤسسية قابلة للتطوير تخدم ملايين المستخدمين.")
+                  .append(" نستخدم Spring Boot وNext.js للـ Full-Stack، وKafka وRabbitMQ للأنظمة الموجهة بالأحداث، وDocker وKubernetes وArgoCD لخطوط CI/CD.")
+                  .append(" منظومة **STC** و**ثقة** و**نيوم** تعتمد على هذه البنية لتحقيق رؤية 2030.\n\n");
+                break;
+            case "NETWORKS":
+                sb.append("البنية التحتية الشبكية عمود التحول الرقمي. في **").append(company).append("**، نطبق مفاهيم **").append(courseAr)
+                  .append("** لبناء شبكات عالية التوفر بتقنيات SDN وNFV. نستخدم Terraform وAnsible للبنية التحتية ككود، وIstio لشبكات الخدمات،")
+                  .append(" وAWS CloudWatch وZabbix للمراقبة. مشاريع **نيوم** و**Elm** تتطلب بنية شبكية متطورة.\n\n");
+                break;
+            case "DATABASE":
+                sb.append("القرارات الاستراتيجية تُبنى على بيانات موثوقة. في **").append(company).append("**، نوظف مفاهيم **").append(courseAr)
+                  .append("** لتصميم قواعد بيانات مؤسسية. نستخدم Oracle RAC وPostgreSQL للعلائقية، وCassandra وDynamoDB للـ NoSQL،")
+                  .append(" وElasticsearch للبحث. **البنوك السعودية** كالراجحي وSNB ومراكز بيانات **أرامكو** تعتمد على هذه الأنظمة.\n\n");
+                break;
+            case "HARDWARE":
+                sb.append("الأنظمة المضمنة والدوائر المتكاملة أساس IoT والروبوتات. في **").append(company).append("**، نطبق مفاهيم **").append(courseAr)
+                  .append("** لتصميم أنظمة إلكترونية متقدمة. نستخدم STM32CubeIDE وFreeRTOS للأنظمة المضمنة، وQuartus Prime وXilinx Vivado لتصميم FPGA.")
+                  .append(" مشاريع **نيوم** و**SAMI** و**كاكست** تتطلب هذه الخبرات.\n\n");
+                break;
+            case "MATH":
+                sb.append("قد يبدو مقرر **").append(courseAr).append("** نظرياً، لكنه الأساس لكل التقنيات الحديثة. في **").append(company)
+                  .append("**، نستخدم الجبر الخطي في التعلم العميق، والتفاضل في تحسين النماذج (Gradient Descent)، والإحصاء في تقييم النماذج.")
+                  .append(" أدوات NumPy وPandas وScikit-learn تعتمد كلياً على هذه الأسس.\n\n");
+                break;
+            default:
+                sb.append("مقرر **").append(courseAr).append("** ركيزة أساسية في بناء العقلية الهندسية في **").append(company).append("**.\n\n");
+                break;
+        }
+        sb.append("### 🗺️ المسار المهني والشهادات\n\n");
+        switch (domain) {
+            case "AI_DATA":
+                sb.append("| المرحلة | المسمى الوظيفي | الخبرة |\n|---|---|---|\n");
+                sb.append("| Entry | محلل بيانات / ML Engineer مبتدئ | 0-2 سنوات |\n");
+                sb.append("| Senior | مهندس تعلم آلة أول / MLOps | 3-6 سنوات |\n");
+                sb.append("| Lead | قائد فريق AI / Principal DS | 7-10 سنوات |\n");
+                sb.append("| C-Level | Chief Data Officer | 10+ سنوات |\n\n");
+                break;
+            case "SECURITY":
+                sb.append("| المرحلة | المسمى الوظيفي | الخبرة |\n|---|---|---|\n");
+                sb.append("| Entry | محلل SOC / Security Analyst | 0-2 سنوات |\n");
+                sb.append("| Senior | Pen Tester أول / Threat Hunter | 3-6 سنوات |\n");
+                sb.append("| Lead | Security Architect / Red Team Lead | 7-10 سنوات |\n");
+                sb.append("| C-Level | CISO | 10+ سنوات |\n\n");
+                break;
+            case "SOFTWARE":
+                sb.append("| المرحلة | المسمى الوظيفي | الخبرة |\n|---|---|---|\n");
+                sb.append("| Entry | Junior Developer | 0-2 سنوات |\n");
+                sb.append("| Senior | Senior / Staff Engineer | 3-6 سنوات |\n");
+                sb.append("| Lead | Architect / Engineering Manager | 7-10 سنوات |\n");
+                sb.append("| C-Level | VP of Engineering / CTO | 10+ سنوات |\n\n");
+                break;
+            default:
+                sb.append("دمج المفاهيم الأكاديمية مع الأدوات الحديثة يُعد الطريق الأمثل لدخول سوق العمل.\n\n");
+                break;
+        }
+        sb.append("### 🇸🇦 الربط برؤية 2030\n\n");
+        sb.append("هذا المقرر يدعم أهداف رؤية 2030 في بناء اقتصاد معرفي وتأهيل كوادر وطنية متخصصة في **").append(courseEn).append("**.\n\n");
+        sb.append("### 💡 نصيحة الخبير\n\n");
+        sb.append("> *\"لا تتعاملوا مع مقرر **").append(courseAr).append("** على أنه مجرد متطلب أكاديمي. ");
+        sb.append("استثمروا في فهم تطبيقاته وابنوا مشاريع حقيقية على GitHub، ");
+        sb.append("فسوق العمل السعودي يبحث عن خريجين يمتلكون المعرفة التطبيقية.\"*\n\n");
+        sb.append("— **").append(expertName).append("**، ").append(company);
+        return sb.toString();
     }
 }
