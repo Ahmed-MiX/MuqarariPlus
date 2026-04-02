@@ -1,7 +1,7 @@
 # 🎓 منصة مقرري+ (Moqarari+) - الدستور المعماري الشامل
-> **"الهندسة المعمارية لربط النظرية الأكاديمية بالواقع الصناعي - الإصدار الذهبي v1.18 (Student Hierarchy Wizard)"**
+> **"الهندسة المعمارية لربط النظرية الأكاديمية بالواقع الصناعي - الإصدار الذهبي v1.19 (Course Addition Request System)"**
 
-[![Build Status](https://img.shields.io/badge/Build-SUCCESS-success.svg)](#) [![Version](https://img.shields.io/badge/Version-1.18%20Ultimate-blue.svg)](#) [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.4-brightgreen.svg)](#) [![Java](https://img.shields.io/badge/Java-17-orange.svg)](#)
+[![Build Status](https://img.shields.io/badge/Build-SUCCESS-success.svg)](#) [![Version](https://img.shields.io/badge/Version-1.19%20Ultimate-blue.svg)](#) [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.4-brightgreen.svg)](#) [![Java](https://img.shields.io/badge/Java-17-orange.svg)](#)
 
 ---
 
@@ -125,3 +125,13 @@ v1.18 (واجهة الطالب الهرمية - Student Hierarchy Wizard):
 * **إصلاح CSRF:** معالجة تعبير `_csrf` الآمن للصفحات المجهولة (anonymous) باستخدام `th:if="${_csrf != null}"`.
 * **إصلاح `showLoading`:** كشف الحاوية الأم (`wizard-step-*`) عند تحميل البيانات لمنع اختفاء مؤشرات التحميل وحالات الفراغ.
 * **إصلاح نموذج التسجيل:** استبدال `th:action` بـ `action="/student/enroll"` في النماذج المُولَّدة بـ JavaScript لأن ثيميليف لا يعالج HTML المُولَّد ديناميكياً.
+
+v1.19 (نظام طلبات المقررات - Course Addition Request System):
+* **كيان طلبات المقررات:** إضافة `CourseAdditionRequest` مع `CourseAdditionRequestStatus` (PENDING, APPROVED, REJECTED) — يسمح للطلاب بطلب إضافة مقررات مفقودة ضمن سياق تخصصهم.
+* **معمارية حقن الخدمات:** `CourseAdditionRequestService` يحقن `MajorService` و `CourseService` بدلاً من المستودعات الخام — إعادة استخدام منطق التحقق وإنشاء المقررات وتجنب التكرار.
+* **إنشاء المقررات تلقائياً:** عند موافقة الإدارة على الطلب يُنشأ المقرر آلياً عبر `CourseService.createCourse()` مع توليد رمز تلقائي `REQ-{id}` عند عدم توفيره.
+* **واجهة الطالب:** صفحة `/student/requests` مع نموذج طلب يستخدم المعالج الهرمي (جامعة ← كلية ← تخصص) عبر AJAX، وسجل طلبات الطالب مع عرض حالة كل طلب وملاحظات الإدارة.
+* **واجهة الإدارة:** صفحة `/admin/course-requests` مع فلترة حسب الحالة (الكل/معلّق/موافق/مرفوض)، وبطاقات مراجعة تعرض التسلسل الأكاديمي الكامل (جامعة ← كلية ← تخصص)، ونوافذ منبثقة (Modals) للموافقة والرفض مع ملاحظات اختيارية.
+* **حماية الحذف:** لا يمكن حذف الطلبات الموافق عليها (لأنها ولّدت مقرراً فعلياً).
+* **تحسينات التنقل:** إضافة زر "طلب مقرر مفقود" في لوحة الطالب، وتحويل بطاقات الإجراءات السريعة في لوحة الإدارة إلى صف واحد (4 بطاقات `col-md-3`)، وإضافة رابط "لوحة الإدارة" في شريط التنقل للمشرفين العامين (Super Admins).
+* **إصلاحات القوالب:** تصحيح أخطاء SpEL (`&& request.adminNotes` → `and request.adminNotes != null`) لمنع فشل تحليل القالب عند القيم الفارغة، وإزالة سمة `data-confirm-msg` الميتة من زر الموافقة المنبثق.
