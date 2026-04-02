@@ -348,6 +348,11 @@
                         </ol>
                     </div>
 
+                    <!-- Request Missing Course CTA -->
+                    <a th:href="@{/student/requests}" class="btn btn-primary btn-lg w-100 fw-bold rounded-pill shadow-sm mb-3">
+                        <span th:text="${#locale.language == 'ar' ? '📝 طلب مقرر مفقود' : '📝 Request Missing Course'}">📝 Request Missing Course</span>
+                    </a>
+
                     <!-- Browse Courses CTA -->
                     <a th:href="@{/courses}" class="btn btn-outline-secondary btn-lg w-100 fw-bold rounded-pill shadow-sm">
                         <span th:text="${#locale.language == 'ar' ? '🔍 تصفح كتالوج المقررات' : '🔍 Browse Course Catalog'}">🔍 Browse Course Catalog</span>
