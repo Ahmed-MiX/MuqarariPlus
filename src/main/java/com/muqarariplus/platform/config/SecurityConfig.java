@@ -2,14 +2,14 @@ package com.muqarariplus.platform.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
 @Configuration
 @EnableWebSecurity
@@ -28,7 +28,7 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable) // Simplified for the prototype
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/", "/courses", "/course/**", "/search", "/css/**", "/js/**", "/img/**", "/fonts/**", "/uploads/**", "/login", "/register", "/error", "/favicon.ico").permitAll()
+                .requestMatchers("/", "/courses", "/course/**", "/search", "/css/**", "/js/**", "/img/**", "/fonts/**", "/uploads/**", "/login", "/register", "/error", "/favicon.ico", "/student/api/**").permitAll()
                 .requestMatchers("/super-admin", "/super-admin/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/expert", "/expert/**").hasAnyRole("EXPERT", "ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/admin", "/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")

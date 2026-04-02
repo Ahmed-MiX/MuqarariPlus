@@ -70,29 +70,17 @@
                 <div class="col-lg-8">
 
                     <!-- ══════════════════════════════════════════════ -->
-                    <!-- SECTION 1: ENROLL IN A COURSE                -->
+                    <!-- SECTION 1: ENROLL VIA HIERARCHY WIZARD       -->
                     <!-- ══════════════════════════════════════════════ -->
                     <div class="card bg-white rounded-4 shadow-sm border-0 p-4 mb-4">
                         <h3 class="h5 fw-bold text-primary-blue mb-3">
-                            <span class="me-2">➕</span>
+                            <span class="me-2">🎯</span>
                             <span th:text="${#locale.language == 'ar' ? 'تسجيل مقرر جديد' : 'Enroll in a Course'}">Enroll in a Course</span>
                         </h3>
-                        <form th:action="@{/student/enroll}" method="post" class="d-flex gap-3 align-items-end flex-wrap">
-                            <div class="flex-grow-1">
-                                <select name="courseId" class="form-select form-select-lg bg-light border-0 shadow-sm" required>
-                                    <option value="" disabled selected
-                                            th:text="${#locale.language == 'ar' ? '— اختر مقرراً للتسجيل —' : '— Select a course to enroll —'}">— Select a course —</option>
-                                    <option th:each="course : ${allCourses}"
-                                            th:value="${course.id}"
-                                            th:text="${course.code + ' — ' + (#locale.language == 'ar' ? course.nameAr : course.nameEn)}">
-                                        CS 1301 — Programming
-                                    </option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-lg px-4 fw-bold rounded-pill shadow-sm flex-shrink-0">
-                                <span th:text="${#locale.language == 'ar' ? 'تسجيل' : 'Enroll'}">Enroll</span>
-                            </button>
-                        </form>
+                        <!-- Hidden enrolled course IDs for the wizard -->
+                        <input type="hidden" id="enrolled-course-ids"
+                               th:value="${#strings.listJoin(enrolledCourseIds, ',')}">
+                        <div th:replace="~{fragments/course-wizard :: wizard(mode='enroll')}"></div>
                     </div>
 
                     <!-- ══════════════════════════════════════════════ -->

@@ -35,9 +35,6 @@ public class Course {
     @JoinColumn(name = "creator_id")
     private User creator;
 
-    private String specialization;
-    private String university;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "major_id")
     private Major major;

@@ -7,75 +7,84 @@
 
     <div th:fragment="main-content">
 
-        <!-- ===== SEARCH HEADER ===== -->
+        <!-- ===== HEADER ===== -->
         <section class="bg-primary text-white py-5"
                  style="background-color: var(--primary-blue) !important;">
             <div class="container py-4 text-center">
-                <h1 class="display-5 fw-bold text-white mb-4"
+                <h1 class="display-5 fw-bold text-white mb-3"
                     th:text="${content['nav.courses']}">Courses</h1>
-                <form th:action="@{/courses}" method="get" class="d-flex mx-auto"
-                      style="max-width: 600px;">
-                    <div class="input-group shadow border-0 rounded-3 overflow-hidden">
-                        <input type="text" name="search"
-                               class="form-control form-control-lg border-0 py-3"
-                               th:placeholder="${content['courses.search.placeholder']}"
-                               th:value="${param.search}">
-                        <button type="submit" class="btn btn-accent px-4 fw-bold">🔍</button>
-                    </div>
-                </form>
+                <p class="text-white-50 fs-5 mb-0"
+                   th:text="${#locale.language == 'ar' ? 'استكشف المقررات حسب الجامعة والكلية والتخصص.' : 'Explore courses by university, college, and major.'}">
+                    Explore courses by university, college, and major.
+                </p>
             </div>
         </section>
 
-        <!-- ===== COURSE LISTING ===== -->
+        <!-- ===== WIZARD + COURSE GRID ===== -->
         <section class="bg-offwhite py-5 min-vh-75">
             <div class="container pb-5">
-                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 pt-3">
 
-                    <!-- Dynamic Course Cards -->
-                    <div th:each="course : ${courses}" class="col">
-                        <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden course-card transition-all">
-                            <div class="card-body p-4 d-flex flex-column">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="text-uppercase small fw-bold text-muted"
-                                          th:text="${course.university ?: ''}"></span>
-                                    <span th:if="${course.enrichments != null and !course.enrichments.isEmpty()}"
-                                          class="badge text-white fw-bold rounded-pill px-3 py-2"
-                                          style="background-color: var(--secondary-teal);"
-                                          th:text="${content['course.expert.verified']}">Verified</span>
-                                </div>
+                <!-- Wizard -->
+                <div th:replace="~{fragments/course-wizard :: wizard(mode='browse')}"></div>
 
-                                <h3 class="h5 fw-bold text-primary-blue mb-3"
-                                    th:text="${#locale.language == 'ar' ? course.nameAr : course.nameEn}">Course Name</h3>
-                                <p class="text-muted"
-                                   th:text="${#locale.language == 'ar' ? course.descriptionAr : course.descriptionEn}"
-                                   style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Description</p>
+                <!-- Fallback: server-filtered course grid (when JS is disabled or direct link with params) -->
+                <div th:if="${courses != null and !#lists.isEmpty(courses)}" class="mt-4">
+                    <h4 class="h5 fw-bold text-primary-blue mb-3">
+                        <span th:text="${#locale.language == 'ar' ? 'نتائج التصفح' : 'Browse Results'}">Browse Results</span>
+                    </h4>
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                        <div th:each="course : ${courses}" class="col">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden course-card transition-all">
+                                <div class="card-body p-4 d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+                                        <div>
+                                            <span class="text-uppercase small fw-bold text-muted"
+                                                  th:text="${course.code ?: ''}"></span>
+                                            <span th:if="${course.major != null}" class="badge bg-light text-muted rounded-pill ms-1 small">
+                                                <span th:text="${#locale.language == 'ar' ? course.major.nameAr : course.major.nameEn}">Major</span>
+                                            </span>
+                                        </div>
+                                        <span th:if="${course.enrichments != null and !course.enrichments.isEmpty()}"
+                                              class="badge text-white fw-bold rounded-pill px-3 py-2"
+                                              style="background-color: var(--secondary-teal);"
+                                              th:text="${content['course.expert.verified']}">Verified</span>
+                                    </div>
 
-                                <div class="mt-auto pt-4 d-flex justify-content-between align-items-center">
-                                    <strong class="text-secondary-teal fs-6">
-                                        <span th:text="${course.enrichments != null ? course.enrichments.size() : 0}">0</span>
-                                        <span th:text="${content['courses.card.resources']}">Resources</span>
-                                    </strong>
-                                    <a th:href="@{/course/{id}(id=${course.id})}"
-                                       class="btn btn-outline-primary btn-sm px-3 rounded-pill fw-bold"
-                                       th:text="${content['courses.card.view']}">View &rarr;</a>
+                                    <h3 class="h5 fw-bold text-primary-blue mb-3"
+                                        th:text="${#locale.language == 'ar' ? course.nameAr : course.nameEn}">Course Name</h3>
+                                    <p class="text-muted"
+                                       th:text="${#locale.language == 'ar' ? course.descriptionAr : course.descriptionEn}"
+                                       style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Description</p>
+
+                                    <div class="mt-auto pt-4 d-flex justify-content-between align-items-center">
+                                        <strong class="text-secondary-teal fs-6">
+                                            <span th:text="${course.enrichments != null ? course.enrichments.size() : 0}">0</span>
+                                            <span th:text="${content['courses.card.resources']}">Resources</span>
+                                        </strong>
+                                        <a th:href="@{/course/{id}(id=${course.id})}"
+                                           class="btn btn-outline-primary btn-sm px-3 rounded-pill fw-bold"
+                                           th:text="${content['courses.card.view']}">View &rarr;</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Empty State -->
-                    <div th:if="${courses == null or #lists.isEmpty(courses)}" class="col-12 text-center py-5 mt-4">
-                        <div class="p-5 bg-white border rounded-4 shadow-sm mx-auto text-muted"
-                             style="max-width: 500px;">
-                            <div class="display-1 mb-3">📚</div>
-                            <h3 class="fw-bold text-primary-blue mb-3"
-                                th:text="${content['courses.empty.title']}">No Courses Found</h3>
-                            <p class="fs-5"
-                               th:text="${content['courses.empty.desc']}">Try adjusting your search.</p>
-                        </div>
-                    </div>
-
                 </div>
+
+                <!-- Empty state when no courses and no wizard interaction -->
+                <div th:if="${courses == null or #lists.isEmpty(courses)}" class="text-center py-5 mt-4">
+                    <div class="p-5 bg-white border rounded-4 shadow-sm mx-auto text-muted"
+                         style="max-width: 500px;">
+                        <div class="display-1 mb-3">🏛️</div>
+                        <h3 class="fw-bold text-primary-blue mb-3"
+                            th:text="${#locale.language == 'ar' ? 'ابدأ باختيار جامعتك' : 'Start by Choosing Your University'}">Start by Choosing Your University</h3>
+                        <p class="fs-5"
+                           th:text="${#locale.language == 'ar' ? 'استخدم الدليل أعلاه لاستكشاف المقررات حسب الهيكل الأكاديمي.' : 'Use the guide above to explore courses by academic structure.'}">
+                            Use the guide above to explore courses.
+                        </p>
+                    </div>
+                </div>
+
             </div>
         </section>
 

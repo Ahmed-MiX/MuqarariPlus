@@ -222,7 +222,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                 co.setNameAr(c[2]);
                 co.setDescriptionEn("CCIS standard course.");
                 co.setDescriptionAr("مقرر ضمن كلية علوم الحاسب والمعلومات.");
-                co.setUniversity("CCIS");
                 co.setMajor(major);
                 courseRepository.save(co);
             }
@@ -235,7 +234,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             co.setNameAr(c[2]);
             co.setDescriptionEn("CCIS standard course.");
             co.setDescriptionAr("مقرر ضمن كلية علوم الحاسب والمعلومات.");
-            co.setUniversity("CCIS");
             co.setMajor(seMajor);
             courseRepository.save(co);
         }

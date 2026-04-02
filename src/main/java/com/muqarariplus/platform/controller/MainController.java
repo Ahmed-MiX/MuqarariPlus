@@ -4,6 +4,7 @@ import com.muqarariplus.platform.entity.Course;
 import com.muqarariplus.platform.entity.CourseEnrichment;
 import com.muqarariplus.platform.repository.CourseRepository;
 import com.muqarariplus.platform.service.CourseEnrichmentService;
+import com.muqarariplus.platform.service.UniversityService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,11 +19,14 @@ public class MainController {
 
     private final CourseRepository courseRepository;
     private final CourseEnrichmentService enrichmentService;
+    private final UniversityService universityService;
 
     public MainController(CourseRepository courseRepository,
-                          CourseEnrichmentService enrichmentService) {
+                          CourseEnrichmentService enrichmentService,
+                          UniversityService universityService) {
         this.courseRepository = courseRepository;
         this.enrichmentService = enrichmentService;
+        this.universityService = universityService;
     }
 
     @GetMapping("/student-dashboard")
@@ -36,15 +40,32 @@ public class MainController {
     }
 
     @GetMapping("/courses")
-    public String courses(@RequestParam(required = false) String search, Model model) {
-        List<Course> courses;
+    public String courses(@RequestParam(required = false) String search,
+                          @RequestParam(required = false) Long universityId,
+                          @RequestParam(required = false) Long collegeId,
+                          @RequestParam(required = false) Long majorId,
+                          Model model) {
+        model.addAttribute("universities", universityService.getAllUniversities());
+
         if (search != null && !search.isEmpty()) {
-            courses = courseRepository.findByNameArContainingIgnoreCaseOrNameEnContainingIgnoreCase(search, search);
+            List<Course> courses = courseRepository.findByNameArContainingIgnoreCaseOrNameEnContainingIgnoreCase(search, search);
+            model.addAttribute("courses", courses);
+        } else if (majorId != null) {
+            model.addAttribute("courses", courseRepository.findAll().stream()
+                    .filter(c -> c.getMajor() != null && c.getMajor().getId().equals(majorId))
+                    .toList());
+        } else if (collegeId != null) {
+            model.addAttribute("courses", courseRepository.findAll().stream()
+                    .filter(c -> c.getMajor() != null && c.getMajor().getCollege() != null && c.getMajor().getCollege().getId().equals(collegeId))
+                    .toList());
+        } else if (universityId != null) {
+            model.addAttribute("courses", courseRepository.findAll().stream()
+                    .filter(c -> c.getMajor() != null && c.getMajor().getCollege() != null && c.getMajor().getCollege().getUniversity() != null && c.getMajor().getCollege().getUniversity().getId().equals(universityId))
+                    .toList());
         } else {
-            courses = courseRepository.findAll();
+            model.addAttribute("courses", List.of());
         }
 
-        model.addAttribute("courses", courses);
         return "courses";
     }
 
