@@ -60,7 +60,7 @@
         <!-- ===== QUICK ACTIONS ===== -->
         <section class="container py-4">
             <div class="row g-4 mb-5">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <a th:href="@{/admin/academic}" class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4 text-decoration-none">
                         <div class="d-flex align-items-center gap-3">
                             <span class="fs-2">🏛️</span>
@@ -71,7 +71,7 @@
                         </div>
                     </a>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <a th:href="@{/admin/dashboard}" class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4 text-decoration-none">
                         <div class="d-flex align-items-center gap-3">
                             <span class="fs-2">📊</span>
@@ -82,13 +82,24 @@
                         </div>
                     </a>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <a th:href="@{/admin/enrichments/pending}" class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4 text-decoration-none">
                         <div class="d-flex align-items-center gap-3">
                             <span class="fs-2">📋</span>
                             <div>
                                 <h3 class="h6 fw-bold text-primary-blue mb-1" th:text="${#locale.language == 'ar' ? 'قائمة الإثراءات' : 'Enrichment Queue'}">Enrichment Queue</h3>
                                 <small class="text-muted" th:text="${#locale.language == 'ar' ? 'مراجعة إثراءات الخبراء المعلّقة' : 'Review pending expert enrichments'}">Review pending expert enrichments</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a th:href="@{/admin/course-requests}" class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4 text-decoration-none">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="fs-2">📝</span>
+                            <div>
+                                <h3 class="h6 fw-bold text-primary-blue mb-1" th:text="${#locale.language == 'ar' ? 'طلبات المقررات' : 'Course Requests'}">Course Requests</h3>
+                                <small class="text-muted" th:text="${#locale.language == 'ar' ? 'مراجعة وإدارة طلبات الطلاب لإضافة مقررات' : 'Review & manage student course addition requests'}">Review & manage student course addition requests</small>
                             </div>
                         </div>
                     </a>
