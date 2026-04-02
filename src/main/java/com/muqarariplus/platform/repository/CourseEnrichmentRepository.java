@@ -52,4 +52,6 @@ public interface CourseEnrichmentRepository extends JpaRepository<CourseEnrichme
            ")")
     List<CourseEnrichment> searchApprovedByKeyword(@Param("keyword") String keyword,
                                                    @Param("status") EnrichmentStatus status);
+
+    long countByCourseId(Long courseId);
 }

@@ -50,7 +50,7 @@
                                         th:text="${#locale.language == 'ar' ? course.nameAr : course.nameEn}">Course</h3>
                                     <p class="text-muted small mb-0">
                                         <span th:text="${course.code}">CODE</span> •
-                                        <span th:text="${course.university}">University</span>
+                                        <span th:text="${course.major != null ? (#locale.language == 'ar' ? course.major.college.university.nameAr : course.major.college.university.nameEn) : 'N/A'}">University</span>
                                     </p>
                                 </div>
                             </div>

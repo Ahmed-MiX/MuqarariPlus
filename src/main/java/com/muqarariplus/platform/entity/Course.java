@@ -15,7 +15,6 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
     private String code;
 
     @Column(nullable = false)
@@ -36,8 +35,9 @@ public class Course {
     @JoinColumn(name = "creator_id")
     private User creator;
 
-    private String specialization;
-    private String university;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "major_id")
+    private Major major;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;

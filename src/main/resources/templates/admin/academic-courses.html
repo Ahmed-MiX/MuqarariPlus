@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${#locale.language == 'ar' ? 'إدارة المقررات | Muqarari+' : 'Manage Courses | Muqarari+'}">Manage Courses | Muqarari+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <div th:fragment="main-content">
+
+        <section class="text-white py-5" style="background: linear-gradient(135deg, #0A192F 0%, #1a3a5c 50%, #00B4D8 100%);">
+            <div class="container py-3">
+                <nav aria-label="breadcrumb" class="mb-2">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a th:href="@{/admin}" class="text-white-50 text-decoration-none" th:text="${#locale.language == 'ar' ? 'لوحة الإدارة' : 'Admin Dashboard'}">Admin Dashboard</a></li>
+                        <li class="breadcrumb-item"><a th:href="@{/admin/academic}" class="text-white-50 text-decoration-none" th:text="${#locale.language == 'ar' ? 'الهيكل الأكاديمي' : 'Academic Structure'}">Academic Structure</a></li>
+                        <li class="breadcrumb-item active text-white" th:text="${#locale.language == 'ar' ? 'المقررات' : 'Courses'}">Courses</li>
+                    </ol>
+                </nav>
+                <h1 class="display-6 fw-bold mb-0 text-white">
+                    <span th:text="${#locale.language == 'ar' ? '📖 إدارة المقررات' : '📖 Manage Courses'}">📖 Manage Courses</span>
+                </h1>
+            </div>
+        </section>
+
+        <section class="container py-5 mt-3">
+
+            <div th:if="${successMsg}" class="alert alert-success border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">✅</span>
+                <span class="fw-semibold" th:text="${successMsg}"></span>
+            </div>
+
+            <div th:if="${errorMsg}" class="alert alert-danger border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">⛔</span>
+                <span class="fw-semibold" th:text="${errorMsg}"></span>
+            </div>
+
+            <div class="card bg-white rounded-4 shadow-sm border-0 mb-4">
+                <div class="card-body p-4">
+                    <form th:action="@{/admin/academic/courses}" method="get" class="row g-3 align-items-end">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" th:text="${#locale.language == 'ar' ? 'تصفية حسب التخصص' : 'Filter by Major'}">Filter by Major</label>
+                            <select name="majorId" class="form-select rounded-3" onchange="this.form.submit()">
+                                <option value="" th:text="${#locale.language == 'ar' ? 'اختر تخصصاً...' : 'Select a major...'}">Select a major...</option>
+                                <option th:each="m : ${majors}" th:value="${m.id}"
+                                        th:text="${(#locale.language == 'ar' ? m.nameAr : m.nameEn) + (m.code != null ? ' (' + m.code + ')' : '')}"
+                                        th:selected="${selectedMajorId != null && selectedMajorId == m.id}"></option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(majors)}" class="card bg-warning bg-opacity-10 border-warning rounded-4 shadow-sm p-4 mb-4">
+                <span th:text="${#locale.language == 'ar' ? '⚠️ يجب إضافة تخصص أولاً قبل إضافة مقرر.' : '⚠️ You must add a major before adding a course.'}">⚠️ You must add a major before adding a course.</span>
+                <a th:href="@{/admin/academic/majors}" class="btn btn-sm btn-outline-warning rounded-pill mt-2"
+                   th:text="${#locale.language == 'ar' ? 'إدارة التخصصات' : 'Manage Majors'}">Manage Majors</a>
+            </div>
+
+            <div th:if="${selectedMajorId != null}" class="card bg-white rounded-4 shadow-sm border-0 mb-4">
+                <div class="card-header bg-white border-bottom p-4">
+                    <h5 class="fw-bold text-primary-blue mb-0"
+                        th:text="${editingCourse != null ? (#locale.language == 'ar' ? 'تعديل مقرر' : 'Edit Course') : (#locale.language == 'ar' ? 'إضافة مقرر جديد' : 'Add New Course')}">Add New Course</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="${editingCourse != null} ? @{'/admin/academic/courses/' + ${editingCourse.id} + '/update'} : @{'/admin/academic/courses/create'}" method="post">
+                        <input type="hidden" name="majorId" th:value="${selectedMajorId}">
+                        <div class="row g-3">
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold" th:text="${#locale.language == 'ar' ? 'الرمز' : 'Code'}">Code</label>
+                                <input type="text" name="code" class="form-control rounded-3" required
+                                       th:value="${editingCourse != null} ? ${editingCourse.code} : ''">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold" th:text="${#locale.language == 'ar' ? 'الاسم بالإنجليزية' : 'Name (English)'}">Name (English)</label>
+                                <input type="text" name="nameEn" class="form-control rounded-3" required
+                                       th:value="${editingCourse != null} ? ${editingCourse.nameEn} : ''">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold" th:text="${#locale.language == 'ar' ? 'الاسم بالعربية' : 'Name (Arabic)'}">Name (Arabic)</label>
+                                <input type="text" name="nameAr" class="form-control rounded-3" required
+                                       th:value="${editingCourse != null} ? ${editingCourse.nameAr} : ''">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold" th:text="${#locale.language == 'ar' ? 'الوصف (EN)' : 'Description (EN)'}">Description (EN)</label>
+                                <input type="text" name="descriptionEn" class="form-control rounded-3"
+                                       th:value="${editingCourse != null} ? ${editingCourse.descriptionEn} : ''">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end gap-2">
+                                <button type="submit" class="btn btn-primary fw-bold rounded-pill shadow-sm w-100"
+                                        th:text="${editingCourse != null ? (#locale.language == 'ar' ? 'تحديث' : 'Update') : (#locale.language == 'ar' ? 'إضافة' : 'Add')}">Add</button>
+                                <a th:if="${editingCourse != null}" th:href="@{/admin/academic/courses(majorId=${selectedMajorId})}" class="btn btn-outline-secondary rounded-pill">✕</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card bg-white rounded-4 shadow-sm border-0 overflow-hidden">
+                <div class="card-header bg-white border-bottom p-4">
+                    <h5 class="fw-bold text-primary-blue mb-0"
+                        th:text="${#locale.language == 'ar' ? 'المقررات الموجودة' : 'Existing Courses'}">Existing Courses</h5>
+                </div>
+                <div th:if="${#lists.isEmpty(courses)}" class="text-center py-5">
+                    <span class="fs-1">📭</span>
+                    <p class="text-muted mt-2" th:text="${#locale.language == 'ar' ? 'لا توجد مقررات لهذا التخصص.' : 'No courses for this major.'}">No courses for this major.</p>
+                </div>
+                <div th:unless="${#lists.isEmpty(courses)}" class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th th:text="${#locale.language == 'ar' ? 'الرمز' : 'Code'}">Code</th>
+                                <th th:text="${#locale.language == 'ar' ? 'الاسم (EN)' : 'Name (EN)'}">Name (EN)</th>
+                                <th th:text="${#locale.language == 'ar' ? 'الاسم (AR)' : 'Name (AR)'}">Name (AR)</th>
+                                <th th:text="${#locale.language == 'ar' ? 'الإثراءات' : 'Enrichments'}">Enrichments</th>
+                                <th th:text="${#locale.language == 'ar' ? 'إجراءات' : 'Actions'}">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="course : ${courses}">
+                                <td><span class="badge bg-secondary rounded-pill" th:text="${course.code}">CS 1301</span></td>
+                                <td class="fw-semibold" th:text="${course.nameEn}"></td>
+                                <td th:text="${course.nameAr}"></td>
+                                <td><span class="badge bg-info rounded-pill" th:text="${course.enrichments != null ? #lists.size(course.enrichments) : 0}">0</span></td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a th:href="@{/admin/academic/courses(majorId=${selectedMajorId}, editId=${course.id})}"
+                                           class="btn btn-sm btn-outline-primary rounded-pill"
+                                           th:text="${#locale.language == 'ar' ? 'تعديل' : 'Edit'}">Edit</a>
+                                        <form th:action="@{'/admin/academic/courses/' + ${course.id} + '/delete'}" method="post" class="d-inline">
+                                            <input type="hidden" name="majorId" th:value="${selectedMajorId}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill"
+                                                    onclick="return confirm(this.dataset.confirmMsg)"
+                                                    th:data-confirm-msg="${#locale.language == 'ar' ? 'هل أنت متأكد؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure? This action cannot be undone.'}"
+                                                    th:text="${#locale.language == 'ar' ? 'حذف' : 'Delete'}">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <a th:href="@{/admin/academic}" class="btn btn-outline-secondary btn-lg px-5 fw-bold rounded-pill shadow-sm">
+                    <span th:text="${#locale.language == 'ar' ? '← العودة للهيكل الأكاديمي' : '→ Back to Academic Structure'}">→ Back to Academic Structure</span>
+                </a>
+            </div>
+
+        </section>
+    </div>
+
+</body>
+</html>

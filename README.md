@@ -1,7 +1,7 @@
 # 🎓 منصة مقرري+ (Moqarari+) - الدستور المعماري الشامل
-> **"الهندسة المعمارية لربط النظرية الأكاديمية بالواقع الصناعي - الإصدار الذهبي v1.16 (Absolute Perfection)"**
+> **"الهندسة المعمارية لربط النظرية الأكاديمية بالواقع الصناعي - الإصدار الذهبي v1.18 (Student Hierarchy Wizard)"**
 
-[![Build Status](https://img.shields.io/badge/Build-SUCCESS-success.svg)](#) [![Version](https://img.shields.io/badge/Version-1.16%20Ultimate-blue.svg)](#) [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.4-brightgreen.svg)](#) [![Java](https://img.shields.io/badge/Java-17-orange.svg)](#)
+[![Build Status](https://img.shields.io/badge/Build-SUCCESS-success.svg)](#) [![Version](https://img.shields.io/badge/Version-1.18%20Ultimate-blue.svg)](#) [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.4-brightgreen.svg)](#) [![Java](https://img.shields.io/badge/Java-17-orange.svg)](#)
 
 ---
 
@@ -96,3 +96,32 @@ v1.14: ترقية واجهة الخبير إلى "مركز قيادة" مع مح
 v1.15: إضافة حلقة التفاعل (التصويت والحفظ - Upvotes & Bookmarks).
 
 v1.16 (الإصدار النهائي): حقن الشهادات الاحترافية، وبيانات السوق الحقيقية (سدايا، أرامكو، الخ).
+
+v1.17 (الهيكل الأكاديمي والإدارة الشاملة):
+* **توسيع الشبكة المعرفية:** إضافة كيان `University` → `College` → `Major` → `Course` لتحويل الهيكلة الأكاديمية من مسطحة إلى هرمية متداخلة.
+* **كيانات جديدة:** `University` (جامعات)، `College` (كليات)، `Major` (تخصصات) مع روابط ثنائية الاتجاه.
+* **ربط المقررات بالتخصصات:** إضافة علاقة `@ManyToOne` من `Course` إلى `Major` — كل مقرر ينتمي لتخصص واحد، مع تكرار المقررات المشتركة بين التخصصات.
+* **مستودعات جديدة:** `UniversityRepository`, `CollegeRepository`, `MajorRepository` مع استعلامات عدّ (`countBy*`) لحماية الحذف.
+* **طبقة الخدمات الكاملة:** `UniversityService`, `CollegeService`, `MajorService`, `CourseService` — كل خدمة توفر CRUD كامل مع حماية الحذف (لا يمكن حذف كيان له أبناء مرتبطون).
+* **نموذج طلبات DTO:** استخدام Java Records في `payload/requests/` (`UniversityRequest`, `CollegeRequest`, `MajorRequest`, `CourseRequest`) مع تحقق `@Valid`.
+* **لوحة إدارة أكاديمية:** 4 متحكمات (`AdminUniversityController`, `AdminCollegeController`, `AdminMajorController`, `AdminCourseController`) + 5 قوالب Thymeleaf مع دعم ثنائي اللغة (AR/EN) كامل.
+* **لوحة الأكاديمية الرئيسية:** عرض شجري للهيكل الكامل (جامعة ← كلية ← تخصص ← مقررات) مع بطاقات إحصائية وروابط سريعة.
+* **إصلاحات أمنية:** تصحيح مسارات `AdminController` (كانت `/admin/admin` بسبب تكرار البادئة).
+* **تحسينات .gitignore:** إضافة `.settings/`, `.classpath`, `.project`, `.factorypath`, `uploads/`.
+* **توطين شامل:** ترجمة جميع العناوين، مسارات التنقل (breadcrumbs)، النصوص الاحتياطية، والعناصر التفاعلية في لوحة الإدارة الأكاديمية.
+
+v1.18 (واجهة الطالب الهرمية - Student Hierarchy Wizard):
+* **إزالة الحقول الميتة:** حذف حقلي `specialization` و `university` من كيان `Course` — السياق الأكاديمي يُستنتج الآن عبر العلاقة الهرمية `course.major.college.university`.
+* **تحديث DatabaseSeeder:** إزالة استدعاءات `co.setUniversity()` الميتة، المقررات تُربط بالتخصصات فقط.
+* **واجهات REST جديدة:** إضافة 3 نقاط نهاية JSON في `StudentDashboardController`:
+  - `GET /student/api/colleges?universityId=X` — جلب الكليات
+  - `GET /student/api/majors?collegeId=X` — جلب التخصصات
+  - `GET /student/api/courses?majorId=X&search=Y` — جلب المقررات مع دعم البحث
+* **مكون المعالج المشترك (Shared Wizard Fragment):** إنشاء `fragments/course-wizard.html` — مكون ثيميليف مشترك يعمل بنظام الخطوات المتتالية (University → College → Major → Courses) مع دعم AR/EN كامل، وشريط بحث يظهر بعد اختيار الكلية، ومسار تنقل (breadcrumb) قابل للنقر لإعادة التعيين.
+* **لوحة الطالب:** استبدال قائمة التسجيل المسطحة بالمعالج الهرمي — لم يعد يتم تحميل جميع المقررات دفعة واحدة، بل تُحمّل عند الطلب عبر AJAX.
+* **كتالوج المقررات العام (`/courses`):** تحويل الصفحة من شبكة مقررات مسطحة إلى معالج استكشاف هرمي — لا تُحمّل أي مقررات عند فتح الصفحة، بل يبدأ المستخدم باختيار الجامعة ويتنقل للأسفل.
+* **إصلاحات القوالب الميتة:** تحديث جميع مراجع `course.university` في `student/course-details.html` و `student-dashboard.html` لاستخدام التتبع الهرمي `course.major.college.university.nameAr/nameEn`.
+* **إصلاحات أمنية:** إضافة `/student/api/**` إلى قائمة `permitAll()` في `SecurityConfig` للسماح للمستخدمين غير المسجلين باستعراض الكتالوج.
+* **إصلاح CSRF:** معالجة تعبير `_csrf` الآمن للصفحات المجهولة (anonymous) باستخدام `th:if="${_csrf != null}"`.
+* **إصلاح `showLoading`:** كشف الحاوية الأم (`wizard-step-*`) عند تحميل البيانات لمنع اختفاء مؤشرات التحميل وحالات الفراغ.
+* **إصلاح نموذج التسجيل:** استبدال `th:action` بـ `action="/student/enroll"` في النماذج المُولَّدة بـ JavaScript لأن ثيميليف لا يعالج HTML المُولَّد ديناميكياً.
