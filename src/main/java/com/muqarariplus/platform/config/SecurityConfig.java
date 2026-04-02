@@ -14,11 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 @Configuration
 @EnableWebSecurity
-<<<<<<< HEAD
 @EnableMethodSecurity
-=======
-@EnableMethodSecurity // تفعيل حماية Method Security (كودك)
->>>>>>> dev/mentorship
 public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
@@ -32,43 +28,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-<<<<<<< HEAD
-            .csrf(AbstractHttpConfigurer::disable) // Simplified for the prototype
-            .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/", "/courses", "/course/**", "/search", "/css/**", "/js/**", "/img/**", "/fonts/**", "/uploads/**", "/login", "/register", "/error", "/favicon.ico").permitAll()
-                .requestMatchers("/u/**", "/expert-profile/**").permitAll()
-                .requestMatchers("/api/admin/audit", "/api/admin/audit/**").hasRole("SUPER_ADMIN")
-                .requestMatchers("/super-admin", "/super-admin/**").hasRole("SUPER_ADMIN")
-                .requestMatchers("/expert", "/expert/**").hasAnyRole("EXPERT", "ADMIN", "SUPER_ADMIN")
-                .requestMatchers("/admin", "/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-                .requestMatchers("/student-dashboard", "/student-dashboard/**", "/student", "/student/**", "/api/engagement/**").hasAnyRole("STUDENT", "EXPERT", "ADMIN", "SUPER_ADMIN")
-                .requestMatchers("/profile/**").authenticated()
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .successHandler(successHandler)
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutSuccessUrl("/")
-                .permitAll()
-            );
-=======
-                .csrf(AbstractHttpConfigurer::disable) // Simplified for the prototype
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
-                        // دمج مسار /student/api/** الخاص بالزملاء مع مساراتك الأساسية
                         .requestMatchers("/", "/courses", "/course/**", "/search", "/css/**", "/js/**", "/img/**", "/fonts/**", "/uploads/**", "/login", "/register", "/error", "/favicon.ico", "/student/api/**").permitAll()
-                        // مسارات محرك الهويات المزدوجة (كودك)
                         .requestMatchers("/u/**", "/expert-profile/**").permitAll()
-                        // مسارات سجل المراقبة (كودك)
                         .requestMatchers("/api/admin/audit", "/api/admin/audit/**").hasRole("SUPER_ADMIN")
-                        // مسارات الإدارة العليا والمشتركة
                         .requestMatchers("/super-admin", "/super-admin/**").hasRole("SUPER_ADMIN")
                         .requestMatchers("/expert", "/expert/**").hasAnyRole("EXPERT", "ADMIN", "SUPER_ADMIN")
                         .requestMatchers("/admin", "/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                         .requestMatchers("/student-dashboard", "/student-dashboard/**", "/student", "/student/**", "/api/engagement/**").hasAnyRole("STUDENT", "EXPERT", "ADMIN", "SUPER_ADMIN")
-                        // مسار الخزنة الخاصة (كودك)
                         .requestMatchers("/profile/**").authenticated()
                         .anyRequest().authenticated()
                 )
@@ -81,7 +49,6 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/")
                         .permitAll()
                 );
->>>>>>> dev/mentorship
 
         return http.build();
     }

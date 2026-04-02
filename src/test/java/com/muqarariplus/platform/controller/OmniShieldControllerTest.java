@@ -18,22 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * ═══════════════════════════════════════════════════════════════════
- * OMNI-SHIELD CONTROLLER TEST — API & UI Ghost Data Prevention
- * ═══════════════════════════════════════════════════════════════════
- * Uses MockMvc to verify:
- * 1. The catalog endpoint (/courses) never sends ghost enrichment counts
-<<<<<<< HEAD
- *    to non-technical courses.
- * 2. RBAC enforcement prevents unauthorized roles (STUDENT) from
- *    accessing admin enrichment approval/rejection endpoints.
-=======
- * to non-technical courses.
- * 2. RBAC enforcement prevents unauthorized roles (STUDENT) from
- * accessing admin enrichment approval/rejection endpoints.
->>>>>>> dev/mentorship
- */
 @SpringBootTest
 @AutoConfigureMockMvc
 class OmniShieldControllerTest {
@@ -41,15 +25,9 @@ class OmniShieldControllerTest {
     @Autowired private MockMvc mockMvc;
     @Autowired private CourseRepository courseRepository;
 
-    // ── Non-technical keywords (mirrors DatabaseSeeder.NON_TECH_KEYWORDS) ──
     private static final String[] NON_TECH_KEYWORDS = {
-<<<<<<< HEAD
-        "ثقافة", "سلم", "إسلام", "عرب", "لغة", "مهارات", "قرآن", "تحرير",
-        "islamic", "arabic", "english", "communication", "writing", "reading"
-=======
             "ثقافة", "سلم", "إسلام", "عرب", "لغة", "مهارات", "قرآن", "تحرير",
             "islamic", "arabic", "english", "communication", "writing", "reading"
->>>>>>> dev/mentorship
     };
 
     private boolean isNonTechnical(Course c) {
@@ -60,111 +38,43 @@ class OmniShieldControllerTest {
         return false;
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // TEST 1: Catalog Ghost Data Prevention via Model Inspection
-    // ═══════════════════════════════════════════════════════════════
     @Test
     @DisplayName("GHOST SHIELD: Non-technical courses show ZERO approved enrichments in /courses catalog model")
     @SuppressWarnings("unchecked")
     void preventGhostDataInCatalog() throws Exception {
-<<<<<<< HEAD
         MvcResult result = mockMvc.perform(get("/courses"))
-            .andExpect(status().isOk())
-            .andExpect(model().attributeExists("courses", "approvedCounts"))
-            .andReturn();
-=======
-
-        // 💡 التعديل الجراحي: إضافة معامل البحث (search) لمحاكاة سلوك المستخدم
-        // لأن الواجهة الجديدة لا تعرض المقررات إلا بعد البحث أو تحديد التخصص
-        MvcResult result = mockMvc.perform(get("/courses").param("search", "ال"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("courses", "approvedCounts"))
                 .andReturn();
->>>>>>> dev/mentorship
 
         List<Course> courses = (List<Course>) result.getModelAndView().getModel().get("courses");
         Map<Long, Long> approvedCounts = (Map<Long, Long>) result.getModelAndView().getModel().get("approvedCounts");
 
-        assertNotNull(courses, "Courses list must not be null");
-        assertNotNull(approvedCounts, "ApprovedCounts map must not be null");
-<<<<<<< HEAD
-        assertFalse(courses.isEmpty(), "Course catalog must not be empty");
-=======
-        assertFalse(courses.isEmpty(), "Course catalog must not be empty after search");
->>>>>>> dev/mentorship
+        assertNotNull(courses);
+        assertNotNull(approvedCounts);
 
         int nonTechVerified = 0;
         for (Course course : courses) {
             if (isNonTechnical(course)) {
                 Long count = approvedCounts.getOrDefault(course.getId(), 0L);
-                assertEquals(0L, count,
-<<<<<<< HEAD
-                    "GHOST STATE IN CATALOG! Non-technical course '"
-                    + course.getCode() + " - " + course.getNameAr()
-                    + "' reports " + count + " approved enrichments via model. Must be 0.");
-=======
-                        "GHOST STATE IN CATALOG! Non-technical course '"
-                                + course.getCode() + " - " + course.getNameAr()
-                                + "' reports " + count + " approved enrichments via model. Must be 0.");
->>>>>>> dev/mentorship
+                assertEquals(0L, count);
                 nonTechVerified++;
             }
         }
-
-        assertTrue(nonTechVerified > 0,
-<<<<<<< HEAD
-            "Test validity: at least one non-technical course must exist in the catalog");
-
-        System.out.println("╔══════════════════════════════════════════════════════════════════╗");
-        System.out.println("║ ✅ OMNI-SHIELD TEST 1: " + nonTechVerified
-            + " non-tech courses verified ZERO in catalog    ║");
-=======
-                "Test validity: at least one non-technical course must exist in the search results");
-
-        System.out.println("╔══════════════════════════════════════════════════════════════════╗");
-        System.out.println("║ ✅ OMNI-SHIELD TEST 1: " + nonTechVerified
-                + " non-tech courses verified ZERO in catalog    ║");
->>>>>>> dev/mentorship
-        System.out.println("╚══════════════════════════════════════════════════════════════════╝");
+        assertTrue(nonTechVerified > 0);
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // TEST 2: RBAC Enforcement — Student Cannot Access Admin Paths
-    // ═══════════════════════════════════════════════════════════════
     @Test
     @WithMockUser(username = "attacker@student.com", roles = "STUDENT")
     @DisplayName("RBAC SHIELD: Student role receives 403 Forbidden on all admin enrichment endpoints")
     void preventUnauthorizedApproval() throws Exception {
-        // Attempt to approve an enrichment — MUST be blocked
         mockMvc.perform(post("/admin/enrichments/1/approve"))
-<<<<<<< HEAD
-            .andExpect(status().isForbidden());
-
-        // Attempt to reject an enrichment — MUST be blocked
-        mockMvc.perform(post("/admin/enrichments/1/reject"))
-            .andExpect(status().isForbidden());
-
-        // Attempt to view the pending moderation queue — MUST be blocked
-        mockMvc.perform(get("/admin/enrichments/pending"))
-            .andExpect(status().isForbidden());
-=======
                 .andExpect(status().isForbidden());
 
-        // Attempt to reject an enrichment — MUST be blocked
         mockMvc.perform(post("/admin/enrichments/1/reject"))
                 .andExpect(status().isForbidden());
 
-        // Attempt to view the pending moderation queue — MUST be blocked
         mockMvc.perform(get("/admin/enrichments/pending"))
                 .andExpect(status().isForbidden());
->>>>>>> dev/mentorship
-
-        System.out.println("╔══════════════════════════════════════════════════════════════════╗");
-        System.out.println("║ ✅ OMNI-SHIELD TEST 2: RBAC enforced — 403 on all admin paths    ║");
-        System.out.println("╚══════════════════════════════════════════════════════════════════╝");
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> dev/mentorship
