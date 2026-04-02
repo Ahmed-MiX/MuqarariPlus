@@ -33,6 +33,12 @@ public class User {
     private String firstName;
     private String lastName;
 
+    @Column(columnDefinition = "TEXT")
+    private String bio;
+
+    private String linkedInUrl;
+    private String githubUrl;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 

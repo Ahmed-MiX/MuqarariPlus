@@ -45,26 +45,40 @@ public class MainController {
                           @RequestParam(required = false) Long collegeId,
                           @RequestParam(required = false) Long majorId,
                           Model model) {
+
+        // 1. إضافة الجامعات للواجهة الهرمية (كود الزملاء)
         model.addAttribute("universities", universityService.getAllUniversities());
 
+        List<Course> filteredCourses;
+
+        // 2. فلترة المقررات بناءً على البحث أو التسلسل الهرمي (كود الزملاء)
         if (search != null && !search.isEmpty()) {
-            List<Course> courses = courseRepository.findByNameArContainingIgnoreCaseOrNameEnContainingIgnoreCase(search, search);
-            model.addAttribute("courses", courses);
+            filteredCourses = courseRepository.findByNameArContainingIgnoreCaseOrNameEnContainingIgnoreCase(search, search);
         } else if (majorId != null) {
-            model.addAttribute("courses", courseRepository.findAll().stream()
+            filteredCourses = courseRepository.findAll().stream()
                     .filter(c -> c.getMajor() != null && c.getMajor().getId().equals(majorId))
-                    .toList());
+                    .toList();
         } else if (collegeId != null) {
-            model.addAttribute("courses", courseRepository.findAll().stream()
+            filteredCourses = courseRepository.findAll().stream()
                     .filter(c -> c.getMajor() != null && c.getMajor().getCollege() != null && c.getMajor().getCollege().getId().equals(collegeId))
-                    .toList());
+                    .toList();
         } else if (universityId != null) {
-            model.addAttribute("courses", courseRepository.findAll().stream()
+            filteredCourses = courseRepository.findAll().stream()
                     .filter(c -> c.getMajor() != null && c.getMajor().getCollege() != null && c.getMajor().getCollege().getUniversity() != null && c.getMajor().getCollege().getUniversity().getId().equals(universityId))
-                    .toList());
+                    .toList();
         } else {
-            model.addAttribute("courses", List.of());
+            filteredCourses = List.of();
         }
+
+        // 3. تطبيق بروتوكول إبادة الأشباح على النتائج المفلترة (كودك أنت)
+        java.util.Map<Long, Long> approvedCounts = new java.util.HashMap<>();
+        for (Course c : filteredCourses) {
+            approvedCounts.put(c.getId(), enrichmentService.getApprovedCountForCourse(c.getId()));
+        }
+
+        // 4. تمرير البيانات النهائية للواجهة
+        model.addAttribute("courses", filteredCourses);
+        model.addAttribute("approvedCounts", approvedCounts);
 
         return "courses";
     }
@@ -73,7 +87,7 @@ public class MainController {
     public String courseDetail(@PathVariable Long id, Model model) {
         Optional<Course> courseOpt = courseRepository.findById(id);
         if (courseOpt.isEmpty()) {
-             return "redirect:/courses";
+            return "redirect:/courses";
         }
 
         Course course = courseOpt.get();

@@ -1,5 +1,6 @@
 package com.muqarariplus.platform.service;
 
+import com.muqarariplus.platform.audit.Auditable;
 import com.muqarariplus.platform.entity.CourseEnrichment;
 import com.muqarariplus.platform.entity.User;
 import com.muqarariplus.platform.repository.CourseEnrichmentRepository;
@@ -26,6 +27,7 @@ public class EngagementService {
      * Toggle upvote: if the user already upvoted, remove it; otherwise, add it.
      * Returns the new upvote count after the toggle.
      */
+    @Auditable(action = "TOGGLE_UPVOTE", entity = "CourseEnrichment")
     @Transactional
     public int toggleUpvote(Long enrichmentId, String userIdentifier) {
         CourseEnrichment enrichment = enrichmentRepository.findById(enrichmentId)
@@ -46,6 +48,7 @@ public class EngagementService {
      * Toggle bookmark: if the user already bookmarked, remove it; otherwise, add it.
      * Returns true if bookmarked after toggle, false if un-bookmarked.
      */
+    @Auditable(action = "TOGGLE_BOOKMARK", entity = "CourseEnrichment")
     @Transactional
     public boolean toggleBookmark(Long enrichmentId, String userIdentifier) {
         CourseEnrichment enrichment = enrichmentRepository.findById(enrichmentId)
