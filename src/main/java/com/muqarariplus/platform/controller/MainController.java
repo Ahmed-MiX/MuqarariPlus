@@ -44,7 +44,15 @@ public class MainController {
             courses = courseRepository.findAll();
         }
 
+        // Build a map of courseId -> approved enrichment count (strict APPROVED only)
+        java.util.Map<Long, Long> approvedCounts = new java.util.HashMap<>();
+        for (Course c : courses) {
+            approvedCounts.put(c.getId(),
+                enrichmentService.getApprovedCountForCourse(c.getId()));
+        }
+
         model.addAttribute("courses", courses);
+        model.addAttribute("approvedCounts", approvedCounts);
         return "courses";
     }
 

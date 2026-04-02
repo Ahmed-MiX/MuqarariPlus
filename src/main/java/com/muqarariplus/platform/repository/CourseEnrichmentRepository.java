@@ -18,6 +18,16 @@ public interface CourseEnrichmentRepository extends JpaRepository<CourseEnrichme
     List<CourseEnrichment> findByCourseIdAndStatus(Long courseId, EnrichmentStatus status);
 
     /**
+     * Returns ALL enrichments for a course regardless of status (used by purge).
+     */
+    List<CourseEnrichment> findByCourseId(Long courseId);
+
+    /**
+     * Counts enrichments for a course by status (used by catalog badge logic).
+     */
+    long countByCourseIdAndStatus(Long courseId, EnrichmentStatus status);
+
+    /**
      * For the expert's dashboard — returns all enrichments by the expert's User ID.
      */
     List<CourseEnrichment> findByExpertUserId(Long userId);

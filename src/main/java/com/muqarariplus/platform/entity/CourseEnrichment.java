@@ -138,4 +138,33 @@ public class CourseEnrichment {
     public void removeBookmark(User user) {
         this.bookmarkedByUsers.remove(user);
     }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // IRON VAULT: JPA Lifecycle Constraint — @PrePersist & @PreUpdate
+    // Physically blocks enrichment persistence on non-technical courses.
+    // Keywords mirror DatabaseSeeder.NON_TECH_KEYWORDS exactly.
+    // ═══════════════════════════════════════════════════════════════════
+
+    private static final String[] NON_TECH_KEYWORDS = {
+        "ثقافة", "سلم", "إسلام", "عرب", "لغة", "مهارات", "قرآن", "تحرير",
+        "islamic", "arabic", "english", "communication", "writing", "reading"
+    };
+
+    @PrePersist
+    @PreUpdate
+    private void validateDomainIntegrity() {
+        if (course == null) return;
+        String nameEn = course.getNameEn() != null ? course.getNameEn() : "";
+        String nameAr = course.getNameAr() != null ? course.getNameAr() : "";
+        String combined = (nameEn + " " + nameAr).toLowerCase();
+        for (String keyword : NON_TECH_KEYWORDS) {
+            if (combined.contains(keyword.toLowerCase())) {
+                throw new IllegalStateException(
+                    "CRITICAL SECURITY VIOLATION: Attempted to inject technical enrichment " +
+                    "into a non-technical course [" + course.getCode() + " - " + nameAr + "]. " +
+                    "Iron Vault @PrePersist/@PreUpdate constraint activated. Operation BLOCKED."
+                );
+            }
+        }
+    }
 }

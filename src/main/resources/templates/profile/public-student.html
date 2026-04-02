@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${profileUser.firstName + ' ' + profileUser.lastName + ' | Tech CV | Muqarari+'}">Tech CV | Muqarari+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <th:block th:fragment="head-extra">
+        <style>
+            .cv-hero {
+                background: linear-gradient(135deg, #0A192F 0%, #132F4C 40%, #1e3a5f 70%, #00B4D8 100%);
+                position: relative;
+                overflow: hidden;
+            }
+            .cv-hero::before {
+                content: '';
+                position: absolute;
+                top: -50%; right: -20%;
+                width: 600px; height: 600px;
+                background: radial-gradient(circle, rgba(0,180,216,0.08) 0%, transparent 70%);
+                pointer-events: none;
+            }
+            .avatar-circle {
+                width: 110px; height: 110px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #00B4D8, #0099b8);
+                display: flex; align-items: center; justify-content: center;
+                color: white; font-size: 2.8rem; font-weight: 700;
+                border: 4px solid rgba(255,255,255,0.2);
+                box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            }
+            .social-btn {
+                display: inline-flex; align-items: center; gap: 0.5rem;
+                padding: 0.5rem 1.25rem;
+                border-radius: 10px;
+                font-size: 0.82rem;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                border: 1px solid rgba(255,255,255,0.15);
+            }
+            .social-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            }
+            .btn-linkedin { background: rgba(10,102,194,0.2); color: #60a5fa; }
+            .btn-linkedin:hover { background: rgba(10,102,194,0.3); color: #93bbfc; }
+            .btn-github { background: rgba(255,255,255,0.08); color: #e2e8f0; }
+            .btn-github:hover { background: rgba(255,255,255,0.15); color: white; }
+
+            /* Stat Counters */
+            .cv-stat {
+                text-align: center;
+                padding: 1rem;
+            }
+            .cv-stat-value {
+                font-size: 2rem;
+                font-weight: 800;
+                color: var(--primary-blue);
+                line-height: 1;
+            }
+            .cv-stat-label {
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: #64748b;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-top: 0.3rem;
+            }
+
+            /* Skill Matrix */
+            .skill-badge {
+                display: inline-flex; align-items: center;
+                padding: 0.45rem 1rem;
+                border-radius: 25px;
+                font-size: 0.78rem;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                border: 1px solid transparent;
+            }
+            .skill-badge:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            }
+            .badge-skill {
+                background: rgba(59, 130, 246, 0.08);
+                color: #3b82f6;
+                border-color: rgba(59,130,246,0.15);
+            }
+            .badge-tool {
+                background: rgba(16, 185, 129, 0.08);
+                color: #10b981;
+                border-color: rgba(16,185,129,0.15);
+            }
+            .badge-cert {
+                background: rgba(245, 158, 11, 0.08);
+                color: #d97706;
+                border-color: rgba(245,158,11,0.15);
+            }
+
+            /* Section Cards */
+            .cv-section {
+                background: #fff;
+                border-radius: 16px;
+                border: 1px solid rgba(0,0,0,0.05);
+                box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+                padding: 1.75rem;
+                transition: all 0.3s ease;
+            }
+            .cv-section:hover {
+                box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            }
+            .cv-section-title {
+                font-size: 1rem;
+                font-weight: 700;
+                color: var(--primary-blue);
+                margin-bottom: 1rem;
+                display: flex; align-items: center; gap: 0.5rem;
+            }
+
+            /* Course Cards */
+            .course-chip {
+                background: rgba(10,25,47,0.03);
+                border: 1px solid rgba(0,0,0,0.06);
+                border-radius: 12px;
+                padding: 1rem 1.25rem;
+                transition: all 0.3s ease;
+            }
+            .course-chip:hover {
+                border-color: rgba(0,180,216,0.3);
+                background: rgba(0,180,216,0.03);
+                transform: translateY(-2px);
+            }
+            .course-code {
+                font-size: 0.7rem;
+                font-weight: 700;
+                color: #00B4D8;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            .course-name {
+                font-size: 0.88rem;
+                font-weight: 600;
+                color: var(--primary-blue);
+                margin-top: 0.2rem;
+            }
+        </style>
+    </th:block>
+
+    <div th:fragment="main-content">
+
+        <!-- ═══ CV HERO ═══ -->
+        <section class="cv-hero text-white py-5">
+            <div class="container py-4">
+                <div class="d-flex align-items-center gap-4 flex-wrap">
+                    <div class="avatar-circle"
+                         th:text="${profileUser.firstName != null ? profileUser.firstName.substring(0, 1).toUpperCase() : '?'}">?</div>
+                    <div class="flex-grow-1">
+                        <h1 class="display-5 fw-bold mb-1" style="color: #f1f5f9;"
+                            th:text="${(profileUser.firstName ?: '') + ' ' + (profileUser.lastName ?: '')}">Name</h1>
+                        <p style="color: rgba(255,255,255,0.5);" class="mb-2"
+                           th:text="${profileUser.bio ?: (profileUser.role.replace('ROLE_', '') + ' @ Muqarari+')}">Bio</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a th:if="${profileUser.linkedInUrl != null and !profileUser.linkedInUrl.isEmpty()}"
+                               th:href="${profileUser.linkedInUrl}"
+                               class="social-btn btn-linkedin" target="_blank">
+                                🔗 LinkedIn — تواصل معي
+                            </a>
+                            <a th:if="${profileUser.githubUrl != null and !profileUser.githubUrl.isEmpty()}"
+                               th:href="${profileUser.githubUrl}"
+                               class="social-btn btn-github" target="_blank">
+                                🐙 GitHub
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ STATS BAR ═══ -->
+        <section class="container">
+            <div class="row g-0 bg-white rounded-4 shadow-sm border mt-n3 position-relative" style="z-index: 10;">
+                <div class="col-3 cv-stat border-end">
+                    <div class="cv-stat-value" th:text="${skillCount}">0</div>
+                    <div class="cv-stat-label">🧠 Skills / مهارات</div>
+                </div>
+                <div class="col-3 cv-stat border-end">
+                    <div class="cv-stat-value" th:text="${toolCount}">0</div>
+                    <div class="cv-stat-label">🔧 Tools / أدوات</div>
+                </div>
+                <div class="col-3 cv-stat border-end">
+                    <div class="cv-stat-value" th:text="${certCount}">0</div>
+                    <div class="cv-stat-label">🏅 Certs / شهادات</div>
+                </div>
+                <div class="col-3 cv-stat">
+                    <div class="cv-stat-value" th:text="${courseCount}">0</div>
+                    <div class="cv-stat-label">📚 Courses / مقررات</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ MAIN CONTENT ═══ -->
+        <section class="container py-5">
+            <div class="row g-4">
+
+                <!-- LEFT: Skill Matrix -->
+                <div class="col-lg-5">
+                    <!-- Skills -->
+                    <div class="cv-section mb-4">
+                        <div class="cv-section-title">🧠 مصفوفة المهارات — Skill Matrix</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span th:each="skill : ${acquiredSkills}" class="skill-badge badge-skill"
+                                  th:text="${skill.nameEn}">Skill</span>
+                        </div>
+                        <p th:if="${#sets.isEmpty(acquiredSkills)}" class="text-muted small fst-italic mb-0 mt-2">
+                            No skills acquired yet. Enroll in courses to build your matrix.
+                        </p>
+                    </div>
+
+                    <!-- Tools -->
+                    <div class="cv-section mb-4">
+                        <div class="cv-section-title">🔧 الأدوات التقنية — Technical Tools</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span th:each="tool : ${acquiredTools}" class="skill-badge badge-tool"
+                                  th:text="${tool.nameEn}">Tool</span>
+                        </div>
+                        <p th:if="${#sets.isEmpty(acquiredTools)}" class="text-muted small fst-italic mb-0 mt-2">
+                            No tools acquired yet.
+                        </p>
+                    </div>
+
+                    <!-- Certifications -->
+                    <div class="cv-section">
+                        <div class="cv-section-title">🏅 الشهادات المهنية — Professional Certifications</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span th:each="cert : ${acquiredCerts}" class="skill-badge badge-cert"
+                                  th:text="${cert.nameEn + ' (' + cert.issuingBody + ')'}">Cert</span>
+                        </div>
+                        <p th:if="${#sets.isEmpty(acquiredCerts)}" class="text-muted small fst-italic mb-0 mt-2">
+                            No certifications acquired yet.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Enrolled Courses -->
+                <div class="col-lg-7">
+                    <div class="cv-section">
+                        <div class="cv-section-title">📚 المقررات المسجلة — Enrolled Courses</div>
+                        <div class="row g-3">
+                            <div th:each="course : ${enrolledCourses}" class="col-md-6">
+                                <a th:href="@{'/course/' + ${course.id}}" class="text-decoration-none">
+                                    <div class="course-chip">
+                                        <div class="course-code" th:text="${course.code}">CS101</div>
+                                        <div class="course-name" th:text="${course.nameEn}">Course Name</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;" th:text="${course.nameAr}">اسم المقرر</div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div th:if="${#sets.isEmpty(enrolledCourses)}" class="col-12">
+                                <p class="text-muted text-center py-4 fst-italic mb-0">
+                                    📭 No courses enrolled yet.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+</body>
+</html>
