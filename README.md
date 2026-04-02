@@ -96,3 +96,16 @@ v1.14: ترقية واجهة الخبير إلى "مركز قيادة" مع مح
 v1.15: إضافة حلقة التفاعل (التصويت والحفظ - Upvotes & Bookmarks).
 
 v1.16 (الإصدار النهائي): حقن الشهادات الاحترافية، وبيانات السوق الحقيقية (سدايا، أرامكو، الخ).
+
+v1.17 (الهيكل الأكاديمي والإدارة الشاملة):
+* **توسيع الشبكة المعرفية:** إضافة كيان `University` → `College` → `Major` → `Course` لتحويل الهيكلة الأكاديمية من مسطحة إلى هرمية متداخلة.
+* **كيانات جديدة:** `University` (جامعات)، `College` (كليات)، `Major` (تخصصات) مع روابط ثنائية الاتجاه.
+* **ربط المقررات بالتخصصات:** إضافة علاقة `@ManyToOne` من `Course` إلى `Major` — كل مقرر ينتمي لتخصص واحد، مع تكرار المقررات المشتركة بين التخصصات.
+* **مستودعات جديدة:** `UniversityRepository`, `CollegeRepository`, `MajorRepository` مع استعلامات عدّ (`countBy*`) لحماية الحذف.
+* **طبقة الخدمات الكاملة:** `UniversityService`, `CollegeService`, `MajorService`, `CourseService` — كل خدمة توفر CRUD كامل مع حماية الحذف (لا يمكن حذف كيان له أبناء مرتبطون).
+* **نموذج طلبات DTO:** استخدام Java Records في `payload/requests/` (`UniversityRequest`, `CollegeRequest`, `MajorRequest`, `CourseRequest`) مع تحقق `@Valid`.
+* **لوحة إدارة أكاديمية:** 4 متحكمات (`AdminUniversityController`, `AdminCollegeController`, `AdminMajorController`, `AdminCourseController`) + 5 قوالب Thymeleaf مع دعم ثنائي اللغة (AR/EN) كامل.
+* **لوحة الأكاديمية الرئيسية:** عرض شجري للهيكل الكامل (جامعة ← كلية ← تخصص ← مقررات) مع بطاقات إحصائية وروابط سريعة.
+* **إصلاحات أمنية:** تصحيح مسارات `AdminController` (كانت `/admin/admin` بسبب تكرار البادئة).
+* **تحسينات .gitignore:** إضافة `.settings/`, `.classpath`, `.project`, `.factorypath`, `uploads/`.
+* **توطين شامل:** ترجمة جميع العناوين، مسارات التنقل (breadcrumbs)، النصوص الاحتياطية، والعناصر التفاعلية في لوحة الإدارة الأكاديمية.
