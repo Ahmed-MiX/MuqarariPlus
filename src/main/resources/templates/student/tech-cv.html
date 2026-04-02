@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Tech CV | Muqarari+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <th:block th:fragment="head-extra">
+        <style>
+            /* ════════════════════════════════════════════════════════
+               TECH CV — Premium Design System
+               ════════════════════════════════════════════════════════ */
+
+            .cv-hero {
+                background: linear-gradient(135deg, #0A192F 0%, #0d2540 40%, #132F4C 70%, #0E7490 100%);
+                position: relative;
+                overflow: hidden;
+            }
+            .cv-hero::before {
+                content: '';
+                position: absolute;
+                top: -30%; left: -10%;
+                width: 600px; height: 600px;
+                background: radial-gradient(circle, rgba(0,180,216,0.08) 0%, transparent 70%);
+                pointer-events: none;
+            }
+            .cv-hero::after {
+                content: '';
+                position: absolute;
+                bottom: -40%; right: -15%;
+                width: 500px; height: 500px;
+                background: radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 70%);
+                pointer-events: none;
+            }
+
+            /* Student Identity Card */
+            .identity-card {
+                background: rgba(255,255,255,0.07);
+                backdrop-filter: blur(12px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 2rem 2.5rem;
+            }
+            .identity-avatar {
+                width: 80px; height: 80px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #00B4D8, #10b981);
+                display: flex; align-items: center; justify-content: center;
+                font-size: 2rem; font-weight: 800; color: white;
+                box-shadow: 0 4px 15px rgba(0,180,216,0.3);
+                flex-shrink: 0;
+            }
+
+            /* Section Cards */
+            .cv-section {
+                background: #ffffff;
+                border-radius: 20px;
+                border: 1px solid rgba(0,0,0,0.04);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+                padding: 2rem;
+                transition: all 0.3s ease;
+            }
+            .cv-section:hover {
+                box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+                transform: translateY(-2px);
+            }
+
+            .section-icon {
+                width: 50px; height: 50px;
+                border-radius: 14px;
+                display: inline-flex; align-items: center; justify-content: center;
+                font-size: 1.5rem; flex-shrink: 0;
+            }
+            .section-icon-blue   { background: rgba(59,130,246,0.1); }
+            .section-icon-teal   { background: rgba(0,180,216,0.1); }
+            .section-icon-amber  { background: rgba(245,158,11,0.1); }
+
+            .section-title {
+                font-size: 1.15rem;
+                font-weight: 800;
+                color: #0A192F;
+                margin: 0;
+            }
+            .section-subtitle {
+                font-size: 0.82rem;
+                color: #64748b;
+                margin: 0;
+            }
+
+            /* Course Row */
+            .course-row {
+                background: #f8fafc;
+                border-radius: 14px;
+                padding: 1rem 1.25rem;
+                border: 1px solid #e2e8f0;
+                transition: all 0.25s ease;
+            }
+            .course-row:hover {
+                background: #f1f5f9;
+                border-color: #00B4D8;
+                box-shadow: 0 2px 8px rgba(0,180,216,0.1);
+            }
+            .course-code {
+                display: inline-block;
+                background: linear-gradient(135deg, #0A192F, #132F4C);
+                color: white;
+                font-size: 0.75rem;
+                font-weight: 700;
+                padding: 0.25rem 0.75rem;
+                border-radius: 8px;
+                letter-spacing: 0.5px;
+            }
+
+            /* Tool Badge */
+            .tool-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                background: linear-gradient(135deg, rgba(0,180,216,0.08), rgba(0,180,216,0.15));
+                color: #0E7490;
+                border: 1px solid rgba(0,180,216,0.2);
+                font-size: 0.85rem;
+                font-weight: 700;
+                padding: 0.5rem 1rem;
+                border-radius: 50px;
+                transition: all 0.3s ease;
+            }
+            .tool-badge:hover {
+                background: linear-gradient(135deg, #00B4D8, #0099b8);
+                color: white;
+                border-color: transparent;
+                transform: translateY(-3px);
+                box-shadow: 0 6px 15px rgba(0,180,216,0.25);
+            }
+
+            /* Certificate Card */
+            .cert-card {
+                background: linear-gradient(135deg, #fffbeb, #fef3c7);
+                border: 1px solid rgba(245,158,11,0.2);
+                border-radius: 16px;
+                padding: 1.25rem;
+                transition: all 0.3s ease;
+            }
+            .cert-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(245,158,11,0.15);
+                border-color: #f59e0b;
+            }
+            .cert-issuer {
+                display: inline-block;
+                background: rgba(245,158,11,0.15);
+                color: #92400e;
+                font-size: 0.72rem;
+                font-weight: 700;
+                padding: 0.2rem 0.6rem;
+                border-radius: 6px;
+            }
+
+            /* Badge Counters */
+            .counter-badge {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 32px; height: 32px;
+                border-radius: 10px;
+                font-weight: 800;
+                font-size: 0.85rem;
+            }
+            .counter-blue  { background: rgba(59,130,246,0.1); color: #3b82f6; }
+            .counter-teal  { background: rgba(0,180,216,0.1);  color: #0E7490; }
+            .counter-amber { background: rgba(245,158,11,0.1); color: #b45309; }
+
+            /* Print Button */
+            .btn-print {
+                background: linear-gradient(135deg, #0A192F, #132F4C);
+                color: white;
+                border: none;
+                border-radius: 50px;
+                padding: 0.8rem 2.5rem;
+                font-weight: 700;
+                font-size: 0.95rem;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(10,25,47,0.2);
+            }
+            .btn-print:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(10,25,47,0.35);
+                color: white;
+            }
+
+            /* Empty State */
+            .empty-state {
+                text-align: center;
+                padding: 3rem 2rem;
+                color: #94a3b8;
+            }
+            .empty-state-icon {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+                opacity: 0.5;
+            }
+
+            /* Print-specific styles */
+            @media print {
+                .navbar, footer, .btn-print, .no-print { display: none !important; }
+                .cv-hero { background: #0A192F !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                .cv-section { box-shadow: none !important; border: 1px solid #e2e8f0 !important; break-inside: avoid; }
+                .tool-badge { background: #e0f7fa !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                .cert-card { background: #fffbeb !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                body { font-size: 11pt; }
+            }
+        </style>
+    </th:block>
+
+    <div th:fragment="main-content">
+
+        <!-- ═══════════════════════════════════════════════════════
+             HERO HEADER — Student Identity Showcase
+             ═══════════════════════════════════════════════════════ -->
+        <section class="cv-hero text-white py-5">
+            <div class="container py-4">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <!-- Breadcrumb -->
+                        <nav aria-label="breadcrumb" class="mb-3">
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item">
+                                    <a th:href="@{/student/dashboard}" class="text-white-50 text-decoration-none">
+                                        🏠 لوحة الطالب / Student Dashboard
+                                    </a>
+                                </li>
+                                <li class="breadcrumb-item active text-white" aria-current="page">
+                                    📄 السيرة الذاتية التقنية / Tech CV
+                                </li>
+                            </ol>
+                        </nav>
+
+                        <!-- Identity Card -->
+                        <div class="identity-card mt-3">
+                            <div class="d-flex align-items-center gap-4">
+                                <div class="identity-avatar">
+                                    <span th:text="${techCv.studentName != null && !techCv.studentName.isEmpty() ? techCv.studentName.substring(0, 1).toUpperCase() : '?'}">A</span>
+                                </div>
+                                <div>
+                                    <h1 class="display-6 fw-bold mb-1 text-white" th:text="${techCv.studentName}">Student Name</h1>
+                                    <p class="text-white-50 mb-0 fs-6">
+                                        📧 <span th:text="${techCv.email}">student@example.com</span>
+                                    </p>
+                                    <div class="d-flex gap-3 mt-3 flex-wrap">
+                                        <span class="badge bg-white bg-opacity-10 border border-white border-opacity-25 px-3 py-2">
+                                            📚 <span th:text="${techCv.enrolledCourses != null ? techCv.enrolledCourses.size() : 0}">0</span>
+                                            مقرر / Courses
+                                        </span>
+                                        <span class="badge bg-white bg-opacity-10 border border-white border-opacity-25 px-3 py-2">
+                                            🔧 <span th:text="${techCv.extractedTools != null ? techCv.extractedTools.size() : 0}">0</span>
+                                            أداة / Tools
+                                        </span>
+                                        <span class="badge bg-white bg-opacity-10 border border-white border-opacity-25 px-3 py-2">
+                                            📜 <span th:text="${techCv.extractedCertificates != null ? techCv.extractedCertificates.size() : 0}">0</span>
+                                            شهادة / Certs
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                        <button class="btn-print no-print" onclick="window.print();">
+                            🖨️ طباعة السيرة الذاتية — Print CV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SECTION 1: ENROLLED COURSES — المقررات الأكاديمية
+             ═══════════════════════════════════════════════════════ -->
+        <section class="container py-5">
+
+            <div class="cv-section mb-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="section-icon section-icon-blue">📚</div>
+                    <div class="flex-grow-1">
+                        <h2 class="section-title">المقـررات الأكاديمية المدعومة بالمهارات</h2>
+                        <p class="section-subtitle">Skill-Backed Academic Courses</p>
+                    </div>
+                    <span class="counter-badge counter-blue"
+                          th:text="${techCv.enrolledCourses != null ? techCv.enrolledCourses.size() : 0}">0</span>
+                </div>
+
+                <!-- Course List -->
+                <div th:if="${techCv.enrolledCourses != null && !techCv.enrolledCourses.isEmpty()}">
+                    <div class="d-flex flex-column gap-3">
+                        <div class="course-row" th:each="course, iter : ${techCv.enrolledCourses}">
+                            <div class="d-flex align-items-center gap-3 flex-wrap">
+                                <span class="course-code" th:text="${course.code != null ? course.code : '—'}">CS 1301</span>
+                                <div class="flex-grow-1">
+                                    <span class="fw-bold d-block" th:text="${course.nameAr}">برمجة الحاسب 1</span>
+                                    <span class="text-muted small" th:text="${course.nameEn}">Computer Programming 1</span>
+                                </div>
+                                <span class="badge bg-light text-dark border small px-2 py-1"
+                                      th:text="'#' + ${iter.count}">No. #1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div th:if="${techCv.enrolledCourses == null || techCv.enrolledCourses.isEmpty()}" class="empty-state">
+                    <div class="empty-state-icon">📚</div>
+                    <p class="fw-bold">لا توجد مقررات مسجلة بعد — No enrolled courses yet.</p>
+                    <p class="small">سجل في المقررات من لوحة التحكم لبناء سيرتك الذاتية التقنية.</p>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════
+                 SECTION 2: TOOLS — ترسانة الأدوات التقنية المكتسبة
+                 ═══════════════════════════════════════════════════════ -->
+            <div class="cv-section mb-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="section-icon section-icon-teal">🔧</div>
+                    <div class="flex-grow-1">
+                        <h2 class="section-title">ترسانة الأدوات التقنية المكتسبة</h2>
+                        <p class="section-subtitle">Acquired Technical Tools Arsenal</p>
+                    </div>
+                    <span class="counter-badge counter-teal"
+                          th:text="${techCv.extractedTools != null ? techCv.extractedTools.size() : 0}">0</span>
+                </div>
+
+                <!-- Tools Flex Wrap -->
+                <div th:if="${techCv.extractedTools != null && !techCv.extractedTools.isEmpty()}">
+                    <div class="d-flex flex-wrap gap-3">
+                        <span class="tool-badge" th:each="tool : ${techCv.extractedTools}">
+                            <span>🔧</span>
+                            <span th:text="${tool.nameEn}">Docker</span>
+                            <span class="text-muted" style="font-weight: 400;">/ <span th:text="${tool.nameAr}">دوكر</span></span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div th:if="${techCv.extractedTools == null || techCv.extractedTools.isEmpty()}" class="empty-state">
+                    <div class="empty-state-icon">🔧</div>
+                    <p class="fw-bold">لا توجد أدوات مستخلصة بعد — No tools extracted yet.</p>
+                    <p class="small">سيتم استخلاص الأدوات تلقائياً من الإثراءات المعتمدة لمقرراتك المسجلة.</p>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════
+                 SECTION 3: CERTIFICATES — الشهادات المهنية
+                 ═══════════════════════════════════════════════════════ -->
+            <div class="cv-section mb-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="section-icon section-icon-amber">📜</div>
+                    <div class="flex-grow-1">
+                        <h2 class="section-title">الشهادات المهنية المطابقة لسوق العمل</h2>
+                        <p class="section-subtitle">Industry-Aligned Professional Certifications</p>
+                    </div>
+                    <span class="counter-badge counter-amber"
+                          th:text="${techCv.extractedCertificates != null ? techCv.extractedCertificates.size() : 0}">0</span>
+                </div>
+
+                <!-- Certificates Grid -->
+                <div th:if="${techCv.extractedCertificates != null && !techCv.extractedCertificates.isEmpty()}">
+                    <div class="row g-3">
+                        <div class="col-md-6 col-lg-4" th:each="cert : ${techCv.extractedCertificates}">
+                            <div class="cert-card h-100">
+                                <div class="d-flex align-items-start gap-3">
+                                    <span class="fs-3">🏆</span>
+                                    <div>
+                                        <h6 class="fw-bold mb-1" style="color: #92400e;" th:text="${cert.nameEn}">AWS SAA</h6>
+                                        <p class="text-muted small mb-2" th:text="${cert.nameAr}">شهادة حلول أمازون</p>
+                                        <span class="cert-issuer" th:text="${cert.issuingBody}">Amazon Web Services</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div th:if="${techCv.extractedCertificates == null || techCv.extractedCertificates.isEmpty()}" class="empty-state">
+                    <div class="empty-state-icon">📜</div>
+                    <p class="fw-bold">لا توجد شهادات مهنية مستخلصة بعد — No certifications extracted yet.</p>
+                    <p class="small">سيتم استخلاص الشهادات تلقائياً من الإثراءات المعتمدة لمقرراتك المسجلة.</p>
+                </div>
+            </div>
+
+            <!-- ═══ FOOTER ACTIONS ═══ -->
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 no-print mb-5">
+                <a th:href="@{/student/dashboard}" class="btn btn-outline-secondary btn-lg px-4 rounded-pill fw-bold shadow-sm">
+                    ← العودة للوحة التحكم / Back to Dashboard
+                </a>
+                <button class="btn-print" onclick="window.print();">
+                    🖨️ طباعة السيرة الذاتية — Print CV
+                </button>
+            </div>
+
+        </section>
+    </div>
+
+</body>
+</html>

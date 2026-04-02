@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${content['expert.enrichment.form_title'] ?: 'Submit Enrichment | Muqarari+'}">Submit Enrichment | Muqarari+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <th:block th:fragment="head-extra">
+        <style>
+            .vanguard-hero {
+                background: linear-gradient(135deg, #0A192F 0%, #132F4C 50%, #10b981 100%);
+                position: relative;
+                overflow: hidden;
+            }
+            .vanguard-hero::before {
+                content: '';
+                position: absolute;
+                top: -40%; right: -10%;
+                width: 500px; height: 500px;
+                background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%);
+                pointer-events: none;
+            }
+            .form-card {
+                background: #fff;
+                border-radius: 16px;
+                border: 1px solid rgba(0,0,0,0.05);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+                padding: 2rem;
+                transition: all 0.3s ease;
+            }
+            .form-card:hover {
+                box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            }
+            .step-badge {
+                width: 38px; height: 38px;
+                border-radius: 50%;
+                display: inline-flex; align-items: center; justify-content: center;
+                font-weight: 800; font-size: 0.9rem; color: white; flex-shrink: 0;
+            }
+            .step-badge-blue  { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+            .step-badge-green { background: linear-gradient(135deg, #10b981, #34d399); }
+            .step-badge-amber { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+            .step-badge-teal  { background: linear-gradient(135deg, #00B4D8, #0099b8); }
+
+            .field-label {
+                font-size: 0.88rem;
+                font-weight: 700;
+                color: var(--primary-blue);
+                margin-bottom: 0.4rem;
+            }
+            .form-control-enrichment {
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+                transition: all 0.3s ease;
+            }
+            .form-control-enrichment:focus {
+                border-color: var(--secondary-teal);
+                box-shadow: 0 0 0 3px rgba(0,180,216,0.12);
+            }
+            .field-error {
+                display: block;
+                color: #dc3545;
+                font-size: 0.78rem;
+                font-weight: 600;
+                margin-top: 0.35rem;
+                padding-left: 0.5rem;
+                border-left: 3px solid #dc3545;
+            }
+            .btn-submit-enrichment {
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                border: none;
+                border-radius: 50px;
+                padding: 1rem 3rem;
+                font-weight: 700;
+                font-size: 1.1rem;
+                transition: all 0.3s ease;
+                box-shadow: 0 6px 20px rgba(16,185,129,0.3);
+            }
+            .btn-submit-enrichment:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 30px rgba(16,185,129,0.4);
+                color: white;
+            }
+            .multi-select {
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                font-size: 0.85rem;
+                transition: all 0.3s ease;
+            }
+            .multi-select:focus {
+                border-color: var(--secondary-teal);
+                box-shadow: 0 0 0 3px rgba(0,180,216,0.12);
+            }
+            .multi-select option:checked {
+                background: rgba(0,180,216,0.12);
+                color: var(--primary-blue);
+            }
+        </style>
+    </th:block>
+
+    <div th:fragment="main-content">
+
+        <!-- ═══ HERO HEADER ═══ -->
+        <section class="vanguard-hero text-white py-5">
+            <div class="container py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <nav aria-label="breadcrumb" class="mb-2">
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item">
+                                    <a th:href="@{/expert}" class="text-white-50 text-decoration-none">
+                                        🏠 مركز الخبير / Expert Center
+                                    </a>
+                                </li>
+                                <li class="breadcrumb-item active text-white" aria-current="page">
+                                    ✍️ محرر الإثراء / Enrichment Form
+                                </li>
+                            </ol>
+                        </nav>
+                        <h1 class="display-6 fw-bold mb-0 text-white">
+                            ✍️ بوابة إثراء المقررات — Enrichment Submission Portal
+                        </h1>
+                        <p class="text-white-50 mt-2 fs-6">
+                            أنشئ محتوى إثرائياً ثنائي اللغة لإلهام الطلاب — Create bilingual enrichment content to inspire students.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-4 mt-md-0">
+                        <div class="d-inline-flex align-items-center bg-white text-dark rounded-pill shadow-sm px-4 py-3">
+                            <span class="fs-4 me-3">📝</span>
+                            <div class="text-start">
+                                <span class="d-block fw-bold fs-6">نموذج الإثراء</span>
+                                <span class="text-muted small">Enrichment Form</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ MAIN FORM AREA ═══ -->
+        <section class="container py-5 mt-3">
+
+            <!-- ── Flash Messages ── -->
+            <div th:if="${successMsg}" class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 p-4 mb-4" role="alert">
+                <div class="d-flex align-items-start gap-3">
+                    <span class="fs-3">🎉</span>
+                    <div>
+                        <h5 class="alert-heading fw-bold mb-1">تم بنجاح! — Success!</h5>
+                        <p class="mb-0" th:text="${successMsg}">Enrichment submitted successfully.</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div th:if="${errorMsg}" class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm border-0 p-4 mb-4" role="alert">
+                <div class="d-flex align-items-start gap-3">
+                    <span class="fs-3">⛔</span>
+                    <div>
+                        <h5 class="alert-heading fw-bold mb-1">خطأ — Error</h5>
+                        <p class="mb-0" th:text="${errorMsg}">An error occurred.</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- ═══ ENRICHMENT FORM ═══ -->
+            <form th:action="@{/expert/enrich}" method="post" th:object="${enrichmentDTO}">
+
+                <!-- ── STEP 1: COURSE SELECTION ── -->
+                <div class="form-card mb-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="step-badge step-badge-blue">1</span>
+                        <label for="courseId" class="field-label mb-0">
+                            📚 اختر المقرر الجامعي — Select University Course
+                            <span class="text-danger">*</span>
+                        </label>
+                    </div>
+                    <select th:field="*{courseId}" id="courseId"
+                            class="form-select form-select-lg form-control-enrichment" required>
+                        <option value="" disabled selected>— اختر مقرراً / Choose a course —</option>
+                        <option th:each="course : ${courses}"
+                                th:value="${course.id}"
+                                th:text="${course.code + ' — ' + course.nameAr + ' / ' + course.nameEn}">
+                            CS 1301 — Computer Programming 1
+                        </option>
+                    </select>
+                    <span class="field-error"
+                          th:if="${#fields.hasErrors('courseId')}"
+                          th:errors="*{courseId}">Course selection error</span>
+                </div>
+
+                <!-- ── STEP 2: PRACTICAL APPLICATIONS (AR + EN) ── -->
+                <div class="form-card mb-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="step-badge step-badge-green">2</span>
+                        <div class="field-label mb-0">
+                            🎯 التطبيقات العملية — Practical Applications
+                            <span class="text-danger">*</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label for="applicationAr" class="form-label fw-semibold text-muted small">
+                                🇸🇦 النص العربي — Arabic Text
+                            </label>
+                            <textarea th:field="*{applicationAr}" id="applicationAr" rows="4"
+                                      class="form-control form-control-enrichment"
+                                      dir="rtl"
+                                      placeholder="اكتب التطبيقات العملية لهذا المقرر في الصناعة..."
+                                      required></textarea>
+                            <span class="field-error"
+                                  th:if="${#fields.hasErrors('applicationAr')}"
+                                  th:errors="*{applicationAr}">Arabic applications error</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="applicationEn" class="form-label fw-semibold text-muted small">
+                                🇬🇧 English Text
+                            </label>
+                            <textarea th:field="*{applicationEn}" id="applicationEn" rows="4"
+                                      class="form-control form-control-enrichment"
+                                      dir="ltr"
+                                      placeholder="Describe the practical industry applications of this course..."
+                                      required></textarea>
+                            <span class="field-error"
+                                  th:if="${#fields.hasErrors('applicationEn')}"
+                                  th:errors="*{applicationEn}">English applications error</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── STEP 3: CAREER ROADMAP (AR + EN) ── -->
+                <div class="form-card mb-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="step-badge step-badge-amber">3</span>
+                        <div class="field-label mb-0">
+                            🛤️ المسار المهني — Career Roadmap
+                            <span class="text-danger">*</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label for="roadmapAr" class="form-label fw-semibold text-muted small">
+                                🇸🇦 النص العربي — Arabic Text
+                            </label>
+                            <textarea th:field="*{roadmapAr}" id="roadmapAr" rows="3"
+                                      class="form-control form-control-enrichment"
+                                      dir="rtl"
+                                      placeholder="صف المسار المهني الذي يقود إليه هذا المقرر..."
+                                      required></textarea>
+                            <span class="field-error"
+                                  th:if="${#fields.hasErrors('roadmapAr')}"
+                                  th:errors="*{roadmapAr}">Arabic roadmap error</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="roadmapEn" class="form-label fw-semibold text-muted small">
+                                🇬🇧 English Text
+                            </label>
+                            <textarea th:field="*{roadmapEn}" id="roadmapEn" rows="3"
+                                      class="form-control form-control-enrichment"
+                                      dir="ltr"
+                                      placeholder="Describe the career path this course leads to..."
+                                      required></textarea>
+                            <span class="field-error"
+                                  th:if="${#fields.hasErrors('roadmapEn')}"
+                                  th:errors="*{roadmapEn}">English roadmap error</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── STEP 4: TOOLS & CERTIFICATES (MULTI-SELECT) ── -->
+                <div class="row g-4 mb-4">
+                    <!-- Tools -->
+                    <div class="col-md-6">
+                        <div class="form-card h-100">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <span class="step-badge step-badge-teal">4</span>
+                                <label class="field-label mb-0">
+                                    🔧 الأدوات ذات الصلة — Related Tools
+                                    <span class="text-muted small fw-normal">(اختياري / Optional)</span>
+                                </label>
+                            </div>
+                            <p class="text-muted small mb-3">
+                                اضغط Ctrl/Cmd + Click لاختيار عدة أدوات — Hold Ctrl/Cmd + Click to select multiple tools
+                            </p>
+                            <select th:field="*{toolIds}" multiple
+                                    class="form-select multi-select"
+                                    style="height: 150px;">
+                                <option th:each="tool : ${tools}"
+                                        th:value="${tool.id}"
+                                        th:text="${tool.nameEn + ' / ' + tool.nameAr}">Docker</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Certificates -->
+                    <div class="col-md-6">
+                        <div class="form-card h-100">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <span class="step-badge step-badge-amber">5</span>
+                                <label class="field-label mb-0">
+                                    📜 الشهادات المهنية — Professional Certifications
+                                    <span class="text-muted small fw-normal">(اختياري / Optional)</span>
+                                </label>
+                            </div>
+                            <p class="text-muted small mb-3">
+                                اضغط Ctrl/Cmd + Click لاختيار عدة شهادات — Hold Ctrl/Cmd + Click to select multiple
+                            </p>
+                            <select th:field="*{certificateIds}" multiple
+                                    class="form-select multi-select"
+                                    style="height: 150px;">
+                                <option th:each="cert : ${certificates}"
+                                        th:value="${cert.id}"
+                                        th:text="${cert.nameEn + ' (' + cert.issuingBody + ') / ' + cert.nameAr}">AWS SAA (Amazon)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── SUBMIT ROW ── -->
+                <div class="d-flex gap-3 justify-content-between flex-wrap align-items-center">
+                    <a th:href="@{/expert}"
+                       class="btn btn-outline-secondary btn-lg px-5 fw-bold rounded-pill shadow-sm">
+                        ← العودة / Back
+                    </a>
+                    <button type="submit" class="btn-submit-enrichment">
+                        🚀 إرسال للمراجعة — Submit for Review
+                    </button>
+                </div>
+            </form>
+
+        </section>
+    </div>
+
+</body>
+</html>

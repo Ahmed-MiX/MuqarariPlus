@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>لوحة التدقيق والاعتماد | Muqarari+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <th:block th:fragment="head-extra">
+        <style>
+            /* ════════════════════════════════════════════════════════
+               THE BRIDGE — Moderation Dashboard Design System
+               ════════════════════════════════════════════════════════ */
+
+            .bridge-hero {
+                background: linear-gradient(135deg, #0A192F 0%, #132F4C 50%, #1e3a5f 100%);
+                position: relative;
+                overflow: hidden;
+            }
+            .bridge-hero::before {
+                content: '';
+                position: absolute;
+                top: -50%; right: -20%;
+                width: 600px; height: 600px;
+                background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
+                pointer-events: none;
+            }
+            .bridge-hero::after {
+                content: '';
+                position: absolute;
+                bottom: -40%; left: -10%;
+                width: 400px; height: 400px;
+                background: radial-gradient(circle, rgba(0,180,216,0.05) 0%, transparent 70%);
+                pointer-events: none;
+            }
+
+            /* Stats Pill */
+            .stat-pill {
+                background: rgba(255,255,255,0.08);
+                backdrop-filter: blur(8px);
+                border: 1px solid rgba(255,255,255,0.12);
+                border-radius: 50px;
+                padding: 0.6rem 1.5rem;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+            .stat-pill-count {
+                background: linear-gradient(135deg, #f59e0b, #fbbf24);
+                color: #0A192F;
+                font-weight: 800;
+                font-size: 1.1rem;
+                width: 36px; height: 36px;
+                border-radius: 50%;
+                display: flex; align-items: center; justify-content: center;
+            }
+
+            /* Enrichment Card */
+            .enrichment-card {
+                background: #ffffff;
+                border-radius: 20px;
+                border: 1px solid rgba(0,0,0,0.04);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+                padding: 0;
+                overflow: hidden;
+                transition: all 0.3s ease;
+            }
+            .enrichment-card:hover {
+                box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+                transform: translateY(-3px);
+            }
+            .enrichment-card-header {
+                background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+                padding: 1.25rem 1.5rem;
+                border-bottom: 1px solid #e2e8f0;
+            }
+            .enrichment-card-body {
+                padding: 1.5rem;
+            }
+
+            /* Course Code Badge */
+            .course-badge {
+                display: inline-block;
+                background: linear-gradient(135deg, #0A192F, #132F4C);
+                color: white;
+                font-size: 0.72rem;
+                font-weight: 800;
+                padding: 0.3rem 0.8rem;
+                border-radius: 8px;
+                letter-spacing: 0.5px;
+            }
+
+            /* Expert Tag */
+            .expert-tag {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                background: rgba(0,180,216,0.08);
+                color: #0E7490;
+                font-size: 0.78rem;
+                font-weight: 600;
+                padding: 0.3rem 0.8rem;
+                border-radius: 8px;
+                border: 1px solid rgba(0,180,216,0.15);
+            }
+
+            /* Content Preview */
+            .content-preview {
+                background: #f8fafc;
+                border-radius: 12px;
+                padding: 1rem 1.25rem;
+                border-right: 4px solid #00B4D8;
+                font-size: 0.85rem;
+                color: #475569;
+                line-height: 1.7;
+                max-height: 80px;
+                overflow: hidden;
+                position: relative;
+            }
+            .content-preview::after {
+                content: '';
+                position: absolute;
+                bottom: 0; left: 0; right: 0;
+                height: 30px;
+                background: linear-gradient(transparent, #f8fafc);
+                pointer-events: none;
+            }
+
+            /* Action Buttons */
+            .btn-approve {
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                padding: 0.6rem 1.5rem;
+                font-weight: 700;
+                font-size: 0.85rem;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 12px rgba(16,185,129,0.25);
+            }
+            .btn-approve:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 18px rgba(16,185,129,0.35);
+                color: white;
+            }
+
+            .btn-reject {
+                background: linear-gradient(135deg, #ef4444, #dc2626);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                padding: 0.6rem 1.5rem;
+                font-weight: 700;
+                font-size: 0.85rem;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 12px rgba(239,68,68,0.25);
+            }
+            .btn-reject:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 18px rgba(239,68,68,0.35);
+                color: white;
+            }
+
+            /* Section Label */
+            .section-label {
+                font-size: 0.68rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+                color: #94a3b8;
+                margin-bottom: 0.35rem;
+            }
+
+            /* Empty State */
+            .empty-state-bridge {
+                text-align: center;
+                padding: 5rem 2rem;
+            }
+            .empty-state-icon-lg {
+                font-size: 4.5rem;
+                opacity: 0.3;
+                margin-bottom: 1.5rem;
+            }
+        </style>
+    </th:block>
+
+    <div th:fragment="main-content">
+
+        <!-- ═══════════════════════════════════════════════════════
+             HERO HEADER — The Bridge Command Center
+             ═══════════════════════════════════════════════════════ -->
+        <section class="bridge-hero text-white py-5">
+            <div class="container py-4">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <nav aria-label="breadcrumb" class="mb-3">
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item">
+                                    <a th:href="@{/admin}" class="text-white-50 text-decoration-none">
+                                        🏠 لوحة الإدارة / Admin Panel
+                                    </a>
+                                </li>
+                                <li class="breadcrumb-item active text-white" aria-current="page">
+                                    🔍 التدقيق والاعتماد / Moderation
+                                </li>
+                            </ol>
+                        </nav>
+                        <h1 class="display-5 fw-bold mb-2 text-white">
+                            🔍 لوحة التدقيق والاعتماد
+                        </h1>
+                        <p class="text-white-50 fs-6 mb-0">
+                            مراجعة واعتماد أو رفض الإثراءات المقدمة من الخبراء — Review, approve or reject expert-submitted enrichments.
+                        </p>
+                    </div>
+                    <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                        <div class="stat-pill">
+                            <span class="stat-pill-count" th:text="${pendingCount}">0</span>
+                            <div class="text-start">
+                                <span class="d-block fw-bold text-white fs-6">إثراء معلّق</span>
+                                <span class="text-white-50 small">Pending Enrichments</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════
+             MAIN CONTENT — Moderation Queue
+             ═══════════════════════════════════════════════════════ -->
+        <section class="container py-5">
+
+            <!-- ── Flash Messages ── -->
+            <div th:if="${successMsg}" class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 p-4 mb-4" role="alert">
+                <div class="d-flex align-items-start gap-3">
+                    <span class="fs-3">✅</span>
+                    <div>
+                        <h5 class="alert-heading fw-bold mb-1">تمت العملية بنجاح — Success!</h5>
+                        <p class="mb-0" th:text="${successMsg}">Operation completed.</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div th:if="${errorMsg}" class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm border-0 p-4 mb-4" role="alert">
+                <div class="d-flex align-items-start gap-3">
+                    <span class="fs-3">⛔</span>
+                    <div>
+                        <h5 class="alert-heading fw-bold mb-1">خطأ — Error</h5>
+                        <p class="mb-0" th:text="${errorMsg}">An error occurred.</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- ═══ ENRICHMENTS GRID ═══ -->
+            <div th:if="${pendingEnrichments != null && !pendingEnrichments.isEmpty()}">
+                <div class="row g-4">
+                    <div class="col-12" th:each="enrichment, iter : ${pendingEnrichments}">
+                        <div class="enrichment-card">
+                            <!-- Card Header: Course + Expert Info -->
+                            <div class="enrichment-card-header">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                                        <span class="course-badge"
+                                              th:text="${enrichment.course != null && enrichment.course.code != null ? enrichment.course.code : '—'}">CS 1301</span>
+                                        <div>
+                                            <span class="fw-bold d-block" style="color: #0A192F;"
+                                                  th:text="${enrichment.course != null ? enrichment.course.nameAr : 'غير محدد'}">اسم المقرر</span>
+                                            <span class="text-muted small"
+                                                  th:text="${enrichment.course != null ? enrichment.course.nameEn : 'Unknown'}">Course Name</span>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="expert-tag">
+                                            👤 <span th:text="${enrichment.expert != null && enrichment.expert.user != null ? enrichment.expert.user.email : 'غير معروف'}">expert@email.com</span>
+                                        </span>
+                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-1 fw-bold small">
+                                            ⏳ معلّق / Pending
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card Body: Content Preview + Actions -->
+                            <div class="enrichment-card-body">
+                                <div class="row g-4">
+                                    <!-- Left Column: Content Previews -->
+                                    <div class="col-lg-8">
+                                        <div class="row g-3">
+                                            <!-- Application Preview (Arabic) -->
+                                            <div class="col-md-6">
+                                                <div class="section-label">🎯 التطبيقات العملية</div>
+                                                <div class="content-preview" dir="rtl">
+                                                    <span th:if="${enrichment.applicationAr != null && !enrichment.applicationAr.isEmpty()}"
+                                                          th:text="${enrichment.applicationAr.length() > 150 ? enrichment.applicationAr.substring(0, 150) + '...' : enrichment.applicationAr}">محتوى التطبيقات...</span>
+                                                    <span th:if="${enrichment.applicationAr == null || enrichment.applicationAr.isEmpty()}"
+                                                          class="text-muted fst-italic">لا يوجد محتوى</span>
+                                                </div>
+                                            </div>
+                                            <!-- Roadmap Preview (Arabic) -->
+                                            <div class="col-md-6">
+                                                <div class="section-label">🛤️ المسار المهني</div>
+                                                <div class="content-preview" dir="rtl">
+                                                    <span th:if="${enrichment.roadmapAr != null && !enrichment.roadmapAr.isEmpty()}"
+                                                          th:text="${enrichment.roadmapAr.length() > 150 ? enrichment.roadmapAr.substring(0, 150) + '...' : enrichment.roadmapAr}">محتوى المسار المهني...</span>
+                                                    <span th:if="${enrichment.roadmapAr == null || enrichment.roadmapAr.isEmpty()}"
+                                                          class="text-muted fst-italic">لا يوجد محتوى</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right Column: Action Buttons -->
+                                    <div class="col-lg-4">
+                                        <div class="d-flex flex-column gap-3 h-100 justify-content-center">
+                                            <!-- APPROVE FORM — Isolated POST -->
+                                            <form th:action="@{/admin/moderation/approve/{id}(id=${enrichment.id})}"
+                                                  method="post">
+                                                <button type="submit" class="btn-approve w-100">
+                                                    ✅ قبول واعتماد — Approve
+                                                </button>
+                                            </form>
+
+                                            <!-- REJECT FORM — Isolated POST -->
+                                            <form th:action="@{/admin/moderation/reject/{id}(id=${enrichment.id})}"
+                                                  method="post">
+                                                <button type="submit" class="btn-reject w-100">
+                                                    ❌ رفض — Reject
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ EMPTY STATE ═══ -->
+            <div th:if="${pendingEnrichments == null || pendingEnrichments.isEmpty()}">
+                <div class="enrichment-card">
+                    <div class="empty-state-bridge">
+                        <div class="empty-state-icon-lg">🎉</div>
+                        <h3 class="fw-bold mb-2" style="color: #0A192F;">
+                            لا توجد إثراءات قيد الانتظار حالياً
+                        </h3>
+                        <p class="text-muted fs-6 mb-1">
+                            No pending enrichments at the moment.
+                        </p>
+                        <p class="text-muted small mb-4">
+                            كل شيء محدث! ستظهر هنا أي إثراءات جديدة يرسلها الخبراء.
+                        </p>
+                        <a th:href="@{/admin}" class="btn btn-outline-secondary rounded-pill px-4 fw-bold">
+                            ← العودة للوحة الإدارة / Back to Admin Panel
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ BACK NAVIGATION ═══ -->
+            <div class="mt-5" th:if="${pendingEnrichments != null && !pendingEnrichments.isEmpty()}">
+                <a th:href="@{/admin}" class="btn btn-outline-secondary btn-lg rounded-pill px-5 fw-bold shadow-sm">
+                    ← العودة للوحة الإدارة / Back to Admin Panel
+                </a>
+            </div>
+
+        </section>
+    </div>
+
+</body>
+</html>
