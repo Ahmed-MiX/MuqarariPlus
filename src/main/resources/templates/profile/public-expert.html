@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${profileUser.firstName + ' ' + profileUser.lastName + ' | Expert Authority | Muqarari+'}">Expert | Muqarari+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <th:block th:fragment="head-extra">
+        <style>
+            .authority-hero {
+                background: linear-gradient(135deg, #0A192F 0%, #1a1f35 30%, #132F4C 60%, #10b981 100%);
+                position: relative;
+                overflow: hidden;
+            }
+            .authority-hero::before {
+                content: '';
+                position: absolute;
+                top: -30%; right: -15%;
+                width: 500px; height: 500px;
+                background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%);
+                pointer-events: none;
+            }
+            .expert-avatar {
+                width: 120px; height: 120px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #10b981, #059669);
+                display: flex; align-items: center; justify-content: center;
+                color: white; font-size: 3rem; font-weight: 700;
+                border: 4px solid rgba(255,255,255,0.15);
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            }
+            .verified-badge {
+                display: inline-flex; align-items: center; gap: 0.35rem;
+                background: rgba(16,185,129,0.15);
+                border: 1px solid rgba(16,185,129,0.3);
+                color: #34d399;
+                padding: 0.3rem 0.9rem;
+                border-radius: 20px;
+                font-size: 0.72rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            .impact-stat {
+                text-align: center;
+                padding: 1.25rem 1rem;
+            }
+            .impact-value {
+                font-size: 2.2rem;
+                font-weight: 800;
+                line-height: 1;
+            }
+            .impact-label {
+                font-size: 0.72rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-top: 0.3rem;
+                color: #64748b;
+            }
+            .impact-value.text-teal { color: var(--secondary-teal); }
+            .impact-value.text-green { color: #10b981; }
+            .impact-value.text-amber { color: #d97706; }
+            .impact-value.text-blue { color: #3b82f6; }
+
+            /* Social Links */
+            .expert-social {
+                display: inline-flex; align-items: center; gap: 0.5rem;
+                padding: 0.5rem 1.25rem;
+                border-radius: 10px;
+                font-size: 0.82rem;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                border: 1px solid rgba(255,255,255,0.12);
+            }
+            .expert-social:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+            .social-linkedin { background: rgba(10,102,194,0.15); color: #60a5fa; }
+            .social-linkedin:hover { color: #93bbfc; }
+            .social-github { background: rgba(255,255,255,0.06); color: #cbd5e1; }
+            .social-github:hover { color: white; }
+
+            /* Expertise Badges */
+            .expertise-badge {
+                display: inline-flex; align-items: center;
+                padding: 0.4rem 0.9rem;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+            .expertise-badge:hover { transform: translateY(-1px); }
+            .exp-skill { background: rgba(59,130,246,0.08); color: #3b82f6; border: 1px solid rgba(59,130,246,0.15); }
+            .exp-tool { background: rgba(16,185,129,0.08); color: #10b981; border: 1px solid rgba(16,185,129,0.15); }
+            .exp-cert { background: rgba(245,158,11,0.08); color: #d97706; border: 1px solid rgba(245,158,11,0.15); }
+
+            /* Enrichment Cards */
+            .enrichment-article {
+                background: #fff;
+                border: 1px solid rgba(0,0,0,0.06);
+                border-radius: 16px;
+                padding: 1.75rem;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+            .enrichment-article::before {
+                content: '';
+                position: absolute;
+                top: 0; left: 0; right: 0;
+                height: 3px;
+                background: linear-gradient(90deg, #10b981, #00B4D8);
+                border-radius: 16px 16px 0 0;
+            }
+            .enrichment-article:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+                border-color: rgba(0,180,216,0.2);
+            }
+            .article-course-tag {
+                display: inline-block;
+                background: rgba(0,180,216,0.08);
+                color: #0099b8;
+                padding: 0.25rem 0.7rem;
+                border-radius: 8px;
+                font-size: 0.7rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            .article-content {
+                font-size: 0.88rem;
+                color: #475569;
+                line-height: 1.8;
+                margin-top: 0.75rem;
+                max-height: 150px;
+                overflow: hidden;
+                position: relative;
+            }
+            .article-content::after {
+                content: '';
+                position: absolute;
+                bottom: 0; left: 0; right: 0;
+                height: 50px;
+                background: linear-gradient(transparent, white);
+            }
+            .article-meta {
+                font-size: 0.72rem;
+                color: #94a3b8;
+                display: flex;
+                gap: 1rem;
+                margin-top: 0.75rem;
+            }
+            .article-skill-tags {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.35rem;
+                margin-top: 0.75rem;
+            }
+            .article-skill-tag {
+                font-size: 0.65rem;
+                padding: 0.2rem 0.5rem;
+                border-radius: 12px;
+                font-weight: 600;
+            }
+
+            /* Section Card */
+            .authority-section {
+                background: #fff;
+                border-radius: 16px;
+                border: 1px solid rgba(0,0,0,0.05);
+                box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+                padding: 1.75rem;
+            }
+            .authority-section-title {
+                font-size: 1rem;
+                font-weight: 700;
+                color: var(--primary-blue);
+                margin-bottom: 1rem;
+                display: flex; align-items: center; gap: 0.5rem;
+            }
+        </style>
+    </th:block>
+
+    <div th:fragment="main-content">
+
+        <!-- ═══ EXPERT HERO ═══ -->
+        <section class="authority-hero text-white py-5">
+            <div class="container py-4">
+                <div class="d-flex align-items-center gap-4 flex-wrap">
+                    <div class="expert-avatar"
+                         th:text="${profileUser.firstName != null ? profileUser.firstName.substring(0, 1).toUpperCase() : '?'}">?</div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                            <h1 class="display-5 fw-bold mb-0" style="color: #f1f5f9;"
+                                th:text="${(profileUser.firstName ?: '') + ' ' + (profileUser.lastName ?: '')}">Expert Name</h1>
+                            <span class="verified-badge" th:if="${expert.status.name() == 'APPROVED'}">✅ Verified Expert</span>
+                        </div>
+                        <p style="color: rgba(255,255,255,0.5); font-size: 1rem;" class="mb-2"
+                           th:text="${expert.bioEn ?: 'Industry Expert @ Muqarari+'}">Expert bio</p>
+                        <p th:if="${expert.bioAr != null}" style="color: rgba(255,255,255,0.4); font-size: 0.9rem;" class="mb-3"
+                           th:text="${expert.bioAr}">السيرة</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a th:if="${expert.linkedinUrl != null and !expert.linkedinUrl.isEmpty()}"
+                               th:href="${expert.linkedinUrl}"
+                               class="expert-social social-linkedin" target="_blank">
+                                🔗 LinkedIn
+                            </a>
+                            <a th:if="${expert.githubUrl != null and !expert.githubUrl.isEmpty()}"
+                               th:href="${expert.githubUrl}"
+                               class="expert-social social-github" target="_blank">
+                                🐙 GitHub
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ IMPACT STATS BAR ═══ -->
+        <section class="container">
+            <div class="row g-0 bg-white rounded-4 shadow-sm border mt-n3 position-relative" style="z-index: 10;">
+                <div class="col-3 impact-stat border-end">
+                    <div class="impact-value text-green" th:text="${enrichmentCount}">0</div>
+                    <div class="impact-label">📝 Enrichments / إثراءات</div>
+                </div>
+                <div class="col-3 impact-stat border-end">
+                    <div class="impact-value text-teal" th:text="${courseCount}">0</div>
+                    <div class="impact-label">📚 Courses Enriched / مقررات</div>
+                </div>
+                <div class="col-3 impact-stat border-end">
+                    <div class="impact-value text-amber" th:text="${impactScore}">0</div>
+                    <div class="impact-label">🎯 Impact Score / التأثير</div>
+                </div>
+                <div class="col-3 impact-stat">
+                    <div class="impact-value text-blue"
+                         th:text="${expert.rating != null ? #numbers.formatDecimal(expert.rating, 1, 1) : '0.0'}">0.0</div>
+                    <div class="impact-label">⭐ Rating / التقييم</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ MAIN CONTENT ═══ -->
+        <section class="container py-5">
+            <div class="row g-4">
+
+                <!-- LEFT SIDEBAR: Expertise -->
+                <div class="col-lg-4">
+                    <!-- Skills -->
+                    <div class="authority-section mb-4">
+                        <div class="authority-section-title">🧠 الخبرات التقنية — Technical Skills</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span th:each="skill : ${expertSkills}" class="expertise-badge exp-skill"
+                                  th:text="${skill.nameEn}">Skill</span>
+                        </div>
+                        <p th:if="${#sets.isEmpty(expertSkills)}" class="text-muted small fst-italic mb-0 mt-2">—</p>
+                    </div>
+
+                    <!-- Tools -->
+                    <div class="authority-section mb-4">
+                        <div class="authority-section-title">🔧 الأدوات — Industry Tools</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span th:each="tool : ${expertTools}" class="expertise-badge exp-tool"
+                                  th:text="${tool.nameEn}">Tool</span>
+                        </div>
+                        <p th:if="${#sets.isEmpty(expertTools)}" class="text-muted small fst-italic mb-0 mt-2">—</p>
+                    </div>
+
+                    <!-- Certifications -->
+                    <div class="authority-section">
+                        <div class="authority-section-title">🏅 الشهادات — Certifications</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span th:each="cert : ${expertCerts}" class="expertise-badge exp-cert"
+                                  th:text="${cert.nameEn}">Cert</span>
+                        </div>
+                        <p th:if="${#sets.isEmpty(expertCerts)}" class="text-muted small fst-italic mb-0 mt-2">—</p>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Published Enrichments (Articles) -->
+                <div class="col-lg-8">
+                    <h3 class="h5 fw-bold text-primary-blue mb-4">
+                        📖 الإثراءات المنشورة — Published Insights
+                        <span class="badge rounded-pill ms-2"
+                              style="background: rgba(16,185,129,0.1); color: #10b981; font-size: 0.7rem; font-weight: 600;"
+                              th:text="${enrichmentCount + ' articles'}">0 articles</span>
+                    </h3>
+
+                    <div th:each="enrichment : ${approvedEnrichments}" class="enrichment-article mb-4">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                            <div>
+                                <span class="article-course-tag"
+                                      th:text="${enrichment.course.code + ' — ' + enrichment.course.nameEn}">CS101</span>
+                            </div>
+                            <span class="text-muted" style="font-size: 0.72rem;"
+                                  th:text="${enrichment.createdAt != null ? #temporals.format(enrichment.createdAt, 'yyyy-MM-dd') : ''}">Date</span>
+                        </div>
+
+                        <div class="article-content" th:utext="${enrichment.content}">
+                            Enrichment content...
+                        </div>
+
+                        <!-- Skill & Tool tags on article -->
+                        <div class="article-skill-tags">
+                            <span th:each="s : ${enrichment.skills}"
+                                  class="article-skill-tag exp-skill"
+                                  th:text="${s.nameEn}">Skill</span>
+                            <span th:each="t : ${enrichment.tools}"
+                                  class="article-skill-tag exp-tool"
+                                  th:text="${t.nameEn}">Tool</span>
+                        </div>
+
+                        <div class="article-meta">
+                            <span>👍 <span th:text="${enrichment.upvoteCount}">0</span> upvotes</span>
+                            <span>📑 <span th:text="${enrichment.bookmarkCount}">0</span> bookmarks</span>
+                        </div>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(approvedEnrichments)}" class="text-center py-5">
+                        <span style="font-size: 3rem;">📭</span>
+                        <p class="text-muted mt-3 fst-italic">No published enrichments yet.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+</body>
+</html>

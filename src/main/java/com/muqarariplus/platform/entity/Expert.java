@@ -29,6 +29,7 @@ public class Expert {
     private String cvUrl;
     private String cvFilePath;
     private String linkedinUrl;
+    private String githubUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

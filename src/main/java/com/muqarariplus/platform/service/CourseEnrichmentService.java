@@ -1,5 +1,6 @@
 package com.muqarariplus.platform.service;
 
+import com.muqarariplus.platform.audit.Auditable;
 import com.muqarariplus.platform.entity.*;
 import com.muqarariplus.platform.repository.*;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ public class CourseEnrichmentService {
     /**
      * Creates a new course enrichment submitted by a verified expert.
      */
+    @Auditable(action = "CREATE", entity = "CourseEnrichment")
     @Transactional
     public void createEnrichment(String loginIdentifier, Long courseId, String content,
                                  List<Long> skillIds, List<Long> toolIds, List<Long> certIds) {
@@ -100,6 +102,13 @@ public class CourseEnrichmentService {
     }
 
     /**
+     * Returns the count of APPROVED enrichments for a course (for catalog badge).
+     */
+    public long getApprovedCountForCourse(Long courseId) {
+        return enrichmentRepository.countByCourseIdAndStatus(courseId, EnrichmentStatus.APPROVED);
+    }
+
+    /**
      * Returns all enrichments with PENDING status for the admin moderation queue.
      */
     public List<CourseEnrichment> getPendingEnrichments() {
@@ -109,6 +118,7 @@ public class CourseEnrichmentService {
     /**
      * Admin approves an enrichment — sets status to APPROVED.
      */
+    @Auditable(action = "APPROVE", entity = "CourseEnrichment")
     @Transactional
     public void approveEnrichment(Long enrichmentId) {
         CourseEnrichment enrichment = enrichmentRepository.findById(enrichmentId)
@@ -121,6 +131,7 @@ public class CourseEnrichmentService {
     /**
      * Admin rejects an enrichment — sets status to REJECTED.
      */
+    @Auditable(action = "REJECT", entity = "CourseEnrichment")
     @Transactional
     public void rejectEnrichment(Long enrichmentId) {
         CourseEnrichment enrichment = enrichmentRepository.findById(enrichmentId)

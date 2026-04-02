@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${content['sa.title']}">Supreme Command Center | Muqarari+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <th:block th:fragment="head-extra">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </th:block>
+
+    <div th:fragment="main-content">
+
+        <!-- ===== HERO HEADER (matches platform identity) ===== -->
+        <section class="text-white py-5" style="background-color: var(--primary-blue);">
+            <div class="container py-3">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h1 class="display-6 fw-bold mb-0" th:text="${content['sa.title']}">Supreme Command Center</h1>
+                        <p class="text-white-50 mb-0 mt-2" th:text="${content['sa.subtitle']}">Full platform oversight.</p>
+                    </div>
+                    <span class="badge bg-danger rounded-pill px-4 py-2 fs-6 shadow-sm border border-light"
+                          th:text="${content['sa.badge']}">SUPER ADMIN</span>
+                </div>
+
+                <!-- ── Unified Tab Navigation ── -->
+                <div class="mt-4">
+                    <ul class="nav nav-pills gap-2 flex-wrap">
+                        <li class="nav-item">
+                            <a class="nav-link active text-white fw-semibold px-4 rounded-pill"
+                               style="background: rgba(255,255,255,0.15);"
+                               th:href="@{/super-admin/dashboard}">
+                                📊 <span th:text="${content['sa.tab.dashboard']}">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white-50 fw-semibold px-4 rounded-pill"
+                               style="background: rgba(255,255,255,0.05);"
+                               th:href="@{/super-admin/users}">
+                                👥 <span th:text="${content['sa.tab.users']}">User Matrix</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white-50 fw-semibold px-4 rounded-pill"
+                               style="background: rgba(255,255,255,0.05);"
+                               th:href="@{/admin}">
+                                🛡️ <span th:text="${content['sa.tab.admin']}">Admin Tools</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- ── KPI STAT CARDS ── -->
+                <div class="row g-4 mt-3">
+                    <div class="col-md-3">
+                        <div class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width: 52px; height: 52px; background: linear-gradient(135deg, #3b82f6, #60a5fa);">
+                                    <span class="fs-3 text-white">👥</span>
+                                </div>
+                                <div>
+                                    <span class="d-block fs-2 fw-bold text-primary-blue" th:text="${totalUsers}">0</span>
+                                    <span class="text-muted small fw-semibold"
+                                          th:text="${content['sa.kpi.total_users']}">Total Users</span>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <span class="text-muted small" style="font-size: 0.7rem;"
+                                      th:text="${content['sa.kpi.total_users_desc']}">All registered accounts</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4 border-start border-4"
+                             style="border-color: var(--secondary-teal) !important;">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width: 52px; height: 52px; background: linear-gradient(135deg, #10b981, #34d399);">
+                                    <span class="fs-3 text-white">🧑‍💼</span>
+                                </div>
+                                <div>
+                                    <span class="d-block fs-2 fw-bold text-secondary-teal"
+                                          th:text="${usersByRole['ROLE_EXPERT'] ?: 0}">0</span>
+                                    <span class="text-muted small fw-semibold"
+                                          th:text="${content['sa.kpi.experts']}">Experts</span>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <span class="text-muted small" style="font-size: 0.7rem;"
+                                      th:text="${content['sa.kpi.experts_desc']}">Expert accounts</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width: 52px; height: 52px; background: linear-gradient(135deg, #8b5cf6, #a78bfa);">
+                                    <span class="fs-3 text-white">📚</span>
+                                </div>
+                                <div>
+                                    <span class="d-block fs-2 fw-bold text-primary-blue" th:text="${totalCourses}">0</span>
+                                    <span class="text-muted small fw-semibold"
+                                          th:text="${content['sa.kpi.courses']}">Courses</span>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <span class="text-muted small" style="font-size: 0.7rem;"
+                                      th:text="${content['sa.kpi.courses_desc']}">Courses in catalog</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-white text-dark rounded-4 shadow-sm border-0 h-100 p-4 border-start border-4"
+                             style="border-color: var(--accent-orange) !important;">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width: 52px; height: 52px; background: linear-gradient(135deg, #f59e0b, #fbbf24);">
+                                    <span class="fs-3 text-white">📝</span>
+                                </div>
+                                <div>
+                                    <span class="d-block fs-2 fw-bold text-primary-blue" th:text="${totalEnrichments}">0</span>
+                                    <span class="text-muted small fw-semibold"
+                                          th:text="${content['sa.kpi.enrichments']}">Enrichments</span>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <span class="text-muted small" style="font-size: 0.7rem;"
+                                      th:text="${content['sa.kpi.enrichments_desc']}">Total contributions</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== MAIN CONTENT AREA ===== -->
+        <section class="container py-5 mt-2">
+
+            <!-- ═══ CHARTS ROW ═══ -->
+            <div class="row g-4 mb-5">
+                <!-- Bar Chart: User Distribution by Role -->
+                <div class="col-lg-7">
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                            <h3 class="h5 fw-bold text-primary-blue mb-0">
+                                <span class="me-2">📊</span>
+                                <span th:text="${content['sa.chart.users']}">User Distribution by Role</span>
+                            </h3>
+                            <span class="badge rounded-pill px-3 py-2 fw-bold shadow-sm"
+                                  style="font-size: 0.7rem; background: rgba(255,77,77,0.1); color: var(--accent-orange); border: 1px solid rgba(255,77,77,0.2);">
+                                <span th:text="${content['sa.chart.live']}">LIVE</span>
+                            </span>
+                        </div>
+                        <div style="position: relative; height: 320px;">
+                            <canvas id="usersChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <!-- Doughnut Chart: Enrichment Status -->
+                <div class="col-lg-5">
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                            <h3 class="h5 fw-bold text-primary-blue mb-0">
+                                <span class="me-2">🎯</span>
+                                <span th:text="${content['sa.chart.enrichments']}">Enrichment Status</span>
+                            </h3>
+                            <span class="badge rounded-pill px-3 py-2 fw-bold shadow-sm"
+                                  style="font-size: 0.7rem; background: rgba(255,77,77,0.1); color: var(--accent-orange); border: 1px solid rgba(255,77,77,0.2);">
+                                <span th:text="${content['sa.chart.live']}">LIVE</span>
+                            </span>
+                        </div>
+                        <div style="position: relative; height: 320px;">
+                            <canvas id="enrichmentsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ GENERATE ADMINS SECTION (RESTORED) ═══ -->
+            <div class="row g-4 mb-5">
+                <!-- Create Admin Form -->
+                <div class="col-lg-5">
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 h-100 border-top border-4"
+                         style="border-color: var(--secondary-teal) !important;">
+                        <h2 class="h5 fw-bold text-primary-blue border-bottom border-2 pb-3 mb-4">
+                            🔑 <span th:text="${content['superadmin.create.title']}">Create New Administrator</span>
+                        </h2>
+
+                        <!-- Success Alert: Generated Credentials -->
+                        <div th:if="${newUsername}" class="alert alert-success shadow-sm mb-4" role="alert">
+                            <h5 class="alert-heading fw-bold" th:text="${content['superadmin.success']}">Admin Generated!</h5>
+                            <p class="small mb-2" th:text="${content['superadmin.success_msg']}">Copy these credentials now.</p>
+                            <hr>
+                            <p class="mb-1 fw-bold">
+                                <span th:text="${content['superadmin.success_user']}">Username:</span>
+                                <code class="bg-light px-2 py-1 rounded text-dark ms-2" th:text="${newUsername}"></code>
+                            </p>
+                            <p class="mb-0 fw-bold">
+                                <span th:text="${content['superadmin.success_pass']}">Password:</span>
+                                <code class="bg-light px-2 py-1 rounded text-dark ms-2" th:text="${newPassword}"></code>
+                            </p>
+                        </div>
+
+                        <form th:action="@{/super-admin/create-admin}" method="post">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small"
+                                       th:text="${content['superadmin.create.firstname']}">First Name</label>
+                                <input type="text" name="firstName" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small"
+                                       th:text="${content['superadmin.create.lastname']}">Last Name</label>
+                                <input type="text" name="lastName" class="form-control" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small"
+                                       th:text="${content['superadmin.create.email']}">Email</label>
+                                <input type="email" name="email" class="form-control" required>
+                            </div>
+                            <div class="text-end">
+                                <button type="submit"
+                                        class="btn px-5 fw-bold shadow-sm rounded-pill text-white"
+                                        style="background-color: var(--secondary-teal);"
+                                        th:text="${content['superadmin.create.btn']}">Generate Credentials</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Active Admins Fleet -->
+                <div class="col-lg-7">
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-4 h-100">
+                        <h2 class="h5 fw-bold text-primary-blue border-bottom border-2 pb-3 mb-4">
+                            🛡️ <span th:text="${content['superadmin.fleet.title']}">Active Administrators Fleet</span>
+                        </h2>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="py-3 px-4" th:text="${content['superadmin.fleet.name']}">Name</th>
+                                        <th class="py-3 px-4" th:text="${content['superadmin.fleet.email']}">Email</th>
+                                        <th class="py-3 px-4" th:text="${content['superadmin.fleet.username']}">Username</th>
+                                        <th class="py-3 px-4 text-end" th:text="${content['superadmin.fleet.action']}">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="admin : ${admins}">
+                                        <td class="py-3 px-4 fw-semibold text-dark"
+                                            th:text="${admin.firstName + ' ' + admin.lastName}">Name</td>
+                                        <td class="py-3 px-4 text-muted" th:text="${admin.email}">Email</td>
+                                        <td class="py-3 px-4 text-primary-blue fw-bold" th:text="${admin.username}">admin1234</td>
+                                        <td class="py-3 px-4 text-end">
+                                            <form th:action="@{/super-admin/delete-admin}" method="post"
+                                                  th:data-confirm="${content['superadmin.fleet.delete_confirm']}"
+                                                  onsubmit="return confirm(this.getAttribute('data-confirm'));">
+                                                <input type="hidden" name="adminId" th:value="${admin.id}"/>
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-danger rounded-pill px-4 shadow-sm border-0"
+                                                        style="background-color: var(--accent-orange);"
+                                                        th:text="${content['superadmin.fleet.delete']}">Revoke</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${admins == null or #lists.isEmpty(admins)}">
+                                        <td colspan="4" class="text-center py-4 text-muted fst-italic"
+                                            th:text="${content['superadmin.fleet.empty']}">No admins.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ LIVE AUDIT TRAIL ═══ -->
+            <div class="card bg-white rounded-4 shadow-sm border-0 p-4 p-md-5">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <h2 class="h5 fw-bold text-primary-blue mb-0">
+                        🔍 <span th:text="${content['sa.audit.title']}">Live Audit Trail</span>
+                    </h2>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge rounded-pill px-3 py-1 fw-bold"
+                              style="font-size: 0.7rem; background: rgba(255,77,77,0.1); color: var(--accent-orange); border: 1px solid rgba(255,77,77,0.2); animation: pulse-live 2s infinite;">
+                            ● <span th:text="${content['sa.audit.recording']}">RECORDING</span>
+                        </span>
+                        <span class="text-muted small" th:text="${content['sa.audit.latest']}">Latest 50 entries</span>
+                    </div>
+                </div>
+
+                <div style="max-height: 520px; overflow-y: auto;">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm align-middle" id="auditTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="py-2 px-3" style="width: 5%;">#</th>
+                                    <th class="py-2 px-3" style="width: 20%;" th:text="${content['sa.audit.actor']}">Actor</th>
+                                    <th class="py-2 px-3" style="width: 10%;" th:text="${content['sa.audit.role']}">Role</th>
+                                    <th class="py-2 px-3" style="width: 12%;" th:text="${content['sa.audit.action']}">Action</th>
+                                    <th class="py-2 px-3" style="width: 15%;" th:text="${content['sa.audit.entity']}">Entity</th>
+                                    <th class="py-2 px-3" style="width: 8%;" th:text="${content['sa.audit.id']}">ID</th>
+                                    <th class="py-2 px-3" style="width: 15%;" th:text="${content['sa.audit.timestamp']}">Timestamp</th>
+                                    <th class="py-2 px-3" style="width: 10%;" th:text="${content['sa.audit.details']}">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="log, stat : ${auditLogs}">
+                                    <td class="py-2 px-3 text-muted small" th:text="${stat.index + 1}">1</td>
+                                    <td class="py-2 px-3 fw-semibold text-primary-blue small" th:text="${log.actorEmail}">user@ex.com</td>
+                                    <td class="py-2 px-3">
+                                        <span class="badge bg-light text-muted small" th:text="${log.actorRole}">ROLE</span>
+                                    </td>
+                                    <td class="py-2 px-3">
+                                        <span class="badge rounded-pill px-2 py-1 audit-action-badge"
+                                              th:classappend="${
+                                                  log.action == 'CREATE' ? 'bg-success-subtle text-success' :
+                                                  log.action == 'APPROVE' ? 'bg-success-subtle text-success' :
+                                                  log.action == 'REJECT' ? 'bg-danger-subtle text-danger' :
+                                                  log.action == 'DELETE' ? 'bg-danger-subtle text-danger' :
+                                                  log.action == 'TOGGLE_STATUS' ? 'bg-warning-subtle text-warning' :
+                                                  log.action == 'CHANGE_ROLE' ? 'bg-info-subtle text-info' :
+                                                  'bg-secondary-subtle text-secondary'}"
+                                              style="font-size: 0.7rem; font-weight: 700;"
+                                              th:text="${log.action}">ACTION</span>
+                                    </td>
+                                    <td class="py-2 px-3 text-muted small fw-semibold" th:text="${log.entityName}">Entity</td>
+                                    <td class="py-2 px-3 text-muted small" th:text="${log.entityId ?: '—'}">—</td>
+                                    <td class="py-2 px-3 text-muted small"
+                                        th:text="${log.timestamp != null ? #temporals.format(log.timestamp, 'yyyy-MM-dd HH:mm:ss') : '—'}">
+                                        2026-01-01 00:00:00
+                                    </td>
+                                    <td class="py-2 px-3">
+                                        <button class="btn btn-sm btn-outline-secondary px-2 py-0 rounded-pill"
+                                                style="font-size: 0.68rem;"
+                                                th:attr="data-bs-toggle='popover', data-bs-placement='left', data-bs-trigger='hover', data-bs-content=${log.details ?: 'No details'}"
+                                                th:if="${log.details != null}"
+                                                th:text="${content['sa.audit.view']}">View</button>
+                                        <span th:if="${log.details == null}" class="text-muted small">—</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${auditLogs == null or #lists.isEmpty(auditLogs)}">
+                                    <td colspan="8" class="text-center py-5 text-muted fst-italic"
+                                        th:text="${content['sa.audit.empty']}">No audit entries recorded yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </div>
+
+    <!-- ===== CHART.JS RENDERING & STYLES ===== -->
+    <th:block th:fragment="script-extra">
+        <style>
+            @keyframes pulse-live {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.5; }
+            }
+        </style>
+
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+
+            // ── Parse data from Spring Model ──
+            var usersByRole = /*[[${usersByRole}]]*/ {};
+            var enrichmentsByStatus = /*[[${enrichmentsByStatus}]]*/ {};
+            var isArabic = /*[[${#locale.language}]]*/ 'en';
+
+            // ── Users Bar Chart ──
+            var userLabels = [];
+            var userCounts = [];
+            var userLabelMap = {
+                'ROLE_STUDENT': '🎓 ' + (isArabic === 'ar' ? 'طلاب' : 'Students'),
+                'ROLE_EXPERT': '🧑‍💼 ' + (isArabic === 'ar' ? 'خبراء' : 'Experts'),
+                'ROLE_ADMIN': '🛡️ ' + (isArabic === 'ar' ? 'مدراء' : 'Admins'),
+                'ROLE_SUPER_ADMIN': '👁️ ' + (isArabic === 'ar' ? 'المدير الأعلى' : 'Super Admins')
+            };
+            for (var key in usersByRole) {
+                userLabels.push(userLabelMap[key] || key);
+                userCounts.push(usersByRole[key]);
+            }
+
+            var usersCtx = document.getElementById('usersChart').getContext('2d');
+            new Chart(usersCtx, {
+                type: 'bar',
+                data: {
+                    labels: userLabels,
+                    datasets: [{
+                        label: isArabic === 'ar' ? 'العدد' : 'Count',
+                        data: userCounts,
+                        backgroundColor: [
+                            'rgba(0, 180, 216, 0.75)',
+                            'rgba(16, 185, 129, 0.75)',
+                            'rgba(139, 92, 246, 0.75)',
+                            'rgba(255, 77, 77, 0.75)'
+                        ],
+                        borderColor: [
+                            'rgba(0, 180, 216, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(139, 92, 246, 1)',
+                            'rgba(255, 77, 77, 1)'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 10,
+                        borderSkipped: false,
+                        barPercentage: 0.5,
+                        categoryPercentage: 0.6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0A192F',
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            padding: 12,
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, font: { size: 12, weight: '600' }, color: '#666' },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        x: {
+                            ticks: { font: { size: 11, weight: '600' }, color: '#333' },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // ── Enrichments Doughnut Chart ──
+            var enrichLabels = [];
+            var enrichCounts = [];
+            var enrichLabelMap = {
+                'APPROVED': '✅ ' + (isArabic === 'ar' ? 'معتمد' : 'Approved'),
+                'PENDING': '⏳ ' + (isArabic === 'ar' ? 'معلّق' : 'Pending'),
+                'REJECTED': '❌ ' + (isArabic === 'ar' ? 'مرفوض' : 'Rejected')
+            };
+            for (var k in enrichmentsByStatus) {
+                enrichLabels.push(enrichLabelMap[k] || k);
+                enrichCounts.push(enrichmentsByStatus[k]);
+            }
+
+            var enrichCtx = document.getElementById('enrichmentsChart').getContext('2d');
+            new Chart(enrichCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: enrichLabels,
+                    datasets: [{
+                        data: enrichCounts,
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(239, 68, 68, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(245, 158, 11, 1)',
+                            'rgba(239, 68, 68, 1)'
+                        ],
+                        borderWidth: 2,
+                        hoverOffset: 15,
+                        spacing: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '55%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 16, usePointStyle: true, pointStyle: 'circle',
+                                font: { size: 12, weight: '600' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#0A192F',
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            padding: 12,
+                            cornerRadius: 8
+                        }
+                    }
+                }
+            });
+
+            // ── Initialize Bootstrap Popovers ──
+            document.addEventListener('DOMContentLoaded', function() {
+                var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+                popoverTriggerList.forEach(function (el) {
+                    new bootstrap.Popover(el, { container: 'body', html: false });
+                });
+            });
+
+            /*]]>*/
+        </script>
+    </th:block>
+
+</body>
+</html>

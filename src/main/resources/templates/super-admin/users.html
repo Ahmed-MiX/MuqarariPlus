@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${content['sa.users.title']}">User Matrix | Muqarari+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <div th:fragment="main-content">
+
+        <!-- ===== HERO HEADER (matches platform identity) ===== -->
+        <section class="text-white py-5" style="background-color: var(--primary-blue);">
+            <div class="container py-3">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h1 class="display-6 fw-bold mb-0">
+                            👥 <span th:text="${content['sa.users.title']}">User Matrix</span>
+                        </h1>
+                        <p class="text-white-50 mb-0 mt-2" th:text="${content['sa.users.subtitle']}">Full account control.</p>
+                    </div>
+                    <span class="badge bg-danger rounded-pill px-4 py-2 fs-6 shadow-sm border border-light"
+                          th:text="${content['sa.badge']}">SUPER ADMIN</span>
+                </div>
+
+                <!-- ── Unified Tab Navigation ── -->
+                <div class="mt-4">
+                    <ul class="nav nav-pills gap-2 flex-wrap">
+                        <li class="nav-item">
+                            <a class="nav-link text-white-50 fw-semibold px-4 rounded-pill"
+                               style="background: rgba(255,255,255,0.05);"
+                               th:href="@{/super-admin/dashboard}">
+                                📊 <span th:text="${content['sa.tab.dashboard']}">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active text-white fw-semibold px-4 rounded-pill"
+                               style="background: rgba(255,255,255,0.15);"
+                               th:href="@{/super-admin/users}">
+                                👥 <span th:text="${content['sa.tab.users']}">User Matrix</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white-50 fw-semibold px-4 rounded-pill"
+                               style="background: rgba(255,255,255,0.05);"
+                               th:href="@{/admin}">
+                                🛡️ <span th:text="${content['sa.tab.admin']}">Admin Tools</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== MAIN CONTENT AREA ===== -->
+        <section class="container py-5 mt-2">
+
+            <!-- Search Bar -->
+            <div class="card bg-white rounded-4 shadow-sm border-0 p-4 mb-4">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-8">
+                        <input type="text" id="userSearch" class="form-control rounded-pill px-4"
+                               th:placeholder="${content['sa.users.search']}">
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <span class="text-muted small fw-semibold" id="filteredCount">
+                            <span th:text="${content['sa.users.showing']}">Showing</span>
+                            <span th:text="${#lists.size(users)}">0</span>
+                            <span th:text="${content['sa.users.of']}">of</span>
+                            <span th:text="${#lists.size(users)}">0</span>
+                            <span th:text="${content['sa.users.total']}">users</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="card bg-white rounded-4 shadow-sm border-0 overflow-hidden">
+                <div style="max-height: 70vh; overflow-y: auto;">
+                    <table class="table table-hover align-middle mb-0" id="usersTable">
+                        <thead class="table-light" style="position: sticky; top: 0; z-index: 10;">
+                            <tr>
+                                <th class="py-3 px-4" style="width: 5%;" th:text="${content['sa.users.id']}">ID</th>
+                                <th class="py-3 px-4" style="width: 18%;" th:text="${content['sa.users.name']}">Name</th>
+                                <th class="py-3 px-4" style="width: 20%;" th:text="${content['sa.users.email']}">Email</th>
+                                <th class="py-3 px-4" style="width: 12%;" th:text="${content['sa.users.role']}">Role</th>
+                                <th class="py-3 px-4" style="width: 10%;" th:text="${content['sa.users.status']}">Status</th>
+                                <th class="py-3 px-4" style="width: 13%;" th:text="${content['sa.users.joined']}">Joined</th>
+                                <th class="py-3 px-4" style="width: 22%;" th:text="${content['sa.users.actions']}">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${users}"
+                                th:id="'user-row-' + ${user.id}"
+                                th:classappend="${user.role == 'ROLE_SUPER_ADMIN' ? 'table-danger bg-opacity-10' : ''}"
+                                class="user-row">
+                                <!-- ID -->
+                                <td class="py-3 px-4 text-muted small fw-bold" th:text="${user.id}">1</td>
+                                <!-- Name -->
+                                <td class="py-3 px-4 fw-semibold text-dark"
+                                    th:text="${(user.firstName ?: '') + ' ' + (user.lastName ?: '')}">Name</td>
+                                <!-- Email -->
+                                <td class="py-3 px-4">
+                                    <span class="text-primary-blue small" th:text="${user.email}">email@example.com</span>
+                                </td>
+                                <!-- Role -->
+                                <td class="py-3 px-4">
+                                    <span class="badge rounded-pill px-3 py-1"
+                                          th:id="'role-badge-' + ${user.id}"
+                                          th:classappend="${
+                                              user.role == 'ROLE_STUDENT' ? 'bg-info-subtle text-info' :
+                                              user.role == 'ROLE_EXPERT' ? 'bg-success-subtle text-success' :
+                                              user.role == 'ROLE_ADMIN' ? 'bg-primary-subtle text-primary' :
+                                              user.role == 'ROLE_SUPER_ADMIN' ? 'bg-danger-subtle text-danger' :
+                                              'bg-secondary-subtle text-secondary'}"
+                                          style="font-size: 0.72rem; font-weight: 700;"
+                                          th:text="${user.role.replace('ROLE_', '')}">STUDENT</span>
+                                </td>
+                                <!-- Status -->
+                                <td class="py-3 px-4">
+                                    <span class="badge rounded-pill px-3 py-1"
+                                          th:id="'status-badge-' + ${user.id}"
+                                          th:classappend="${
+                                              user.status == 'APPROVED' ? 'bg-success-subtle text-success' :
+                                              user.status == 'SUSPENDED' ? 'bg-danger-subtle text-danger' :
+                                              'bg-warning-subtle text-warning'}"
+                                          style="font-size: 0.72rem; font-weight: 700;"
+                                          th:text="${user.status ?: 'ACTIVE'}">ACTIVE</span>
+                                </td>
+                                <!-- Join Date -->
+                                <td class="py-3 px-4 text-muted small"
+                                    th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'yyyy-MM-dd') : '—'}">
+                                    2026-01-01
+                                </td>
+                                <!-- Actions -->
+                                <td class="py-3 px-4">
+                                    <div th:if="${user.role != 'ROLE_SUPER_ADMIN'}"
+                                         class="d-flex align-items-center gap-2 flex-wrap">
+                                        <!-- Role Change Dropdown -->
+                                        <select class="form-select form-select-sm rounded-pill px-3"
+                                                style="min-width: 130px; font-size: 0.78rem;"
+                                                th:id="'role-select-' + ${user.id}"
+                                                th:data-user-id="${user.id}"
+                                                onchange="changeRole(this)">
+                                            <option value="" disabled selected
+                                                    th:text="${content['sa.users.change_role']}">Change Role</option>
+                                            <option value="ROLE_STUDENT"
+                                                    th:selected="${user.role == 'ROLE_STUDENT'}">🎓 Student</option>
+                                            <option value="ROLE_EXPERT"
+                                                    th:selected="${user.role == 'ROLE_EXPERT'}">🧑‍💼 Expert</option>
+                                            <option value="ROLE_ADMIN"
+                                                    th:selected="${user.role == 'ROLE_ADMIN'}">🛡️ Admin</option>
+                                        </select>
+                                        <!-- Toggle Status Button -->
+                                        <button class="btn btn-sm rounded-pill px-3 fw-semibold"
+                                                th:id="'toggle-btn-' + ${user.id}"
+                                                th:classappend="${user.status == 'SUSPENDED' ? 'btn-outline-success' : 'btn-outline-danger'}"
+                                                th:data-user-id="${user.id}"
+                                                th:data-current-status="${user.status}"
+                                                onclick="toggleStatus(this)"
+                                                style="font-size: 0.75rem;"
+                                                th:text="${user.status == 'SUSPENDED' ?
+                                                    ('✅ ' + content['sa.users.activate']) :
+                                                    ('⛔ ' + content['sa.users.suspend'])}">
+                                            ⛔ Suspend
+                                        </button>
+                                    </div>
+                                    <!-- Protected SUPER_ADMIN -->
+                                    <div th:if="${user.role == 'ROLE_SUPER_ADMIN'}">
+                                        <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-1"
+                                              style="font-size: 0.72rem; font-weight: 700;">
+                                            🔒 <span th:text="${content['sa.users.protected']}">PROTECTED</span>
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${users == null or #lists.isEmpty(users)}">
+                                <td colspan="7" class="text-center py-5 text-muted fst-italic"
+                                    th:text="${content['sa.users.empty']}">No users found.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Toast Notification Container -->
+            <div style="position: fixed; bottom: 2rem; right: 2rem; z-index: 9999; min-width: 320px;" id="toastContainer">
+                <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" id="actionToast">
+                    <div class="toast-header">
+                        <span class="me-2" id="toastIcon">✅</span>
+                        <strong class="me-auto" id="toastTitle"
+                                th:text="${content['sa.toast.success']}">Action Complete</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body" id="toastBody">
+                        Operation executed successfully.
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </div>
+
+    <!-- ===== AJAX SCRIPTS FOR ROLE CHANGE & STATUS TOGGLE ===== -->
+    <th:block th:fragment="script-extra">
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+
+            var totalUsers = /*[[${#lists.size(users)}]]*/ 0;
+            var contentMap = /*[[${content}]]*/ {};
+
+            // ── Show Toast Notification ──
+            function showToast(icon, title, body, isError) {
+                document.getElementById('toastIcon').textContent = icon;
+                document.getElementById('toastTitle').textContent = title;
+                document.getElementById('toastBody').textContent = body;
+                var toastEl = document.getElementById('actionToast');
+                var toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+                toast.show();
+            }
+
+            // ── Toggle User Status (AJAX) ──
+            function toggleStatus(btn) {
+                var userId = btn.getAttribute('data-user-id');
+                var currentStatus = btn.getAttribute('data-current-status');
+
+                btn.disabled = true;
+                btn.textContent = '⏳ ' + (contentMap['sa.users.processing'] || 'Processing...');
+
+                fetch('/super-admin/users/' + userId + '/toggle-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.error) {
+                        showToast('❌', contentMap['sa.toast.error'] || 'Error', data.error, true);
+                        btn.disabled = false;
+                        btn.textContent = currentStatus === 'SUSPENDED' ?
+                            ('✅ ' + (contentMap['sa.users.activate'] || 'Activate')) :
+                            ('⛔ ' + (contentMap['sa.users.suspend'] || 'Suspend'));
+                        return;
+                    }
+
+                    var newStatus = data.status;
+                    btn.setAttribute('data-current-status', newStatus);
+
+                    if (newStatus === 'SUSPENDED') {
+                        btn.textContent = '✅ ' + (contentMap['sa.users.activate'] || 'Activate');
+                        btn.classList.remove('btn-outline-danger');
+                        btn.classList.add('btn-outline-success');
+                    } else {
+                        btn.textContent = '⛔ ' + (contentMap['sa.users.suspend'] || 'Suspend');
+                        btn.classList.remove('btn-outline-success');
+                        btn.classList.add('btn-outline-danger');
+                    }
+                    btn.disabled = false;
+
+                    // Update status badge
+                    var statusBadge = document.getElementById('status-badge-' + userId);
+                    if (statusBadge) {
+                        statusBadge.textContent = newStatus;
+                        statusBadge.className = 'badge rounded-pill px-3 py-1 ' +
+                            (newStatus === 'SUSPENDED' ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success');
+                        statusBadge.style.fontSize = '0.72rem';
+                        statusBadge.style.fontWeight = '700';
+                    }
+
+                    showToast('✅', contentMap['sa.toast.status_updated'] || 'Status Updated',
+                        'User #' + userId + ' → ' + newStatus, false);
+                })
+                .catch(function(err) {
+                    console.error('Toggle status error:', err);
+                    showToast('❌', contentMap['sa.toast.error'] || 'Error',
+                        contentMap['sa.toast.network_error'] || 'Network error.', true);
+                    btn.disabled = false;
+                    btn.textContent = currentStatus === 'SUSPENDED' ?
+                        ('✅ ' + (contentMap['sa.users.activate'] || 'Activate')) :
+                        ('⛔ ' + (contentMap['sa.users.suspend'] || 'Suspend'));
+                });
+            }
+
+            // ── Change User Role (AJAX) ──
+            function changeRole(select) {
+                var userId = select.getAttribute('data-user-id');
+                var newRole = select.value;
+                if (!newRole) return;
+
+                select.disabled = true;
+
+                fetch('/super-admin/users/' + userId + '/change-role?newRole=' + encodeURIComponent(newRole), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.error) {
+                        showToast('❌', contentMap['sa.toast.error'] || 'Error', data.error, true);
+                        select.disabled = false;
+                        return;
+                    }
+
+                    var role = data.role;
+                    var roleBadge = document.getElementById('role-badge-' + userId);
+                    if (roleBadge) {
+                        roleBadge.textContent = role.replace('ROLE_', '');
+                        var classMap = {
+                            'ROLE_STUDENT': 'bg-info-subtle text-info',
+                            'ROLE_EXPERT': 'bg-success-subtle text-success',
+                            'ROLE_ADMIN': 'bg-primary-subtle text-primary'
+                        };
+                        roleBadge.className = 'badge rounded-pill px-3 py-1 ' + (classMap[role] || 'bg-secondary-subtle text-secondary');
+                        roleBadge.style.fontSize = '0.72rem';
+                        roleBadge.style.fontWeight = '700';
+                    }
+
+                    select.disabled = false;
+                    showToast('🔑', contentMap['sa.toast.role_updated'] || 'Role Updated',
+                        'User #' + userId + ' → ' + role.replace('ROLE_', ''), false);
+                })
+                .catch(function(err) {
+                    console.error('Change role error:', err);
+                    showToast('❌', contentMap['sa.toast.error'] || 'Error',
+                        contentMap['sa.toast.network_error'] || 'Network error.', true);
+                    select.disabled = false;
+                });
+            }
+
+            // ── Client-Side Search Filter ──
+            document.addEventListener('DOMContentLoaded', function() {
+                var searchInput = document.getElementById('userSearch');
+                if (searchInput) {
+                    searchInput.addEventListener('input', function() {
+                        var query = this.value.toLowerCase().trim();
+                        var rows = document.querySelectorAll('.user-row');
+                        var visibleCount = 0;
+
+                        rows.forEach(function(row) {
+                            var text = row.textContent.toLowerCase();
+                            var match = !query || text.indexOf(query) !== -1;
+                            row.style.display = match ? '' : 'none';
+                            if (match) visibleCount++;
+                        });
+
+                        var countEl = document.getElementById('filteredCount');
+                        if (countEl) {
+                            countEl.textContent = (contentMap['sa.users.showing'] || 'Showing') + ' ' +
+                                visibleCount + ' ' +
+                                (contentMap['sa.users.of'] || 'of') + ' ' +
+                                totalUsers + ' ' +
+                                (contentMap['sa.users.total'] || 'users');
+                        }
+                    });
+                }
+            });
+
+            /*]]>*/
+        </script>
+    </th:block>
+
+</body>
+</html>
