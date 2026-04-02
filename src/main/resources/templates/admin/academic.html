@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${#locale.language == 'ar' ? 'الهيكل الأكاديمي | Muqarari+' : 'Academic Structure | Muqarari+'}">Academic Structure | Muqarari+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <div th:fragment="main-content">
+
+        <section class="text-white py-5" style="background: linear-gradient(135deg, #0A192F 0%, #1a3a5c 50%, #00B4D8 100%);">
+            <div class="container py-3">
+                <nav aria-label="breadcrumb" class="mb-2">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a th:href="@{/admin}" class="text-white-50 text-decoration-none"
+                            th:text="${#locale.language == 'ar' ? 'لوحة الإدارة' : 'Admin Dashboard'}">Admin Dashboard</a></li>
+                        <li class="breadcrumb-item active text-white" aria-current="page"
+                            th:text="${#locale.language == 'ar' ? 'الهيكل الأكاديمي' : 'Academic Structure'}">Academic Structure</li>
+                    </ol>
+                </nav>
+                <h1 class="display-6 fw-bold mb-0 text-white">
+                    <span th:text="${#locale.language == 'ar' ? '🏛️ الهيكل الأكاديمي' : '🏛️ Academic Structure'}">🏛️ Academic Structure</span>
+                </h1>
+                <p class="text-white-50 mt-2 fs-5"
+                   th:text="${#locale.language == 'ar' ? 'إدارة الجامعات والكليات والتخصصات والمقررات.' : 'Manage universities, colleges, majors, and courses.'}">
+                    Manage universities, colleges, majors, and courses.
+                </p>
+            </div>
+        </section>
+
+        <section class="container py-5 mt-3">
+
+            <div th:if="${successMsg}" class="alert alert-success border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">✅</span>
+                <span class="fw-semibold" th:text="${successMsg}">Action completed successfully.</span>
+            </div>
+
+            <div th:if="${errorMsg}" class="alert alert-danger border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">⛔</span>
+                <span class="fw-semibold" th:text="${errorMsg}">Error message</span>
+            </div>
+
+            <div class="row g-4 mb-5">
+                <div class="col-md-3 col-6">
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-3 text-center">
+                        <span class="fs-1">🏛️</span>
+                        <span class="fw-bold fs-4 mt-2" th:text="${universities != null ? #lists.size(universities) : 0}">0</span>
+                        <span class="text-muted small" th:text="${#locale.language == 'ar' ? 'جامعات' : 'Universities'}">Universities</span>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-3 text-center">
+                        <span class="fs-1">🏫</span>
+                        <span class="fw-bold fs-4 mt-2" th:text="${colleges != null ? #lists.size(colleges) : 0}">0</span>
+                        <span class="text-muted small" th:text="${#locale.language == 'ar' ? 'كليات' : 'Colleges'}">Colleges</span>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-3 text-center">
+                        <span class="fs-1">📚</span>
+                        <span class="fw-bold fs-4 mt-2" th:text="${majors != null ? #lists.size(majors) : 0}">0</span>
+                        <span class="text-muted small" th:text="${#locale.language == 'ar' ? 'تخصصات' : 'Majors'}">Majors</span>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card bg-white rounded-4 shadow-sm border-0 p-3 text-center">
+                        <span class="fs-1">📖</span>
+                        <span class="fw-bold fs-4 mt-2" th:text="${courses != null ? #lists.size(courses) : 0}">0</span>
+                        <span class="text-muted small" th:text="${#locale.language == 'ar' ? 'مقررات' : 'Courses'}">Courses</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 flex-wrap mb-4">
+                <a th:href="@{/admin/academic/universities}" class="btn btn-outline-primary rounded-pill fw-bold shadow-sm px-4">
+                    <span th:text="${#locale.language == 'ar' ? 'إدارة الجامعات' : 'Manage Universities'}">Manage Universities</span>
+                </a>
+                <a th:href="@{/admin/academic/colleges}" class="btn btn-outline-primary rounded-pill fw-bold shadow-sm px-4">
+                    <span th:text="${#locale.language == 'ar' ? 'إدارة الكليات' : 'Manage Colleges'}">Manage Colleges</span>
+                </a>
+                <a th:href="@{/admin/academic/majors}" class="btn btn-outline-primary rounded-pill fw-bold shadow-sm px-4">
+                    <span th:text="${#locale.language == 'ar' ? 'إدارة التخصصات' : 'Manage Majors'}">Manage Majors</span>
+                </a>
+                <a th:href="@{/admin/academic/courses}" class="btn btn-outline-primary rounded-pill fw-bold shadow-sm px-4">
+                    <span th:text="${#locale.language == 'ar' ? 'إدارة المقررات' : 'Manage Courses'}">Manage Courses</span>
+                </a>
+            </div>
+
+            <div th:if="${universities != null && !#lists.isEmpty(universities)}" class="card bg-white rounded-4 shadow-sm border-0 overflow-hidden">
+                <div class="card-header bg-white border-bottom p-4">
+                    <h5 class="fw-bold text-primary-blue mb-0"
+                        th:text="${#locale.language == 'ar' ? 'شجرة الهيكل الأكاديمي' : 'Academic Hierarchy Tree'}">Academic Hierarchy Tree</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div th:each="university : ${universities}" class="mb-4">
+                        <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 mb-3">
+                            <span class="fs-4">🏛️</span>
+                            <div>
+                                <span class="fw-bold" th:text="${#locale.language == 'ar' ? university.nameAr : university.nameEn}">University Name</span>
+                            </div>
+                            <a th:href="@{/admin/academic/universities}" class="btn btn-sm btn-outline-primary rounded-pill ms-auto"
+                               th:text="${#locale.language == 'ar' ? 'إدارة' : 'Manage'}">Manage</a>
+                        </div>
+
+                        <div th:each="college : ${university.colleges}" class="ms-4 mb-3">
+                            <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 mb-2">
+                                <span class="fs-4">🏫</span>
+                                <span class="fw-semibold" th:text="${#locale.language == 'ar' ? college.nameAr : college.nameEn}">College Name</span>
+                                <a th:href="@{/admin/academic/colleges}" class="btn btn-sm btn-outline-secondary rounded-pill ms-auto"
+                                   th:text="${#locale.language == 'ar' ? 'إدارة' : 'Manage'}">Manage</a>
+                            </div>
+
+                            <div th:each="major : ${college.majors}" class="ms-4 mb-2">
+                                <div class="d-flex align-items-center gap-3 p-3 border rounded-3">
+                                    <span class="fs-4">📚</span>
+                                    <div>
+                                        <span class="fw-semibold" th:text="${#locale.language == 'ar' ? major.nameAr : major.nameEn}">Major Name</span>
+                                        <span th:if="${major.code != null}" class="badge bg-info rounded-pill ms-2" th:text="${major.code}">CS</span>
+                                    </div>
+                                    <span class="text-muted small ms-auto" th:text="${#lists.size(major.courses)} + ' ' + ${#locale.language == 'ar' ? 'مقرر' : 'courses'}">0 courses</span>
+                                    <a th:href="@{/admin/academic/courses(majorId=${major.id})}" class="btn btn-sm btn-outline-primary rounded-pill"
+                                       th:text="${#locale.language == 'ar' ? 'إدارة المقررات' : 'Manage Courses'}">Manage Courses</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${universities == null || #lists.isEmpty(universities)}" class="card bg-white rounded-4 shadow-sm border-0 p-5">
+                <div class="text-center py-5">
+                    <div class="bg-light rounded-circle d-inline-flex justify-content-center align-items-center mb-4"
+                         style="width: 100px; height: 100px;">
+                        <span class="fs-1">🏗️</span>
+                    </div>
+                    <h3 class="h4 fw-bold text-primary-blue mb-3"
+                        th:text="${#locale.language == 'ar' ? 'لا يوجد هيكل أكاديمي بعد' : 'No Academic Structure Yet'}">No Academic Structure Yet</h3>
+                    <p class="text-muted fs-5 mb-4"
+                       th:text="${#locale.language == 'ar' ? 'ابدأ بإضافة جامعة ثم كلية وتخصصات.' : 'Start by adding a university, then colleges and majors.'}">
+                        Start by adding a university, then colleges and majors.
+                    </p>
+                    <a th:href="@{/admin/academic/universities}" class="btn btn-primary btn-lg px-5 fw-bold rounded-pill shadow-sm">
+                        <span th:text="${#locale.language == 'ar' ? '← إضافة جامعة' : '→ Add University'}">→ Add University</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <a th:href="@{/admin}" class="btn btn-outline-secondary btn-lg px-5 fw-bold rounded-pill shadow-sm">
+                    <span th:text="${#locale.language == 'ar' ? '← العودة للوحة الإدارة' : '→ Back to Admin Dashboard'}">→ Back to Admin Dashboard</span>
+                </a>
+            </div>
+
+        </section>
+    </div>
+
+</body>
+</html>

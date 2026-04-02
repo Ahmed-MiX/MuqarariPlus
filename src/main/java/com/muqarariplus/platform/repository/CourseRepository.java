@@ -23,4 +23,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
            "LOWER(c.nameAr) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(c.nameEn) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Course> searchByKeyword(@Param("keyword") String keyword);
+
+    long countByMajorId(Long majorId);
 }

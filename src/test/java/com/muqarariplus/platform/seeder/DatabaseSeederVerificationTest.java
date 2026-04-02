@@ -33,8 +33,13 @@ class DatabaseSeederVerificationTest {
 
     // ── Non-technical keywords (must match DatabaseSeeder.NON_TECH_KEYWORDS) ──
     private static final String[] NON_TECH_KEYWORDS = {
+<<<<<<< HEAD
         "ثقافة", "سلم", "إسلام", "عرب", "لغة", "مهارات", "قرآن", "تحرير",
         "islamic", "arabic", "english", "communication", "writing", "reading"
+=======
+            "ثقافة", "سلم", "إسلام", "عرب", "لغة", "مهارات", "قرآن", "تحرير",
+            "islamic", "arabic", "english", "communication", "writing", "reading"
+>>>>>>> dev/mentorship
     };
 
     private boolean isNonTechnical(Course c) {
@@ -55,6 +60,7 @@ class DatabaseSeederVerificationTest {
         assertFalse(allCourses.isEmpty(), "Course table must not be empty");
 
         List<Course> nonTechCourses = allCourses.stream()
+<<<<<<< HEAD
             .filter(this::isNonTechnical)
             .collect(Collectors.toList());
 
@@ -68,11 +74,30 @@ class DatabaseSeederVerificationTest {
             assertEquals(0, approved.size(),
                 "NON-TECHNICAL COURSE '" + course.getCode() + " - " + course.getNameAr()
                 + "' MUST have 0 approved enrichments, but found " + approved.size());
+=======
+                .filter(this::isNonTechnical)
+                .collect(Collectors.toList());
+
+        assertFalse(nonTechCourses.isEmpty(),
+                "There should be at least some non-technical courses in the DB (IC, ARAB, ENG, COMM)");
+
+        for (Course course : nonTechCourses) {
+            List<CourseEnrichment> approved = enrichmentRepository
+                    .findByCourseIdAndStatus(course.getId(), EnrichmentStatus.APPROVED);
+
+            assertEquals(0, approved.size(),
+                    "NON-TECHNICAL COURSE '" + course.getCode() + " - " + course.getNameAr()
+                            + "' MUST have 0 approved enrichments, but found " + approved.size());
+>>>>>>> dev/mentorship
         }
 
         System.out.println("╔══════════════════════════════════════════════════════╗");
         System.out.println("║ ✅ TEST 1 PASSED: " + nonTechCourses.size()
+<<<<<<< HEAD
             + " non-technical courses verified EMPTY.  ║");
+=======
+                + " non-technical courses verified EMPTY.  ║");
+>>>>>>> dev/mentorship
         System.out.println("╚══════════════════════════════════════════════════════╝");
     }
 
@@ -85,13 +110,20 @@ class DatabaseSeederVerificationTest {
         // ── Find the Database Systems course ──
         List<Course> allCourses = courseRepository.findAll();
         Course dbCourse = allCourses.stream()
+<<<<<<< HEAD
             .filter(c -> c.getNameEn().toLowerCase().contains("database"))
             .findFirst()
             .orElse(null);
+=======
+                .filter(c -> c.getNameEn().toLowerCase().contains("database"))
+                .findFirst()
+                .orElse(null);
+>>>>>>> dev/mentorship
 
         assertNotNull(dbCourse, "A 'Database' course must exist in the DB");
 
         List<CourseEnrichment> enrichments = enrichmentRepository
+<<<<<<< HEAD
             .findByCourseIdAndStatus(dbCourse.getId(), EnrichmentStatus.APPROVED);
 
         assertFalse(enrichments.isEmpty(),
@@ -109,25 +141,55 @@ class DatabaseSeederVerificationTest {
             "React", "Spring Boot", "Kali Linux", "Metasploit",
             "Wireshark", "Burp Suite", "Flutter", "Figma",
             "Arduino", "Xilinx Vivado", "Simulink"
+=======
+                .findByCourseIdAndStatus(dbCourse.getId(), EnrichmentStatus.APPROVED);
+
+        assertFalse(enrichments.isEmpty(),
+                "Database course '" + dbCourse.getCode() + "' should have approved enrichments");
+
+        // ── Forbidden cross-domain items for DATABASE domain ──
+        Set<String> forbiddenCerts = Set.of(
+                "CISSP - Certified Information Systems Security Professional",
+                "CEH - Certified Ethical Hacker",
+                "CompTIA Security+",
+                "Certified ScrumMaster (CSM)",
+                "ISTQB Certified Tester"
+        );
+        Set<String> forbiddenTools = Set.of(
+                "React", "Spring Boot", "Kali Linux", "Metasploit",
+                "Wireshark", "Burp Suite", "Flutter", "Figma",
+                "Arduino", "Xilinx Vivado", "Simulink"
+>>>>>>> dev/mentorship
         );
 
         for (CourseEnrichment e : enrichments) {
             // Check certs
             for (ProfessionalCertificate cert : e.getCertificates()) {
                 assertFalse(forbiddenCerts.contains(cert.getNameEn()),
+<<<<<<< HEAD
                     "DATABASE course enrichment #" + e.getId()
                     + " contains FORBIDDEN cross-domain cert: " + cert.getNameEn());
+=======
+                        "DATABASE course enrichment #" + e.getId()
+                                + " contains FORBIDDEN cross-domain cert: " + cert.getNameEn());
+>>>>>>> dev/mentorship
             }
             // Check tools
             for (Tool tool : e.getTools()) {
                 assertFalse(forbiddenTools.contains(tool.getNameEn()),
+<<<<<<< HEAD
                     "DATABASE course enrichment #" + e.getId()
                     + " contains FORBIDDEN cross-domain tool: " + tool.getNameEn());
+=======
+                        "DATABASE course enrichment #" + e.getId()
+                                + " contains FORBIDDEN cross-domain tool: " + tool.getNameEn());
+>>>>>>> dev/mentorship
             }
         }
 
         // ── Positive check: at least one enrichment should have a DB-related cert ──
         Set<String> expectedDbCerts = Set.of(
+<<<<<<< HEAD
             "Oracle Database SQL Certified Associate",
             "Oracle Certified Professional",
             "MongoDB Developer Certification"
@@ -138,6 +200,26 @@ class DatabaseSeederVerificationTest {
 
         assertTrue(hasDbCert,
             "At least one DATABASE enrichment must have a DB-relevant certification (Oracle/MongoDB)");
+=======
+                "Oracle Database SQL Certified Associate",
+                "Oracle Certified Professional",
+                "MongoDB Developer Certification",
+                "AWS Database Specialty",
+                "Azure Database Administrator",
+                "PostgreSQL Certified Associate",
+                "Cassandra Administrator Certification",
+                "Redis Certified Developer",
+                "MariaDB Certified DBA",
+                "Neo4j Certified Professional"
+        );
+
+        boolean hasDbCert = enrichments.stream()
+                .flatMap(e -> e.getCertificates().stream())
+                .anyMatch(c -> expectedDbCerts.contains(c.getNameEn()));
+
+        assertTrue(hasDbCert,
+                "At least one DATABASE enrichment must have a DB-relevant certification (Oracle/MongoDB/etc)");
+>>>>>>> dev/mentorship
 
         System.out.println("╔══════════════════════════════════════════════════════╗");
         System.out.println("║ ✅ TEST 2 PASSED: Domain logic verified for DB course ║");
@@ -145,6 +227,7 @@ class DatabaseSeederVerificationTest {
     }
 
     // ═══════════════════════════════════════════════════════════════
+<<<<<<< HEAD
     // TEST 3: Expert Consistency — AI Expert ≠ Hardware Course
     // ═══════════════════════════════════════════════════════════════
     @Test
@@ -201,6 +284,74 @@ class DatabaseSeederVerificationTest {
 
         System.out.println("╔══════════════════════════════════════════════════════╗");
         System.out.println("║ ✅ TEST 3 PASSED: Expert-domain alignment verified.  ║");
+=======
+    // TEST 3: Expert Consistency (Dynamic Engine Version)
+    // ═══════════════════════════════════════════════════════════════
+    @Test
+    @DisplayName("PHASE 3 PROOF: AI/Data experts only enrich AI courses, and never Hardware/Circuit courses")
+    void verifyExpertConsistency() {
+        // ── 1. Verify Hardware courses are NOT enriched by AI/Data experts ──
+        List<Course> hardwareCourses = courseRepository.findAll().stream()
+                .filter(c -> {
+                    String n = (c.getNameEn() + " " + c.getNameAr()).toLowerCase();
+                    return n.contains("circuit") || n.contains("دوائر")
+                            || n.contains("vlsi") || n.contains("متكاملة")
+                            || n.contains("embedded") || n.contains("مضمن")
+                            || n.contains("control system") || n.contains("تحكم");
+                })
+                .collect(Collectors.toList());
+
+        assertFalse(hardwareCourses.isEmpty(), "There should be hardware courses in the DB");
+
+        // List of AI/Data expert emails based on the Omni-Seeder
+        Set<String> aiDataExpertEmails = Set.of(
+                "khalid.ai@sdaia.gov.sa", "noura.data@aramco.com", "yasser.bigdata@sabic.com",
+                "tariq.ai@tuwaiq.sa", "layla.ml@google.com", "mohammed.ds@microsoft.com",
+                "nada.nlp@sdaia.gov.sa", "sultan.analytics@neom.com"
+        );
+
+        for (Course hwCourse : hardwareCourses) {
+            List<CourseEnrichment> enrichments = enrichmentRepository
+                    .findByCourseIdAndStatus(hwCourse.getId(), EnrichmentStatus.APPROVED);
+
+            for (CourseEnrichment e : enrichments) {
+                if (e.getExpert() != null && e.getExpert().getUser() != null) {
+                    String expertEmail = e.getExpert().getUser().getEmail();
+                    assertFalse(aiDataExpertEmails.contains(expertEmail),
+                            "AI/Data Expert (" + expertEmail + ") should NOT be enriching HARDWARE course: "
+                                    + hwCourse.getCode() + " (" + hwCourse.getNameAr() + ")");
+                }
+            }
+        }
+
+        // ── 2. Positive check: Verify AI courses ARE enriched by AI experts ──
+        List<Course> aiCourses = courseRepository.findAll().stream()
+                .filter(c -> c.getNameEn().toLowerCase().contains("artificial intelligence"))
+                .collect(Collectors.toList());
+
+        if (!aiCourses.isEmpty()) {
+            boolean hasAiExpert = false;
+            for (Course aiCourse : aiCourses) {
+                List<CourseEnrichment> enrichments = enrichmentRepository
+                        .findByCourseIdAndStatus(aiCourse.getId(), EnrichmentStatus.APPROVED);
+
+                for (CourseEnrichment e : enrichments) {
+                    if (e.getExpert() != null && e.getExpert().getUser() != null) {
+                        String expertEmail = e.getExpert().getUser().getEmail();
+                        if (aiDataExpertEmails.contains(expertEmail)) {
+                            hasAiExpert = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            assertTrue(hasAiExpert,
+                    "Dynamic engine should have assigned at least one AI/Data expert to the AI courses");
+        }
+
+        System.out.println("╔══════════════════════════════════════════════════════╗");
+        System.out.println("║ ✅ TEST 3 PASSED: Dynamic Expert-domain alignment verified. ║");
+>>>>>>> dev/mentorship
         System.out.println("╚══════════════════════════════════════════════════════╝");
     }
 
@@ -211,29 +362,52 @@ class DatabaseSeederVerificationTest {
     @DisplayName("BONUS: Security course enrichments contain ONLY security-domain tools")
     void verifySecurityDomainIsolation() {
         List<Course> secCourses = courseRepository.findAll().stream()
+<<<<<<< HEAD
             .filter(c -> c.getNameEn().toLowerCase().contains("security")
                       || c.getNameAr().contains("أمن"))
             .collect(Collectors.toList());
+=======
+                .filter(c -> c.getNameEn().toLowerCase().contains("security")
+                        || c.getNameAr().contains("أمن"))
+                .collect(Collectors.toList());
+>>>>>>> dev/mentorship
 
         if (secCourses.isEmpty()) return; // Skip if no security courses
 
         Set<String> allowedSecTools = Set.of(
+<<<<<<< HEAD
             "Kali Linux", "Wireshark", "Metasploit", "Burp Suite", "Linux",
             "CrowdStrike", "Splunk", "Fortinet FortiGate", "Nmap", "Snort",
             "Nessus", "OWASP ZAP", "Qualys", "Palo Alto Networks",
             "HashiCorp Vault", "Elastic SIEM", "IBM QRadar", "SentinelOne",
             "Ghidra", "OpenVAS", "Suricata"
+=======
+                "Kali Linux", "Wireshark", "Metasploit", "Burp Suite", "Linux",
+                "CrowdStrike", "Splunk", "Fortinet FortiGate", "Nmap", "Snort",
+                "Nessus", "OWASP ZAP", "Qualys", "Palo Alto Networks",
+                "HashiCorp Vault", "Elastic SIEM", "IBM QRadar", "SentinelOne",
+                "Ghidra", "OpenVAS", "Suricata"
+>>>>>>> dev/mentorship
         );
 
         for (Course secCourse : secCourses) {
             List<CourseEnrichment> enrichments = enrichmentRepository
+<<<<<<< HEAD
                 .findByCourseIdAndStatus(secCourse.getId(), EnrichmentStatus.APPROVED);
+=======
+                    .findByCourseIdAndStatus(secCourse.getId(), EnrichmentStatus.APPROVED);
+>>>>>>> dev/mentorship
 
             for (CourseEnrichment e : enrichments) {
                 for (Tool tool : e.getTools()) {
                     assertTrue(allowedSecTools.contains(tool.getNameEn()),
+<<<<<<< HEAD
                         "SECURITY course '" + secCourse.getCode()
                         + "' enrichment has non-security tool: " + tool.getNameEn());
+=======
+                            "SECURITY course '" + secCourse.getCode()
+                                    + "' enrichment has non-security tool: " + tool.getNameEn());
+>>>>>>> dev/mentorship
                 }
             }
         }
@@ -258,11 +432,19 @@ class DatabaseSeederVerificationTest {
             technicalCount++;
 
             List<CourseEnrichment> approved = enrichmentRepository
+<<<<<<< HEAD
                 .findByCourseIdAndStatus(course.getId(), EnrichmentStatus.APPROVED);
 
             assertTrue(approved.size() >= 3,
                 "Technical course '" + course.getCode() + " - " + course.getNameEn()
                 + "' has only " + approved.size() + " enrichments (minimum 3 required)");
+=======
+                    .findByCourseIdAndStatus(course.getId(), EnrichmentStatus.APPROVED);
+
+            assertTrue(approved.size() >= 3,
+                    "Technical course '" + course.getCode() + " - " + course.getNameEn()
+                            + "' has only " + approved.size() + " enrichments (minimum 3 required)");
+>>>>>>> dev/mentorship
 
             fullyEnriched++;
         }
@@ -271,7 +453,11 @@ class DatabaseSeederVerificationTest {
 
         System.out.println("╔══════════════════════════════════════════════════════╗");
         System.out.println("║ ✅ TEST 5 PASSED: " + fullyEnriched + "/" + technicalCount
+<<<<<<< HEAD
             + " technical courses have ≥3 enrichments ║");
+=======
+                + " technical courses have ≥3 enrichments ║");
+>>>>>>> dev/mentorship
         System.out.println("╚══════════════════════════════════════════════════════╝");
     }
 
@@ -285,11 +471,19 @@ class DatabaseSeederVerificationTest {
 
         // ── Specifically target the "Arabic Writing" course and other known non-tech ──
         List<Course> nonTechCourses = allCourses.stream()
+<<<<<<< HEAD
             .filter(this::isNonTechnical)
             .collect(Collectors.toList());
 
         assertFalse(nonTechCourses.isEmpty(),
             "Non-technical courses must exist for this test to be valid");
+=======
+                .filter(this::isNonTechnical)
+                .collect(Collectors.toList());
+
+        assertFalse(nonTechCourses.isEmpty(),
+                "Non-technical courses must exist for this test to be valid");
+>>>>>>> dev/mentorship
 
         int ghostsFound = 0;
         for (Course course : nonTechCourses) {
@@ -297,6 +491,7 @@ class DatabaseSeederVerificationTest {
             List<CourseEnrichment> allEnrichments = enrichmentRepository.findByCourseId(course.getId());
 
             assertEquals(0, allEnrichments.size(),
+<<<<<<< HEAD
                 "GHOST STATE DETECTED! Non-technical course '" + course.getCode()
                 + " - " + course.getNameAr() + "' has " + allEnrichments.size()
                 + " enrichment(s) of various statuses. Expected: 0 (ZERO).");
@@ -307,11 +502,30 @@ class DatabaseSeederVerificationTest {
             assertEquals(0L, approvedCount,
                 "GHOST BADGE! Approved count for non-technical course '"
                 + course.getCode() + "' should be 0 but was " + approvedCount);
+=======
+                    "GHOST STATE DETECTED! Non-technical course '" + course.getCode()
+                            + " - " + course.getNameAr() + "' has " + allEnrichments.size()
+                            + " enrichment(s) of various statuses. Expected: 0 (ZERO).");
+
+            // Also verify the approved count method returns 0
+            long approvedCount = enrichmentRepository.countByCourseIdAndStatus(
+                    course.getId(), EnrichmentStatus.APPROVED);
+            assertEquals(0L, approvedCount,
+                    "GHOST BADGE! Approved count for non-technical course '"
+                            + course.getCode() + "' should be 0 but was " + approvedCount);
+>>>>>>> dev/mentorship
         }
 
         System.out.println("╔══════════════════════════════════════════════════════╗");
         System.out.println("║ ✅ TEST 6 PASSED: " + nonTechCourses.size()
+<<<<<<< HEAD
             + " non-tech courses have ZERO ghost data  ║");
         System.out.println("╚══════════════════════════════════════════════════════╝");
     }
 }
+=======
+                + " non-tech courses have ZERO ghost data  ║");
+        System.out.println("╚══════════════════════════════════════════════════════╝");
+    }
+}
+>>>>>>> dev/mentorship

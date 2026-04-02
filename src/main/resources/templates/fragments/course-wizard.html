@@ -1,0 +1,445 @@
+<div th:fragment="wizard(mode)">
+
+    <!-- Breadcrumb -->
+    <nav id="wizard-breadcrumb" class="breadcrumb-container mb-4" style="display:none">
+        <ol class="breadcrumb mb-0" id="breadcrumb-list"></ol>
+    </nav>
+
+    <!-- Step 1: University Selection -->
+    <div id="wizard-step-university" class="wizard-step mb-4">
+        <h4 class="h5 fw-bold text-primary-blue mb-3">
+            <span th:text="${#locale.language == 'ar' ? 'اختر جامعتك' : 'Choose Your University'}">Choose Your University</span>
+        </h4>
+        <div class="row g-3">
+            <div th:each="uni : ${universities}" class="col-md-6 col-lg-4">
+                <div class="card wizard-card h-100 shadow-sm border-0 rounded-4 overflow-hidden"
+                     style="cursor:pointer; transition: all 0.2s ease;"
+                     th:data-id="${uni.id}"
+                     th:data-name-ar="${uni.nameAr}"
+                     th:data-name-en="${uni.nameEn}"
+                     onclick="selectUniversity(this)">
+                    <div class="card-body p-4 d-flex flex-column align-items-center text-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center mb-3"
+                             style="width:64px;height:64px;background:linear-gradient(135deg,#0A192F,#00B4D8);">
+                            <span class="text-white fs-3">🏛️</span>
+                        </div>
+                        <h5 class="h6 fw-bold text-primary-blue mb-1"
+                            th:text="${#locale.language == 'ar' ? uni.nameAr : uni.nameEn}">University</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:if="${#lists.isEmpty(universities)}" class="text-center py-4 text-muted">
+            <span th:text="${#locale.language == 'ar' ? 'لا توجد جامعات متاحة' : 'No universities available'}">No universities available</span>
+        </div>
+    </div>
+
+    <!-- Step 2: College Selection -->
+    <div id="wizard-step-college" class="wizard-step mb-4" style="display:none">
+        <h4 class="h5 fw-bold text-primary-blue mb-3">
+            <span th:text="${#locale.language == 'ar' ? 'اختر كليتك' : 'Choose Your College'}">Choose Your College</span>
+        </h4>
+        <div class="row g-3" id="colleges-grid"></div>
+        <div id="colleges-loading" class="text-center py-4" style="display:none">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+        <div id="colleges-empty" class="text-center py-4 text-muted" style="display:none">
+            <span th:text="${#locale.language == 'ar' ? 'لا توجد كليات لهذه الجامعة' : 'No colleges for this university'}">No colleges</span>
+        </div>
+    </div>
+
+    <!-- Step 3: Major Selection -->
+    <div id="wizard-step-major" class="wizard-step mb-4" style="display:none">
+        <h4 class="h5 fw-bold text-primary-blue mb-3">
+            <span th:text="${#locale.language == 'ar' ? 'اختر تخصصك' : 'Choose Your Major'}">Choose Your Major</span>
+        </h4>
+        <div class="row g-3" id="majors-grid"></div>
+        <div id="majors-loading" class="text-center py-4" style="display:none">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+        <div id="majors-empty" class="text-center py-4 text-muted" style="display:none">
+            <span th:text="${#locale.language == 'ar' ? 'لا توجد تخصصات لهذه الكلية' : 'No majors for this college'}">No majors</span>
+        </div>
+    </div>
+
+    <!-- Step 4: Course Display -->
+    <div id="wizard-step-courses" class="wizard-step mb-4" style="display:none">
+        <h4 class="h5 fw-bold text-primary-blue mb-3">
+            <span th:text="${#locale.language == 'ar' ? 'المقررات المتاحة' : 'Available Courses'}">Available Courses</span>
+            <span id="courses-count" class="badge bg-light text-primary-blue border rounded-pill px-2 py-1 ms-2 small"></span>
+        </h4>
+
+        <!-- Search within major — only visible after college is selected -->
+        <div id="wizard-search" class="mb-3">
+            <form id="major-search-form" class="d-flex gap-2" onsubmit="searchCourses(event)">
+                <input type="text" id="search-input"
+                       class="form-control form-control-sm bg-light border-0 shadow-sm"
+                       th:placeholder="${#locale.language == 'ar' ? 'ابحث في المقررات...' : 'Search courses...'}"
+                       autocomplete="off">
+                <button type="submit" class="btn btn-sm btn-primary px-3 rounded-pill shadow-sm">
+                    🔍
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill shadow-sm"
+                        onclick="clearSearch()" th:if="${#locale.language == 'ar' ? true : true}"
+                        th:text="${#locale.language == 'ar' ? 'مسح' : 'Clear'}">Clear</button>
+            </form>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3" id="courses-grid"></div>
+        <div id="courses-loading" class="text-center py-4" style="display:none">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+        <div id="courses-empty" class="text-center py-4 text-muted" style="display:none">
+            <span th:text="${#locale.language == 'ar' ? 'لا توجد مقررات لهذا التخصص' : 'No courses for this major'}">No courses</span>
+        </div>
+        <div id="search-no-results" class="text-center py-4 text-muted" style="display:none">
+            <span th:text="${#locale.language == 'ar' ? 'لا توجد نتائج مطابقة' : 'No matching results'}">No results</span>
+        </div>
+    </div>
+
+    <!-- Hidden state tracking -->
+    <input type="hidden" id="wizard-mode" th:value="${mode}">
+    <input type="hidden" id="wizard-current-university" value="">
+    <input type="hidden" id="wizard-current-college" value="">
+    <input type="hidden" id="wizard-current-major" value="">
+    <input type="hidden" id="wizard-lang" th:value="${#locale.language}">
+
+    <!-- CSRF token for enroll forms — safe for anonymous pages -->
+    <input type="hidden" id="csrf-token-name" value="_csrf">
+    <input type="hidden" id="csrf-token-value" th:if="${_csrf != null}" th:value="${_csrf.token}">
+    <input type="hidden" id="csrf-token-value" th:unless="${_csrf != null}" value="">
+
+    <style>
+        .wizard-card {
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        .wizard-card:hover {
+            border-color: var(--secondary-teal);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,180,216,0.15);
+        }
+        .wizard-card.selected {
+            border-color: var(--secondary-teal);
+            background-color: rgba(0,180,216,0.04);
+        }
+        .breadcrumb-item a {
+            color: var(--secondary-teal);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .breadcrumb-item a:hover {
+            text-decoration: underline;
+        }
+        .breadcrumb-item.active {
+            color: var(--primary-blue);
+        }
+        .course-card-wizard {
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        .course-card-wizard:hover {
+            border-color: var(--secondary-teal);
+            transform: translateY(-2px);
+        }
+        .enrolled-badge {
+            background-color: rgba(0,180,216,0.1);
+            color: var(--secondary-teal);
+            font-size: 0.7rem;
+        }
+    </style>
+
+    <script>
+    (function() {
+        var currentLang = document.getElementById('wizard-lang').value || 'ar';
+        var mode = document.getElementById('wizard-mode').value || 'browse';
+        var csrfName = document.getElementById('csrf-token-name').value;
+        var csrfValue = document.getElementById('csrf-token-value').value;
+        var enrolledCourseIds = [];
+
+        /* ── University Selection ── */
+        window.selectUniversity = function(el) {
+            var id = el.getAttribute('data-id');
+            var name = currentLang === 'ar' ? el.getAttribute('data-name-ar') : el.getAttribute('data-name-en');
+
+            document.querySelectorAll('#wizard-step-university .wizard-card').forEach(function(c) { c.classList.remove('selected'); });
+            el.classList.add('selected');
+
+            document.getElementById('wizard-current-university').value = id;
+            resetFromStep('college');
+
+            updateBreadcrumb([{ id: id, name: name, step: 'university' }]);
+
+            showLoading('colleges');
+            fetch('/student/api/colleges?universityId=' + id)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    hideLoading('colleges');
+                    if (data.length === 0) {
+                        document.getElementById('colleges-empty').style.display = 'block';
+                        return;
+                    }
+                    var html = '';
+                    data.forEach(function(college) {
+                        var cName = currentLang === 'ar' ? college.nameAr : college.nameEn;
+                        html += '<div class="col-md-6 col-lg-4">' +
+                            '<div class="card wizard-card h-100 shadow-sm border-0 rounded-4 overflow-hidden" style="cursor:pointer" ' +
+                            'data-id="' + college.id + '" data-name-ar="' + college.nameAr + '" data-name-en="' + college.nameEn + '" ' +
+                            'onclick="window.selectCollege(this)">' +
+                            '<div class="card-body p-4 d-flex flex-column align-items-center text-center">' +
+                            '<div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px;background:linear-gradient(135deg,#132F4C,#00B4D8);">' +
+                            '<span class="text-white fs-4">🏫</span></div>' +
+                            '<h5 class="h6 fw-bold text-primary-blue mb-0">' + cName + '</h5></div></div></div>';
+                    });
+                    document.getElementById('colleges-grid').innerHTML = html;
+                    document.getElementById('wizard-step-college').style.display = 'block';
+                })
+                .catch(function() { hideLoading('colleges'); });
+        };
+
+        /* ── College Selection ── */
+        window.selectCollege = function(el) {
+            var id = el.getAttribute('data-id');
+            var name = currentLang === 'ar' ? el.getAttribute('data-name-ar') : el.getAttribute('data-name-en');
+
+            document.querySelectorAll('#wizard-step-college .wizard-card').forEach(function(c) { c.classList.remove('selected'); });
+            el.classList.add('selected');
+
+            document.getElementById('wizard-current-college').value = id;
+            resetFromStep('major');
+
+            var uniName = getBreadcrumbName('university');
+            updateBreadcrumb([
+                { id: document.getElementById('wizard-current-university').value, name: uniName, step: 'university' },
+                { id: id, name: name, step: 'college' }
+            ]);
+
+            showLoading('majors');
+            fetch('/student/api/majors?collegeId=' + id)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    hideLoading('majors');
+                    if (data.length === 0) {
+                        document.getElementById('majors-empty').style.display = 'block';
+                        return;
+                    }
+                    var html = '';
+                    data.forEach(function(major) {
+                        var mName = currentLang === 'ar' ? major.nameAr : major.nameEn;
+                        var codeLabel = major.code ? ' <span class="badge bg-light text-muted rounded-pill px-2 py-1 small">' + major.code + '</span>' : '';
+                        html += '<div class="col-md-6 col-lg-4">' +
+                            '<div class="card wizard-card h-100 shadow-sm border-0 rounded-4 overflow-hidden" style="cursor:pointer" ' +
+                            'data-id="' + major.id + '" data-name-ar="' + major.nameAr + '" data-name-en="' + major.nameEn + '" ' +
+                            'onclick="window.selectMajor(this)">' +
+                            '<div class="card-body p-4 d-flex flex-column align-items-center text-center">' +
+                            '<div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px;background:linear-gradient(135deg,#0A192F,#00B4D8);">' +
+                            '<span class="text-white fs-4">📐</span></div>' +
+                            '<h5 class="h6 fw-bold text-primary-blue mb-1">' + mName + '</h5>' + codeLabel +
+                            '</div></div></div>';
+                    });
+                    document.getElementById('majors-grid').innerHTML = html;
+                    document.getElementById('wizard-step-major').style.display = 'block';
+                })
+                .catch(function() { hideLoading('majors'); });
+        };
+
+        /* ── Major Selection ── */
+        window.selectMajor = function(el) {
+            var id = el.getAttribute('data-id');
+            var name = currentLang === 'ar' ? el.getAttribute('data-name-ar') : el.getAttribute('data-name-en');
+
+            document.querySelectorAll('#wizard-step-major .wizard-card').forEach(function(c) { c.classList.remove('selected'); });
+            el.classList.add('selected');
+
+            document.getElementById('wizard-current-major').value = id;
+            resetFromStep('courses');
+
+            var uniName = getBreadcrumbName('university');
+            var colName = getBreadcrumbName('college');
+            updateBreadcrumb([
+                { id: document.getElementById('wizard-current-university').value, name: uniName, step: 'university' },
+                { id: document.getElementById('wizard-current-college').value, name: colName, step: 'college' },
+                { id: id, name: name, step: 'major' }
+            ]);
+
+            loadCourses(id);
+        };
+
+        /* ── Load Courses ── */
+        function loadCourses(majorId, search) {
+            var url = '/student/api/courses?majorId=' + majorId;
+            if (search) url += '&search=' + encodeURIComponent(search);
+
+            showLoading('courses');
+            document.getElementById('courses-empty').style.display = 'none';
+            document.getElementById('search-no-results').style.display = 'none';
+            document.getElementById('courses-grid').innerHTML = '';
+
+            fetch(url)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    hideLoading('courses');
+                    if (data.length === 0) {
+                        if (search) {
+                            document.getElementById('search-no-results').style.display = 'block';
+                        } else {
+                            document.getElementById('courses-empty').style.display = 'block';
+                        }
+                        document.getElementById('courses-count').textContent = '';
+                        return;
+                    }
+                    document.getElementById('courses-count').textContent = data.length + (currentLang === 'ar' ? ' مقرر' : ' courses');
+
+                    var html = '';
+                    data.forEach(function(course) {
+                        var cName = currentLang === 'ar' ? course.nameAr : course.nameEn;
+                        var mName = currentLang === 'ar' ? course.majorNameAr : course.majorNameEn;
+                        var isEnrolled = enrolledCourseIds.indexOf(course.id) !== -1;
+                        var enrichBadge = course.enrichmentCount > 0
+                            ? '<span class="badge text-white fw-bold rounded-pill px-2 py-1" style="background-color:var(--secondary-teal);font-size:0.7rem;">' + course.enrichmentCount + (currentLang === 'ar' ? ' إثراء' : ' enrichments') + '</span>'
+                            : '<span class="badge bg-light text-muted rounded-pill px-2 py-1" style="font-size:0.7rem;">' + (currentLang === 'ar' ? 'بدون إثراءات' : 'No enrichments') + '</span>';
+
+                        var actionHtml;
+                        if (mode === 'enroll') {
+                            if (isEnrolled) {
+                                actionHtml = '<span class="badge enrolled-badge rounded-pill px-3 py-2">' + (currentLang === 'ar' ? 'مسجل ✓' : 'Enrolled ✓') + '</span>';
+                            } else {
+                                actionHtml = '<form action="/student/enroll" method="post" class="m-0">' +
+                                    '<input type="hidden" name="courseId" value="' + course.id + '">' +
+                                    '<input type="hidden" name="' + csrfName + '" value="' + csrfValue + '">' +
+                                    '<button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold shadow-sm">' +
+                                    (currentLang === 'ar' ? 'تسجيل' : 'Enroll') + '</button></form>';
+                            }
+                        } else {
+                            actionHtml = '<a href="/course/' + course.id + '" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">' +
+                                (currentLang === 'ar' ? 'عرض ←' : 'View →') + '</a>';
+                        }
+
+                        html += '<div class="col">' +
+                            '<div class="card h-100 course-card-wizard shadow-sm border-0 rounded-4 overflow-hidden">' +
+                            '<div class="card-body p-4 d-flex flex-column">' +
+                            '<div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">' +
+                            '<div>' +
+                            '<span class="text-uppercase small fw-bold text-muted d-block">' + (course.code || '') + '</span>' +
+                            '<h5 class="h6 fw-bold text-primary-blue mb-0">' + cName + '</h5>' +
+                            '</div>' + enrichBadge + '</div>' +
+                            '<p class="text-muted small mb-2">' + (currentLang === 'ar' ? 'التخصص: ' : 'Major: ') + mName + '</p>' +
+                            '<div class="mt-auto pt-3 d-flex justify-content-between align-items-center">' + actionHtml + '</div>' +
+                            '</div></div></div>';
+                    });
+                    document.getElementById('courses-grid').innerHTML = html;
+                    document.getElementById('wizard-step-courses').style.display = 'block';
+                })
+                .catch(function() { hideLoading('courses'); });
+        }
+
+        /* ── Search ── */
+        window.searchCourses = function(e) {
+            e.preventDefault();
+            var q = document.getElementById('search-input').value.trim();
+            var majorId = document.getElementById('wizard-current-major').value;
+            if (majorId) loadCourses(majorId, q);
+        };
+
+        window.clearSearch = function() {
+            document.getElementById('search-input').value = '';
+            var majorId = document.getElementById('wizard-current-major').value;
+            if (majorId) loadCourses(majorId);
+        };
+
+        /* ── Helpers ── */
+        function resetFromStep(step) {
+            if (step === 'college') {
+                document.getElementById('wizard-step-college').style.display = 'none';
+                document.getElementById('colleges-grid').innerHTML = '';
+                document.getElementById('colleges-empty').style.display = 'none';
+            }
+            if (step === 'major' || step === 'college') {
+                document.getElementById('wizard-step-major').style.display = 'none';
+                document.getElementById('majors-grid').innerHTML = '';
+                document.getElementById('majors-empty').style.display = 'none';
+            }
+            if (step === 'courses' || step === 'major' || step === 'college') {
+                document.getElementById('wizard-step-courses').style.display = 'none';
+                document.getElementById('courses-grid').innerHTML = '';
+                document.getElementById('courses-empty').style.display = 'none';
+                document.getElementById('search-no-results').style.display = 'none';
+                document.getElementById('wizard-search').style.display = 'none';
+                document.getElementById('search-input').value = '';
+            }
+            if (step === 'college' || step === 'major') {
+                document.getElementById('wizard-current-college').value = '';
+            }
+            if (step === 'courses' || step === 'major') {
+                document.getElementById('wizard-current-major').value = '';
+            }
+        }
+
+        function showLoading(section) {
+            var stepEl = document.getElementById('wizard-step-' + section);
+            if (stepEl) stepEl.style.display = 'block';
+            document.getElementById(section + '-loading').style.display = 'block';
+            document.getElementById(section + '-grid').innerHTML = '';
+            document.getElementById(section + '-empty').style.display = 'none';
+        }
+
+        function hideLoading(section) {
+            document.getElementById(section + '-loading').style.display = 'none';
+        }
+
+        function updateBreadcrumb(items) {
+            var bc = document.getElementById('wizard-breadcrumb');
+            var list = document.getElementById('breadcrumb-list');
+            bc.style.display = 'block';
+            var html = '';
+            items.forEach(function(item, i) {
+                var isLast = i === items.length - 1;
+                if (isLast) {
+                    html += '<li class="breadcrumb-item active" aria-current="page">' + item.name + '</li>';
+                } else {
+                    html += '<li class="breadcrumb-item"><a onclick="window.resetToStep(\'' + item.step + '\')">' + item.name + '</a></li>';
+                }
+            });
+            list.innerHTML = html;
+
+            if (items.length >= 2) {
+                document.getElementById('wizard-search').style.display = 'block';
+            }
+        }
+
+        function getBreadcrumbName(step) {
+            var id = document.getElementById('wizard-current-' + step).value;
+            var cards = document.querySelectorAll('#wizard-step-' + step + ' .wizard-card');
+            for (var i = 0; i < cards.length; i++) {
+                if (cards[i].getAttribute('data-id') === id) {
+                    return currentLang === 'ar' ? cards[i].getAttribute('data-name-ar') : cards[i].getAttribute('data-name-en');
+                }
+            }
+            return '';
+        }
+
+        window.resetToStep = function(step) {
+            if (step === 'university') {
+                document.querySelectorAll('#wizard-step-university .wizard-card').forEach(function(c) { c.classList.remove('selected'); });
+                document.getElementById('wizard-current-university').value = '';
+                resetFromStep('college');
+                document.getElementById('wizard-breadcrumb').style.display = 'none';
+            } else if (step === 'college') {
+                var uniId = document.getElementById('wizard-current-university').value;
+                var uniCard = document.querySelector('#wizard-step-university .wizard-card[data-id="' + uniId + '"]');
+                if (uniCard) window.selectUniversity(uniCard);
+            } else if (step === 'major') {
+                var colId = document.getElementById('wizard-current-college').value;
+                var colCard = document.querySelector('#wizard-step-college .wizard-card[data-id="' + colId + '"]');
+                if (colCard) window.selectCollege(colCard);
+            }
+        };
+
+        /* ── Load enrolled course IDs from page data ── */
+        var enrolledEl = document.getElementById('enrolled-course-ids');
+        if (enrolledEl && enrolledEl.value) {
+            enrolledCourseIds = enrolledEl.value.split(',').map(Number);
+        }
+    })();
+    </script>
+</div>

@@ -24,7 +24,7 @@
                              style="backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15);">
                             <span class="fw-bold text-white" th:text="${course.code}">CS 1301</span>
                             <span class="mx-2 text-white-50">|</span>
-                            <span class="text-white-50 small" th:text="${course.university}">CCIS</span>
+                            <span class="text-white-50 small" th:text="${course.major != null ? (#locale.language == 'ar' ? course.major.college.university.nameAr : course.major.college.university.nameEn) : 'N/A'}">University</span>
                         </div>
 
                         <!-- Course Name (Primary Language) -->
@@ -235,7 +235,7 @@
                             <li class="d-flex justify-content-between py-2 border-bottom border-light">
                                 <span class="text-muted fw-semibold"
                                       th:text="${#locale.language == 'ar' ? 'الكلية' : 'College'}">College</span>
-                                <span class="fw-bold" th:text="${course.university ?: 'CCIS'}">CCIS</span>
+                                <span class="fw-bold" th:text="${course.major != null ? (#locale.language == 'ar' ? course.major.college.nameAr : course.major.college.nameEn) : 'N/A'}">College</span>
                             </li>
                             <li class="d-flex justify-content-between py-2">
                                 <span class="text-muted fw-semibold"

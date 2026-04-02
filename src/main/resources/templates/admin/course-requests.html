@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${#locale.language == 'ar' ? 'إدارة طلبات المقررات | مقرري+' : 'Course Requests Admin | Muqarari+'}">Course Requests Admin | Muqarari+</title>
+</head>
+<body th:replace="~{fragments/layout :: html}">
+
+    <div th:fragment="main-content">
+
+        <!-- ===== HEADER ===== -->
+        <section class="text-white py-5" style="background: linear-gradient(135deg, #0A192F 0%, #1a3a5c 50%, #00B4D8 100%);">
+            <div class="container py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <nav aria-label="breadcrumb" class="mb-2">
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item"><a th:href="@{/admin}" class="text-white-50 text-decoration-none"
+                                    th:text="${#locale.language == 'ar' ? 'لوحة الإدارة' : 'Admin Dashboard'}">Admin Dashboard</a></li>
+                                <li class="breadcrumb-item active text-white" aria-current="page"
+                                    th:text="${#locale.language == 'ar' ? 'طلبات المقررات' : 'Course Requests'}">Course Requests</li>
+                            </ol>
+                        </nav>
+                        <h1 class="display-6 fw-bold mb-0 text-white">
+                            <span th:text="${#locale.language == 'ar' ? 'إدارة طلبات المقررات' : 'Course Requests Management'}">Course Requests Management</span>
+                        </h1>
+                        <p class="text-white-50 mt-2 fs-5"
+                           th:text="${#locale.language == 'ar' ? 'راجع طلبات الطلاب لإضافة مقررات مفقودة واتخذ القرار.' : 'Review student requests for missing courses and take action.'}">
+                            Review student requests for missing courses and take action.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-4 mt-md-0">
+                        <div class="d-inline-flex align-items-center bg-white text-dark rounded-pill shadow-sm px-4 py-3">
+                            <span class="fs-4 me-3">📋</span>
+                            <div class="text-start">
+                                <span class="d-block fw-bold fs-6"
+                                      th:text="${#locale.language == 'ar' ? 'إجمالي الطلبات' : 'Total Requests'}">Total Requests</span>
+                                <span class="fw-bold fs-5 text-primary" th:text="${requests.size()}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container py-5 mt-3">
+
+            <!-- Flash Messages -->
+            <div th:if="${successMsg}" class="alert alert-success border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">✅</span>
+                <span class="fw-semibold" th:text="${successMsg}">Action completed successfully.</span>
+            </div>
+            <div th:if="${errorMsg}" class="alert alert-danger border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center" role="alert">
+                <span class="fs-3 me-3">⛔</span>
+                <span class="fw-semibold" th:text="${errorMsg}">Error message</span>
+            </div>
+
+            <!-- Status Filter Tabs -->
+            <div class="d-flex gap-2 mb-4 flex-wrap">
+                <a th:href="@{/admin/course-requests}"
+                   th:class="${selectedStatus == null} ? 'btn btn-primary rounded-pill px-4 fw-semibold shadow-sm' : 'btn btn-outline-secondary rounded-pill px-4 fw-semibold'"
+                   th:text="${#locale.language == 'ar' ? 'الكل' : 'All'} + ' (' + ${requests.size()} + ')'">All</a>
+                <a th:href="@{/admin/course-requests(status='PENDING')}"
+                   th:class="${selectedStatus != null && selectedStatus.name() == 'PENDING'} ? 'btn btn-warning text-dark rounded-pill px-4 fw-semibold shadow-sm' : 'btn btn-outline-warning text-dark rounded-pill px-4 fw-semibold'"
+                   th:text="${#locale.language == 'ar' ? 'قيد المراجعة' : 'Pending'} + ' (' + ${pendingCount} + ')'">Pending</a>
+                <a th:href="@{/admin/course-requests(status='APPROVED')}"
+                   th:class="${selectedStatus != null && selectedStatus.name() == 'APPROVED'} ? 'btn btn-success rounded-pill px-4 fw-semibold shadow-sm' : 'btn btn-outline-success rounded-pill px-4 fw-semibold'"
+                   th:text="${#locale.language == 'ar' ? 'تمت الموافقة' : 'Approved'} + ' (' + ${approvedCount} + ')'">Approved</a>
+                <a th:href="@{/admin/course-requests(status='REJECTED')}"
+                   th:class="${selectedStatus != null && selectedStatus.name() == 'REJECTED'} ? 'btn btn-danger rounded-pill px-4 fw-semibold shadow-sm' : 'btn btn-outline-danger rounded-pill px-4 fw-semibold'"
+                   th:text="${#locale.language == 'ar' ? 'مرفوض' : 'Rejected'} + ' (' + ${rejectedCount} + ')'">Rejected</a>
+            </div>
+
+            <!-- ===== EMPTY STATE ===== -->
+            <div th:if="${#lists.isEmpty(requests)}" class="card bg-white rounded-4 shadow-sm border-0 p-5">
+                <div class="text-center py-5">
+                    <div class="bg-light rounded-circle d-inline-flex justify-content-center align-items-center mb-4"
+                         style="width: 100px; height: 100px;">
+                        <span class="fs-1">🎉</span>
+                    </div>
+                    <h3 class="h4 fw-bold text-primary-blue mb-3"
+                        th:text="${#locale.language == 'ar' ? 'لا توجد طلبات' : 'No Requests Found'}">No Requests Found</h3>
+                    <p class="text-muted fs-5 mb-4"
+                       th:text="${#locale.language == 'ar' ? 'لا توجد طلبات مطابقة لهذا الفلتر.' : 'No requests match this filter.'}">
+                        No requests match this filter.
+                    </p>
+                    <a th:href="@{/admin/course-requests}" class="btn btn-primary btn-lg px-5 fw-bold rounded-pill shadow-sm"
+                       th:text="${#locale.language == 'ar' ? 'عرض جميع الطلبات' : 'View All Requests'}">View All Requests</a>
+                </div>
+            </div>
+
+            <!-- ===== REQUEST CARDS ===== -->
+            <div th:unless="${#lists.isEmpty(requests)}" class="row g-4">
+                <div class="col-12" th:each="request : ${requests}">
+                    <div class="card bg-white rounded-4 shadow-sm border-0 overflow-hidden request-card"
+                         th:style="${request.status.name() == 'PENDING'} ? 'border-left: 5px solid #ffc107 !important;' :
+                                   (${request.status.name() == 'APPROVED'} ? 'border-left: 5px solid #198754 !important;' : 'border-left: 5px solid #dc3545 !important;')">
+
+                        <!-- Card Header: Student + Major Info -->
+                        <div class="card-header bg-white border-bottom p-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-7">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="bg-light rounded-circle d-flex justify-content-center align-items-center flex-shrink-0"
+                                             style="width: 50px; height: 50px;">
+                                            <span class="fs-4">👤</span>
+                                        </div>
+                                        <div>
+                                            <h5 class="fw-bold text-primary-blue mb-1"
+                                                th:text="${request.requestedBy.firstName + ' ' + request.requestedBy.lastName}">Student Name</h5>
+                                            <span class="text-muted small" th:text="${request.requestedBy.email}">student@email.com</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                                    <div class="d-flex align-items-center gap-2 justify-content-md-end flex-wrap">
+                                        <div class="d-inline-flex align-items-center bg-light rounded-pill px-3 py-2">
+                                            <span class="me-2">🏛️</span>
+                                            <span class="fw-bold small text-primary-blue"
+                                                  th:text="${#locale.language == 'ar' ? request.major.college.university.nameAr : request.major.college.university.nameEn}">University</span>
+                                        </div>
+                                        <div class="d-inline-flex align-items-center bg-light rounded-pill px-3 py-2">
+                                            <span class="me-2">🏫</span>
+                                            <span class="fw-bold small text-primary-blue"
+                                                  th:text="${#locale.language == 'ar' ? request.major.college.nameAr : request.major.college.nameEn}">College</span>
+                                        </div>
+                                        <div class="d-inline-flex align-items-center bg-light rounded-pill px-3 py-2">
+                                            <span class="me-2">🎓</span>
+                                            <span class="fw-bold small text-primary-blue"
+                                                  th:text="${#locale.language == 'ar' ? request.major.nameAr : request.major.nameEn}">Major</span>
+                                        </div>
+                                        <span th:class="${request.status.name() == 'PENDING'} ? 'badge bg-warning text-dark rounded-pill px-3 py-2' :
+                                                       (${request.status.name() == 'APPROVED'} ? 'badge bg-success rounded-pill px-3 py-2' : 'badge bg-danger rounded-pill px-3 py-2')"
+                                              th:text="${request.status.name() == 'PENDING'} ? ${#locale.language == 'ar' ? 'قيد المراجعة' : 'PENDING'} :
+                                                      (${request.status.name() == 'APPROVED'} ? ${#locale.language == 'ar' ? 'تمت الموافقة' : 'APPROVED'} : ${#locale.language == 'ar' ? 'مرفوض' : 'REJECTED'})">PENDING</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="card-body p-4">
+
+                            <!-- Course Info -->
+                            <div class="mb-4">
+                                <div class="d-flex align-items-center gap-3 mb-2">
+                                    <div class="bg-primary bg-opacity-10 rounded-3 px-3 py-2">
+                                        <span class="fw-bold text-primary" th:text="${request.courseCode != null ? request.courseCode : '—'}">CS 350</span>
+                                    </div>
+                                    <h5 class="fw-bold mb-0" th:text="${#locale.language == 'ar' ? request.courseNameAr : request.courseNameEn}">Course Name</h5>
+                                </div>
+                                <p class="text-muted small mb-0" th:if="${request.courseCode}">
+                                    <span th:text="${#locale.language == 'ar' ? 'الاسم الآخر: ' : 'Other name: '}">Other name: </span>
+                                    <span th:text="${#locale.language == 'ar' ? request.courseNameEn : request.courseNameAr}">Other Name</span>
+                                </p>
+                            </div>
+
+                            <!-- Justification -->
+                            <div class="mb-4" th:if="${request.justification}">
+                                <label class="form-label fw-bold text-muted small text-uppercase mb-2">
+                                    <span th:text="${#locale.language == 'ar' ? 'سبب الطلب' : 'Justification'}">Justification</span>
+                                </label>
+                                <div class="bg-light rounded-3 p-4 border"
+                                     style="line-height: 1.8; font-size: 0.95rem;">
+                                    <p class="mb-0" th:text="${request.justification}">Justification text...</p>
+                                </div>
+                            </div>
+
+                            <!-- Admin Notes (if already reviewed) -->
+                            <div th:if="${request.adminNotes}" class="mb-4">
+                                <label class="form-label fw-bold text-muted small text-uppercase mb-2">
+                                    <span th:text="${#locale.language == 'ar' ? 'ملاحظة الإدارة' : 'Admin Note'}">Admin Note</span>
+                                </label>
+                                <div th:class="${request.status.name() == 'APPROVED'} ? 'bg-success bg-opacity-10 rounded-3 p-4 border border-success' : 'bg-danger bg-opacity-10 rounded-3 p-4 border border-danger'">
+                                    <p class="mb-0" th:text="${request.adminNotes}">Admin notes...</p>
+                                </div>
+                            </div>
+
+                            <!-- Submission Timestamp -->
+                            <div class="d-flex align-items-center text-muted small mb-4">
+                                <span class="me-2">🕐</span>
+                                <span th:text="${#locale.language == 'ar' ? 'تاريخ الطلب: ' : 'Requested: '}">Requested: </span>
+                                <span th:text="${request.createdAt != null ? #temporals.format(request.createdAt, 'yyyy-MM-dd HH:mm') : '—'}">2026-04-01</span>
+                                <span th:if="${request.reviewedAt}" class="ms-3">
+                                    <span th:text="${#locale.language == 'ar' ? 'تمت المراجعة: ' : 'Reviewed: '}">Reviewed: </span>
+                                    <span th:text="${#temporals.format(request.reviewedAt, 'yyyy-MM-dd HH:mm')}">2026-04-02</span>
+                                </span>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-3 flex-wrap">
+                                <!-- Approve Button (only for PENDING) -->
+                                <button th:if="${request.status.name() == 'PENDING'}" type="button"
+                                        class="btn btn-success btn-lg px-5 fw-bold rounded-pill shadow-sm"
+                                        data-bs-toggle="modal"
+                                        th:data-bs-target="'#approveModal-' + ${request.id}">
+                                    <span class="me-2">✅</span>
+                                    <span th:text="${#locale.language == 'ar' ? 'موافقة وإنشاء المقرر' : 'Approve & Create Course'}">Approve & Create Course</span>
+                                </button>
+
+                                <!-- Reject Button (only for PENDING) -->
+                                <button th:if="${request.status.name() == 'PENDING'}" type="button"
+                                        class="btn btn-outline-danger btn-lg px-5 fw-bold rounded-pill shadow-sm"
+                                        data-bs-toggle="modal"
+                                        th:data-bs-target="'#rejectModal-' + ${request.id}">
+                                    <span class="me-2">❌</span>
+                                    <span th:text="${#locale.language == 'ar' ? 'رفض' : 'Reject'}">Reject</span>
+                                </button>
+
+                                <!-- Delete Button (only for PENDING/REJECTED) -->
+                                <form th:if="${request.status.name() == 'PENDING' || request.status.name() == 'REJECTED'}"
+                                      th:action="@{'/admin/course-requests/' + ${request.id} + '/delete'}" method="post" class="d-inline">
+                                    <button type="submit"
+                                            class="btn btn-outline-secondary btn-lg px-5 fw-bold rounded-pill shadow-sm"
+                                            onclick="return confirm(this.dataset.confirmMsg)"
+                                            th:data-confirm-msg="${#locale.language == 'ar' ? 'هل أنت متأكد من حذف هذا الطلب؟' : 'Are you sure you want to delete this request?'}">
+                                        <span class="me-2">🗑️</span>
+                                        <span th:text="${#locale.language == 'ar' ? 'حذف' : 'Delete'}">Delete</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Card Footer: Request # -->
+                        <div class="card-footer bg-white border-top text-muted small px-4 py-3 d-flex justify-content-between align-items-center">
+                            <span>
+                                <span th:text="${#locale.language == 'ar' ? 'طلب رقم #' : 'Request #'}">Request #</span>
+                                <span th:text="${request.id}">1</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- ===== APPROVE MODAL ===== -->
+                    <div class="modal fade" th:id="'approveModal-' + ${request.id}" tabindex="-1"
+                         th:aria-labelledby="'approveModalLabel-' + ${request.id}">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content rounded-4 border-0">
+                                <div class="modal-header border-0 pb-0">
+                                    <h5 class="modal-title fw-bold text-success"
+                                        th:id="'approveModalLabel-' + ${request.id}">
+                                        <span class="me-2">✅</span>
+                                        <span th:text="${#locale.language == 'ar' ? 'موافقة على الطلب' : 'Approve Request'}">Approve Request</span>
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p class="text-muted mb-3"
+                                       th:text="${#locale.language == 'ar' ? 'سيتم إنشاء المقرر تلقائياً في النظام. يمكنك إضافة ملاحظة (اختياري).' : 'The course will be automatically created in the system. You can add an optional note.'}">
+                                        The course will be automatically created.
+                                    </p>
+                                    <form th:action="@{'/admin/course-requests/' + ${request.id} + '/approve'}" method="post">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold"
+                                                   th:text="${#locale.language == 'ar' ? 'ملاحظة (اختياري)' : 'Note (Optional)'}">Note (Optional)</label>
+                                            <textarea name="adminNotes" class="form-control" rows="3"
+                                                      th:placeholder="${#locale.language == 'ar' ? 'أضف ملاحظة للطالب...' : 'Add a note for the student...'}"></textarea>
+                                        </div>
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal"
+                                                    th:text="${#locale.language == 'ar' ? 'إلغاء' : 'Cancel'}">Cancel</button>
+                                            <button type="submit" class="btn btn-success rounded-pill px-4 fw-semibold"
+                                                    th:text="${#locale.language == 'ar' ? 'موافقة' : 'Approve'}">Approve</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== REJECT MODAL ===== -->
+                    <div class="modal fade" th:id="'rejectModal-' + ${request.id}" tabindex="-1"
+                         th:aria-labelledby="'rejectModalLabel-' + ${request.id}">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content rounded-4 border-0">
+                                <div class="modal-header border-0 pb-0">
+                                    <h5 class="modal-title fw-bold text-danger"
+                                        th:id="'rejectModalLabel-' + ${request.id}">
+                                        <span class="me-2">❌</span>
+                                        <span th:text="${#locale.language == 'ar' ? 'رفض الطلب' : 'Reject Request'}">Reject Request</span>
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p class="text-muted mb-3"
+                                       th:text="${#locale.language == 'ar' ? 'سيتم رفض هذا الطلب. يُفضل إضافة سبب الرفض.' : 'This request will be rejected. It is recommended to add a reason.'}">
+                                        This request will be rejected.
+                                    </p>
+                                    <form th:action="@{'/admin/course-requests/' + ${request.id} + '/reject'}" method="post">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold"
+                                                   th:text="${#locale.language == 'ar' ? 'سبب الرفض (اختياري)' : 'Reason (Optional)'}">Reason (Optional)</label>
+                                            <textarea name="adminNotes" class="form-control" rows="3"
+                                                      th:placeholder="${#locale.language == 'ar' ? 'اشرح سبب الرفض...' : 'Explain the reason for rejection...'}"></textarea>
+                                        </div>
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal"
+                                                    th:text="${#locale.language == 'ar' ? 'إلغاء' : 'Cancel'}">Cancel</button>
+                                            <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold"
+                                                    th:text="${#locale.language == 'ar' ? 'رفض' : 'Reject'}">Reject</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Back to Admin Button -->
+            <div th:unless="${#lists.isEmpty(requests)}" class="text-center mt-5">
+                <a th:href="@{/admin}" class="btn btn-outline-secondary btn-lg px-5 fw-bold rounded-pill shadow-sm">
+                    <span th:text="${#locale.language == 'ar' ? '← العودة للوحة الإدارة' : '→ Back to Admin Dashboard'}">→ Back to Admin Dashboard</span>
+                </a>
+            </div>
+
+        </section>
+    </div>
+
+    <!-- ===== MICRO-INTERACTIONS ===== -->
+    <th:block th:fragment="script-extra">
+        <style>
+            .request-card {
+                transition: all 0.3s ease;
+            }
+            .request-card:hover {
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1) !important;
+                transform: translateY(-3px);
+            }
+            .btn-success {
+                background-color: #198754 !important;
+                border-color: #198754 !important;
+                transition: all 0.2s ease;
+            }
+            .btn-success:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(25, 135, 84, 0.35);
+            }
+            .btn-outline-danger:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
+            }
+            .btn-outline-secondary:hover {
+                transform: translateY(-2px);
+            }
+        </style>
+    </th:block>
+
+</body>
+</html>
